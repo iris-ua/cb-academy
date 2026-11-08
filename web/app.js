@@ -338,6 +338,8 @@
     $('res-next').hidden = !r.win || !next;
     $('res-next').onclick = function () { if (next) openStage(next); };
     box.hidden = false;
+    /* back to the start, ready for another go; deferred: we are inside the sim's frame */
+    setTimeout(function () { call('web_reset'); setErr(0); }, 0);
   }
 
   /* ---- map ------------------------------------------------------------------ */
