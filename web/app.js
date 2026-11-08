@@ -96,6 +96,11 @@
     var extensions = [
       CM.keymap.of([{ key: 'Mod-Enter', run: function () { run(); return true; } }, CM.indentWithTab]),
       CM.basicSetup,
+      // Tab accepts a completion (Enter just inserts a newline).
+      CM.autocompletion({ defaultKeymap: false }),
+      CM.Prec.highest(CM.keymap.of(CM.completionKeymap
+        .filter(function (b) { return b.key !== 'Enter'; })
+        .concat([{ key: 'Tab', run: CM.acceptCompletion }]))),
       CM.StreamLanguage.define(CM.lua),
       CM.EditorState.languageData.of(function () { return [{ autocomplete: complete }]; }),
       CM.EditorState.tabSize.of(2),
