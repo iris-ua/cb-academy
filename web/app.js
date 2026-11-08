@@ -252,8 +252,7 @@
     });
     var tip = document.createElement('p');
     tip.className = 'tip';
-    tip.innerHTML = 'Tips: press <b>Ctrl+Space</b> in the editor for suggestions, <b>Ctrl+Enter</b> to run. ' +
-                    'Click the arena to drive with the arrow keys when no script runs.';
+    tip.innerHTML = 'Tips: press <b>Ctrl+Space</b> in the editor for suggestions, <b>Ctrl+Enter</b> to run.';
     body.appendChild(tip);
 
     function show(on) {

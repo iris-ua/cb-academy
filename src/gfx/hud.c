@@ -202,7 +202,7 @@ static void sec_keys(const HudState *st, float x, float y)
 {
     const char *keys[] = {
 #ifdef __EMSCRIPTEN__ /* the page runs the script; no level file to reload */
-        st->script ? "space pause" : "arrows/WASD drive   space pause",
+        st->script ? "space pause" : "press Run to start",
         "1-4 speed   R reset",
 #else
         st->script ? "save the script to reload   space pause" : "arrows/WASD drive   space pause",

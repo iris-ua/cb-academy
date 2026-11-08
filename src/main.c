@@ -259,6 +259,9 @@ static void frame(void)
     if (shot_file) dt_frame = 1.0f / 60.0f; /* deterministic captures */
     const float dt = SIM_CYCLE_MS / 1000.0f;
     bool frozen = scripted && bot_state(bot) == BOT_ERROR; /* keep the scene where it broke */
+#ifdef __EMSCRIPTEN__
+    frozen = !scripted || bot_state(bot) != BOT_RUNNING; /* the clock only runs after Run */
+#endif
     if (!paused && !sim.over && !frozen) {
         accum += dt_frame * (float)speed;
         int steps = 0;
