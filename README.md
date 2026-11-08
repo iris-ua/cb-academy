@@ -23,6 +23,7 @@ Needs [emsdk](https://emscripten.org/docs/getting_started/downloads.html):
     src/sim/    simulation core (no graphics): motion, collisions, sensors, level loader
     src/gfx/    rendering: camera/primitives (view), arena + mouse (scene), juice (fx), HUD
     src/main.c  raylib app: input, fixed-tick loop, interpolation
+    assets/     fonts (OFL)
     levels/     level JSON (format documented in src/sim/level.h)
     web/        HTML shell for the web build
     tests/      headless tests
@@ -34,3 +35,4 @@ GPL-2.0-or-later. See [LICENSE](LICENSE).
 The simulation model and `levels/default.json` come from
 [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools) (© 2001–2011 Universidade de Aveiro, GPLv2+).
 Dependencies: raylib (zlib), Lua (MIT), cJSON (MIT).
+Fonts in `assets/fonts/`: Nunito and JetBrains Mono (SIL OFL 1.1, licenses alongside).

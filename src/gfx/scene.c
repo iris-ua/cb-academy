@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 #include "scene.h"
+#include "text.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -520,7 +521,7 @@ static void draw_mouse(const Scene *sc, const Sim *s, int i, Pose p, float alpha
     }
     if (s->nrobots > 1) {
         Vector2 c = view_pt(v, p.x, p.y);
-        DrawText(TextFormat("%d", i + 1), (int)c.x - 3, (int)(c.y - view_len(v, 0.9)), 14, C_INK);
+        text_draw(TEXT_BOLD, TextFormat("%d", i + 1), c.x - 4, c.y - view_len(v, 1.0), 15, C_INK);
     }
 }
 

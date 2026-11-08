@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 #include "fx.h"
+#include "text.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -107,13 +108,13 @@ void fx_draw_world(const Fx *fx, const View *v)
         const Popup *p = &fx->pop[i];
         if (p->life <= 0) continue;
         Vector2 s = view_pt(v, p->pos.x, p->pos.y);
-        int size = (int)fmaxf(16, v->scale * 0.7f);
-        float pop = p->life > 0.85f ? 1 + (p->life - 0.85f) * 3 : 1;
-        size = (int)(size * pop);
-        int w = MeasureText(p->text, size);
+        float size = fmaxf(18, v->scale * 0.8f);
+        if (p->life > 0.85f) size *= 1 + (p->life - 0.85f) * 3;
+        float w = text_width(TEXT_BOLD, p->text, size);
         float a = fminf(1, p->life * 2.5f);
-        DrawText(p->text, (int)s.x - w / 2 + 1, (int)s.y - size / 2 + 2, size, color_alpha((Color){ 255, 255, 255, 220 }, a));
-        DrawText(p->text, (int)s.x - w / 2, (int)s.y - size / 2, size, color_alpha(p->color, a));
+        float tx = s.x - w / 2, ty = s.y - size * 0.7f;
+        text_draw(TEXT_BOLD, p->text, tx + 1, ty + 2, size, color_alpha((Color){ 255, 255, 255, 230 }, a));
+        text_draw(TEXT_BOLD, p->text, tx, ty, size, color_alpha(p->color, a));
     }
 }
 

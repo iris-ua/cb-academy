@@ -11,6 +11,7 @@
 #include "gfx/fx.h"
 #include "gfx/hud.h"
 #include "gfx/scene.h"
+#include "gfx/text.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -167,6 +168,7 @@ int main(int argc, char **argv)
     while (!WindowShouldClose() && frames >= 0) frame();
 #endif
     scene_unload(&scene);
+    text_unload();
     CloseWindow();
     return 0;
 }

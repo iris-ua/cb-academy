@@ -46,6 +46,7 @@ Use short, single-line commit messages following Conventional Commits.
 - `src/gfx/view.*` camera (`view_fit`, `view_pt`), local frames (`frame_at`/`frame_pt`), `fill_convex` (any winding), `fill_ellipse`, `rounded_outline`.
 - `src/gfx/scene.*` arena drawing + per-robot visual state (interp poses, wheels, trail); `scene_after_step` after every `sim_step` (fires fx).
 - `src/gfx/fx.*` shake/flash/particles/popups on frame time. `src/gfx/hud.*` `hud_layout` (side or bottom panel) + cards.
+- `src/gfx/text.*` all text: `text_draw`/`text_width` with `TEXT_UI`/`TEXT_BOLD` (Nunito) or `TEXT_MONO*` (JetBrains Mono, for changing numbers). Never raw `DrawText`.
 - Dev flags: `--shot out.png --frames N --size W H --motors L R --overlays` for headless screenshots.
 
 ## Scars
@@ -55,3 +56,4 @@ Use short, single-line commit messages following Conventional Commits.
 - Wall shadow mask: hull-extruded silhouette at 1/2 res + 3x3 taps. 1/4 res or stacked shifted copies show stair-steps.
 - `TakeScreenshot` double-scales on HiDPI (raylib 5.5); `--shot` renders to an RT instead.
 - Web: canvas CSS must be 100vw/100vh; raylib's resize callback sets the buffer to the window size.
+- CMake de-duplicates repeated link flags: multiple `--preload-file` need `"SHELL:--preload-file ..."`.

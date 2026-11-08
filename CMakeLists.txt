@@ -58,7 +58,7 @@ endif()
 FetchContent_MakeAvailable(raylib)
 
 add_executable(ciberrato src/main.c
-  src/gfx/view.c src/gfx/scene.c src/gfx/fx.c src/gfx/hud.c)
+  src/gfx/view.c src/gfx/scene.c src/gfx/fx.c src/gfx/hud.c src/gfx/text.c)
 target_include_directories(ciberrato PRIVATE src)
 target_link_libraries(ciberrato PRIVATE sim lua raylib)
 if(NOT MSVC)
@@ -70,12 +70,14 @@ if(EMSCRIPTEN)
   target_link_options(ciberrato PRIVATE
     -sUSE_GLFW=3 -sALLOW_MEMORY_GROWTH=1 -sSTACK_SIZE=1mb
     --shell-file ${CMAKE_SOURCE_DIR}/web/shell.html
-    --preload-file ${CMAKE_SOURCE_DIR}/levels@/levels)
+    "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/levels@/levels"
+    "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/assets/fonts@/assets/fonts")
   set_property(TARGET ciberrato APPEND PROPERTY LINK_DEPENDS ${CMAKE_SOURCE_DIR}/web/shell.html)
 else()
-  # run from build dir: levels/ next to the binary
+  # run from build dir: levels/ and assets/ next to the binary
   add_custom_command(TARGET ciberrato POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/levels $<TARGET_FILE_DIR:ciberrato>/levels)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/levels $<TARGET_FILE_DIR:ciberrato>/levels
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:ciberrato>/assets)
 
   enable_testing()
   add_executable(test_sim tests/test_sim.c)
