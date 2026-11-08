@@ -8,7 +8,7 @@
 
 typedef struct {
     bool        paused, overlays, trail;
-    int         speed;
+    float       speed;      /* sim time multiplier */
     const char *status;
     /* robot script (script == NULL: keyboard drive) */
     const char *script, *script_state;

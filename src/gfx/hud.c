@@ -78,7 +78,7 @@ static float sec_time_score(const Sim *s, const HudState *st, float x, float y, 
     char t[32];
     card(x, y, cw, 64);
     label("TIME", x + 10, y + 8);
-    const char *sp = TextFormat("x%d", st->speed);
+    const char *sp = TextFormat("x%g", st->speed);
     text_draw(TEXT_MONO_BOLD, sp, x + cw - 10 - text_width(TEXT_MONO_BOLD, sp, 11), y + 6, 11, C_ACC);
     time_str(t, s->cycle);
     text_draw(TEXT_MONO_BOLD, t, x + 10, y + 19, 22, C_TEXT);
@@ -203,10 +203,10 @@ static void sec_keys(const HudState *st, float x, float y)
     const char *keys[] = {
 #ifdef __EMSCRIPTEN__ /* the page runs the script; no level file to reload */
         st->script ? "space pause" : "press Run to start",
-        "1-4 speed   R reset",
+        "0-4 speed   R reset",
 #else
         st->script ? "save the script to reload   space pause" : "arrows/WASD drive   space pause",
-        "1-4 speed   R reset   L reload",
+        "0-4 speed   R reset   L reload",
 #endif
         TextFormat("O overlays [%s]   T trail [%s]", st->overlays ? "on" : "off", st->trail ? "on" : "off"),
     };

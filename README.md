@@ -11,7 +11,7 @@ A simplified, modern take on [ciberRatoTools](https://github.com/iris-ua/ciberRa
 With a `.lua` script the robot runs it and reloads whenever the file is saved
 (API in `src/bot/bot.h`); without one, drive with the keyboard.
 
-Keys: arrows/WASD drive · Space pause · 1–4 speed · R reset · L reload level · O sensor overlays · T trail.
+Keys: arrows/WASD drive · Space pause · 0–4 speed (×½…×8) · R reset · L reload level · O sensor overlays · T trail.
 
 ## Web
 

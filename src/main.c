@@ -28,7 +28,7 @@ static char  level_path[512] = "levels/default.json";
 static char  status_msg[256];
 static bool  paused;
 static float accum;
-static int   speed = 1;
+static float speed = 1;  /* sim time multiplier: 0.5, 1, 2, 4, 8 */
 
 /* robot script */
 #define LOG_N 32
@@ -191,7 +191,7 @@ static const char *last_state; /* NULL: report again */
 
 static void report_changes(void)
 {
-    static int  last_speed;
+    static float last_speed;
     static bool last_over, last_paused;
     const char *st = script_state();
     if (st != last_state) {
@@ -199,7 +199,7 @@ static void report_changes(void)
         js_emit("state", st, 0);
         last_state = st;
     }
-    if (speed != last_speed) js_emit("speed", "", last_speed = speed);
+    if (speed != last_speed) js_emit("speed", TextFormat("%g", last_speed = speed), 0);
     if (paused != last_paused) js_emit("paused", "", last_paused = paused); /* button or Space */
     if (sim.over != last_over && (last_over = sim.over)) js_emit("finished", "", sim.robots[0].score);
 }
@@ -227,7 +227,7 @@ EMSCRIPTEN_KEEPALIVE void web_reset(void)
     reset_world();
 }
 
-EMSCRIPTEN_KEEPALIVE void web_set_speed(int n) { speed = n < 1 ? 1 : n > 8 ? 8 : n; }
+EMSCRIPTEN_KEEPALIVE void web_set_speed(double x) { speed = x < 0.25 ? 0.25f : x > 8 ? 8.0f : (float)x; }
 #endif
 
 static void frame(void)
@@ -239,7 +239,8 @@ static void frame(void)
 #endif
     if (IsKeyPressed(KEY_O)) scene.overlays = !scene.overlays;
     if (IsKeyPressed(KEY_T)) scene.trail = !scene.trail;
-    for (int k = 0; k < 4; k++) if (IsKeyPressed(KEY_ONE + k)) speed = 1 << k;
+    if (IsKeyPressed(KEY_ZERO)) speed = 0.5f;
+    for (int k = 0; k < 4; k++) if (IsKeyPressed(KEY_ONE + k)) speed = (float)(1 << k);
 
     bool scripted = script_on && !auto_drive;
     if (script_path[0] && (script_poll += GetFrameTime()) > 0.5f) { /* hot reload */
@@ -263,7 +264,7 @@ static void frame(void)
     frozen = !scripted || bot_state(bot) != BOT_RUNNING; /* the clock only runs after Run */
 #endif
     if (!paused && !sim.over && !frozen) {
-        accum += dt_frame * (float)speed;
+        accum += dt_frame * speed;
         int steps = 0;
         while (accum >= dt && steps < 32) {
             if (scripted) bot_tick(bot, &sim, 0);

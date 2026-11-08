@@ -199,7 +199,7 @@
     case 'print': log(text); break;
     case 'error': log(text, 'err', n); if (n > 0) setErr(n); break;
     case 'state': setState(text); if (text === 'done') log('Script finished.', 'sys'); break;
-    case 'speed': setSpeed(n); break;
+    case 'speed': setSpeed(parseFloat(text)); break;
     case 'paused': paused = !!n; updateRunButton(); break;
     case 'level': if (ready) log('Level: ' + text, 'sys'); break;
     case 'finished': log('Run over. Score: ' + n, 'win'); break;
