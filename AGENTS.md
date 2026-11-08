@@ -64,7 +64,6 @@ Use short, single-line commit messages following Conventional Commits.
 - Web: canvas CSS must be 100vw/100vh; raylib's resize callback sets the buffer to the window size.
 - CMake de-duplicates repeated link flags: multiple `--preload-file` need `"SHELL:--preload-file ..."`.
 - raylib 5.5 HiDPI resize bug (X11/Windows): screen size became pixels -> layout 2x too big. Patched via `cmake/patch_raylib.cmake` (FetchContent PATCH_COMMAND); drop it when upgrading raylib.
-- Web canvas sizing: patched raylib sizes it to `#stage` (canvas parent), not the window; JS fires a window `resize` on ResizeObserver.
+- Web canvas sizing: patched raylib sizes it to `#stage` (canvas parent), not the window; JS fires a window `resize` on ResizeObserver. HiDPI is patched in too (buffer = CSS size x devicePixelRatio, screen stays CSS px; stock raylib web was blurry). Mouse coords would be in device px if ever used.
 - Emscripten GLFW listens for keys on window in the *capture* phase (and preventDefaults Backspace/Tab): `shell.html` wraps `window.addEventListener` so keydown/keypress from `.ui` elements never reach raylib.
-- `GetWindowScaleDPI()` logs a warning per call on the web: don't call it there (no HIGHDPI flag on web).
 - Web page files are copied by the `web_page` target every build; POST_BUILD only ran when the wasm relinked.

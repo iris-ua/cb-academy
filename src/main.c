@@ -306,11 +306,7 @@ int main(int argc, char **argv)
         else snprintf(level_path, sizeof level_path, "%s", argv[i]);
     }
 
-#ifdef __EMSCRIPTEN__
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT); /* no HiDPI support on the web */
-#else
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
-#endif
     InitWindow(win_w, win_h, "CiberRato Jr");
 #ifdef __EMSCRIPTEN__
     SetWindowMinSize(320, 240); /* the page's canvas pane can be small */
