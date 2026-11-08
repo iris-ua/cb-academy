@@ -35,6 +35,7 @@ button:hover:not(:disabled), select:hover { border-color: #4a5170; }
 button:disabled { opacity: .4; cursor: default; }
 button:focus-visible, select:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
 button.primary { background: var(--green); border-color: var(--green); color: #10140f; font-weight: 800; }
+#run { min-width: 104px; }
 button.ghost { background: none; border-color: transparent; color: var(--dim); padding: 4px 8px; }
 button.ghost:hover, button.ghost[aria-pressed="true"] { color: var(--text); background: var(--card); }
 select { max-width: 180px; }

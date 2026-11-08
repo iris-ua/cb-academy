@@ -169,11 +169,25 @@
     call('web_run', [view.state.doc.toString()]);
   }
 
+  /* Run button: Run (fresh start) -> Pause -> Resume -> Pause ... until the script ends or Reset. */
+  var runState = 'idle', paused = false;
+  function updateRunButton() {
+    var b = $('run'), live = runState === 'running';
+    b.textContent = !live ? '▶ Run' : paused ? '▶ Resume' : '❚❚ Pause';
+    b.title = !live ? 'Run from the start (Ctrl+Enter)' : paused ? 'Continue the script' : 'Pause the script';
+    b.classList.toggle('primary', !live || paused);
+    var pill = $('state'), shown = live && paused ? 'paused' : runState;
+    pill.textContent = shown;
+    pill.className = 'pill ' + shown;
+  }
+  function runButton() {
+    if (runState !== 'running') run();
+    else call('web_pause', [paused ? 0 : 1]);
+  }
+
   function setState(st) {
-    var pill = $('state');
-    pill.textContent = st;
-    pill.className = 'pill ' + st;
-    $('stop').disabled = st !== 'running';
+    runState = st;
+    updateRunButton();
   }
 
   function setSpeed(n) {
@@ -186,6 +200,7 @@
     case 'error': log(text, 'err', n); if (n > 0) setErr(n); break;
     case 'state': setState(text); if (text === 'done') log('Script finished.', 'sys'); break;
     case 'speed': setSpeed(n); break;
+    case 'paused': paused = !!n; updateRunButton(); break;
     case 'level': if (ready) log('Level: ' + text, 'sys'); break;
     case 'finished': log('Run over. Score: ' + n, 'win'); break;
     case 'ready': /* main() is set up: window, level, robot */
@@ -257,8 +272,7 @@
   initCheat();
   setState('idle');
   setSpeed(1);
-  $('run').onclick = run;
-  $('stop').onclick = function () { call('web_stop'); log('■ Stopped', 'sys'); };
+  $('run').onclick = runButton;
   $('reset').onclick = function () { call('web_reset'); setErr(0); };
   $('clear').onclick = function () { $('console').textContent = ''; };
   document.querySelectorAll('#speed button').forEach(function (b) {

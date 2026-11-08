@@ -52,7 +52,7 @@ Use short, single-line commit messages following Conventional Commits.
 - `src/gfx/scene.*` arena drawing + per-robot visual state (interp poses, wheels, trail); `scene_after_step` after every `sim_step` (fires fx).
 - `src/gfx/fx.*` shake/flash/particles/popups on frame time. `src/gfx/hud.*` `hud_layout` (side or bottom panel) + cards.
 - `src/gfx/text.*` all text: `text_draw`/`text_width` with `TEXT_UI`/`TEXT_BOLD` (Nunito) or `TEXT_MONO*` (JetBrains Mono, for changing numbers). Never raw `DrawText`.
-- `web/` page around the canvas. `app.js` holds the API table (autocomplete + cheat-sheet: update it with `bot.h`). Bridge: `web_*` `EMSCRIPTEN_KEEPALIVE` in `main.c`, called via `Module.ccall`; C->JS via `js_emit(kind, text, n)` -> `Module.onEvent` (print/error/state/speed/level/finished/ready). `web/vendor/codemirror.js` is a committed esbuild bundle from `web/vendor-src`.
+- `web/` page around the canvas. `app.js` holds the API table (autocomplete + cheat-sheet: update it with `bot.h`). Bridge: `web_*` `EMSCRIPTEN_KEEPALIVE` in `main.c`, called via `Module.ccall`; C->JS via `js_emit(kind, text, n)` -> `Module.onEvent` (print/error/state/speed/paused/level/finished/ready). `web/vendor/codemirror.js` is a committed esbuild bundle from `web/vendor-src`.
 - Dev flags: `*.lua` arg = robot script, `--shot out.png --frames N --size W H --motors L R --overlays` for headless screenshots.
 
 ## Scars

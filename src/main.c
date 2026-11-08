@@ -192,7 +192,7 @@ static const char *last_state; /* NULL: report again */
 static void report_changes(void)
 {
     static int  last_speed;
-    static bool last_over;
+    static bool last_over, last_paused;
     const char *st = script_state();
     if (st != last_state) {
         if (bot_state(bot) == BOT_ERROR && script_on) js_emit("error", bot_error(bot), bot_error_line(bot));
@@ -200,6 +200,7 @@ static void report_changes(void)
         last_state = st;
     }
     if (speed != last_speed) js_emit("speed", "", last_speed = speed);
+    if (paused != last_paused) js_emit("paused", "", last_paused = paused); /* button or Space */
     if (sim.over != last_over && (last_over = sim.over)) js_emit("finished", "", sim.robots[0].score);
 }
 
@@ -217,15 +218,12 @@ EMSCRIPTEN_KEEPALIVE void web_run(const char *code)
     bot_load(bot, code, "robot");
 }
 
-EMSCRIPTEN_KEEPALIVE void web_stop(void)
-{
-    script_on = false;
-    sim_set_motors(&sim, 0, 0, 0);
-}
+EMSCRIPTEN_KEEPALIVE void web_pause(int on) { paused = on != 0; }
 
 EMSCRIPTEN_KEEPALIVE void web_reset(void)
 {
     script_on = false;
+    paused = false;
     reset_world();
 }
 
