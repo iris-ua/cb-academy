@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /* CiberRato Jr — app shell: input, fixed-tick stepping, rendering.
- * Drive the mouse with the keyboard until the Lua API lands (M3). */
+ * With a .lua argument the robot runs that script (hot-reloaded on save);
+ * otherwise drive it with the keyboard. */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +9,7 @@
 #include "raylib.h"
 #include "sim/sim.h"
 #include "sim/level.h"
+#include "bot/bot.h"
 #include "gfx/fx.h"
 #include "gfx/hud.h"
 #include "gfx/scene.h"
@@ -27,11 +29,71 @@ static bool  paused;
 static float accum;
 static int   speed = 1;
 
+/* robot script */
+#define LOG_N 32
+static Bot  *bot;
+static char  script_path[512];
+static long  script_mtime;
+static float script_poll;
+static char  log_buf[LOG_N][160];
+static const char *log_lines[LOG_N];
+static int   log_n;
+
 /* dev: --shot out.png renders N frames, saves, exits; --motors L R drives constantly */
 static const char *shot_file;
 static int    shot_frames = 90, frames;
 static bool   auto_drive;
 static double auto_l, auto_r;
+
+static void on_say(void *ud, const char *msg)
+{
+    (void)ud;
+    printf("[robot] %s\n", msg);
+    if (log_n == LOG_N) { /* drop oldest */
+        memmove(log_buf[0], log_buf[1], sizeof log_buf[0] * (LOG_N - 1));
+        log_n--;
+    }
+    snprintf(log_buf[log_n++], sizeof log_buf[0], "%s", msg);
+}
+
+static void reset_world(void)
+{
+    sim_reset(&sim);
+    scene_reset(&scene, &sim);
+    fx_reset(&fx);
+    accum = 0;
+    log_n = 0;
+}
+
+static void restart(void)
+{
+    reset_world();
+    if (script_path[0]) bot_restart(bot);
+}
+
+static void load_script(void)
+{
+    script_mtime = GetFileModTime(script_path);
+    char *code = LoadFileText(script_path);
+    if (!code) {
+        snprintf(status_msg, sizeof status_msg, "Error: cannot read %s", GetFileName(script_path));
+        return;
+    }
+    reset_world();
+    if (!bot_load(bot, code, GetFileName(script_path))) printf("[robot] %s\n", bot_error(bot));
+    UnloadFileText(code);
+    snprintf(status_msg, sizeof status_msg, "Loaded %s", GetFileName(script_path));
+}
+
+static const char *script_state(void)
+{
+    switch (bot_state(bot)) {
+    case BOT_RUNNING: return "running";
+    case BOT_DONE:    return "done";
+    case BOT_ERROR:   return "error";
+    default:          return "no code";
+    }
+}
 
 static void load_level(const char *path)
 {
@@ -49,6 +111,8 @@ static void load_level(const char *path)
     scene_level(&scene, &sim);
     fx_reset(&fx);
     accum = 0;
+    log_n = 0;
+    if (script_path[0] && bot) bot_restart(bot);
 }
 
 static void layout(Rectangle *arena, Rectangle *panel)
@@ -78,8 +142,12 @@ static void draw_frame(View v, float alpha)
 
     Rectangle arena, panel;
     layout(&arena, &panel);
-    HudState hs = { paused, scene.overlays, scene.trail, speed, status_msg };
+    for (int i = 0; i < log_n; i++) log_lines[i] = log_buf[i];
+    HudState hs = { paused, scene.overlays, scene.trail, speed, status_msg,
+                    script_path[0] ? GetFileName(script_path) : NULL, script_path[0] ? script_state() : NULL,
+                    log_lines, log_n };
     hud_draw(&sim, panel, &hs);
+    if (script_path[0] && bot_state(bot) == BOT_ERROR) hud_draw_error(arena, bot_error(bot));
 }
 
 static void save_shot(View v, float alpha)
@@ -99,15 +167,21 @@ static void save_shot(View v, float alpha)
 static void frame(void)
 {
     if (IsKeyPressed(KEY_SPACE)) paused = !paused;
-    if (IsKeyPressed(KEY_R)) { sim_reset(&sim); scene_reset(&scene, &sim); fx_reset(&fx); accum = 0; }
+    if (IsKeyPressed(KEY_R)) restart();
     if (IsKeyPressed(KEY_L)) load_level(level_path);
     if (IsKeyPressed(KEY_O)) scene.overlays = !scene.overlays;
     if (IsKeyPressed(KEY_T)) scene.trail = !scene.trail;
     for (int k = 0; k < 4; k++) if (IsKeyPressed(KEY_ONE + k)) speed = 1 << k;
 
+    bool scripted = script_path[0] && !auto_drive;
+    if (script_path[0] && (script_poll += GetFrameTime()) > 0.5f) { /* hot reload */
+        script_poll = 0;
+        if (GetFileModTime(script_path) != script_mtime) load_script();
+    }
+
     if (auto_drive) {
         sim_set_motors(&sim, 0, auto_l, auto_r);
-    } else {
+    } else if (!scripted) {
         double fwd = (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) - (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S));
         double turn = (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) - (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D));
         sim_set_motors(&sim, 0, 0.1 * fwd - 0.05 * turn, 0.1 * fwd + 0.05 * turn);
@@ -116,10 +190,12 @@ static void frame(void)
     float dt_frame = fminf(GetFrameTime(), 0.1f);
     if (shot_file) dt_frame = 1.0f / 60.0f; /* deterministic captures */
     const float dt = SIM_CYCLE_MS / 1000.0f;
-    if (!paused && !sim.over) {
+    bool frozen = scripted && bot_state(bot) == BOT_ERROR; /* keep the scene where it broke */
+    if (!paused && !sim.over && !frozen) {
         accum += dt_frame * (float)speed;
         int steps = 0;
         while (accum >= dt && steps < 32) {
+            if (scripted) bot_tick(bot, &sim, 0);
             sim_step(&sim);
             scene_after_step(&scene, &sim, &fx);
             accum -= dt;
@@ -154,19 +230,23 @@ int main(int argc, char **argv)
         else if (strcmp(argv[i], "--size") == 0 && i + 2 < argc) { win_w = atoi(argv[++i]); win_h = atoi(argv[++i]); }
         else if (strcmp(argv[i], "--motors") == 0 && i + 2 < argc) { auto_drive = true; auto_l = atof(argv[++i]); auto_r = atof(argv[++i]); }
         else if (strcmp(argv[i], "--overlays") == 0) scene.overlays = scene.trail = true;
+        else if (IsFileExtension(argv[i], ".lua")) snprintf(script_path, sizeof script_path, "%s", argv[i]);
         else snprintf(level_path, sizeof level_path, "%s", argv[i]);
     }
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
     InitWindow(win_w, win_h, "CiberRato Jr");
     SetWindowMinSize(640, 360);
+    bot = bot_new(on_say, NULL);
     load_level(level_path);
+    if (script_path[0]) load_script();
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(frame, 0, 1);
 #else
     while (!WindowShouldClose() && frames >= 0) frame();
 #endif
+    bot_free(bot);
     scene_unload(&scene);
     text_unload();
     CloseWindow();

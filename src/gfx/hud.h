@@ -10,10 +10,16 @@ typedef struct {
     bool        paused, overlays, trail;
     int         speed;
     const char *status;
+    /* robot script (script == NULL: keyboard drive) */
+    const char *script, *script_state;
+    const char *const *log;     /* say() lines, oldest first */
+    int         nlog;
 } HudState;
 
 /* Split the screen into arena and HUD panel (side, or bottom on narrow screens). */
 void hud_layout(int screen_w, int screen_h, double lab_w, double lab_h, Rectangle *arena, Rectangle *panel);
 void hud_draw(const Sim *s, Rectangle panel, const HudState *st);
+/* Script error banner along the bottom of the arena. */
+void hud_draw_error(Rectangle arena, const char *msg);
 
 #endif

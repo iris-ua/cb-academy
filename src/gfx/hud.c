@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 #include "hud.h"
 #include <math.h>
+#include <string.h>
 #include "text.h"
 #include "view.h"
 
@@ -161,10 +162,46 @@ static float sec_ground(const Sim *s, float x, float y, float w)
     return 70;
 }
 
+/* copy the longest prefix of s that fits maxw (with "..." if cut) */
+static const char *fit(TextKind k, const char *s, float size, float maxw)
+{
+    static char buf[256];
+    TextCopy(buf, TextFormat("%.255s", s));
+    int n = (int)strlen(buf);
+    if (text_width(k, buf, size) <= maxw) return buf;
+    while (n > 0) {
+        buf[--n] = '\0';
+        if (text_width(k, TextFormat("%s...", buf), size) <= maxw) break;
+    }
+    return TextFormat("%s...", buf);
+}
+
+#define LOG_LINES 4
+
+static float sec_script(const HudState *st, float x, float y, float w)
+{
+    int nl = st->nlog < LOG_LINES ? st->nlog : LOG_LINES;
+    float ch = 32 + (nl ? nl : 1) * 16;
+    card(x, y, w, ch);
+    label("SCRIPT", x + 10, y + 8);
+    text_draw(TEXT_UI, fit(TEXT_UI, st->script, 13, w - 140), x + 60, y + 4, 13, C_TEXT);
+    const char *ss = st->script_state;
+    Color sc = strcmp(ss, "error") == 0 ? C_RED : strcmp(ss, "running") == 0 ? C_GREEN : C_GOLD;
+    float bw = text_width(TEXT_BOLD, ss, 11) + 14;
+    DrawRectangleRounded((Rectangle){ x + w - 10 - bw, y + 6, bw, 16 }, 0.5f, 4, sc);
+    text_draw(TEXT_BOLD, ss, x + w - 10 - bw + 7, y + 7, 11, (Color){ 20, 22, 30, 255 });
+    if (!nl) text_draw(TEXT_UI, "say(...) shows up here", x + 10, y + 26, 13, C_DIM);
+    for (int k = 0; k < nl; k++) {
+        const char *line = st->log[st->nlog - nl + k];
+        text_draw(TEXT_MONO, fit(TEXT_MONO, line, 12, w - 20), x + 10, y + 26 + k * 16, 12, k == nl - 1 ? C_TEXT : C_DIM);
+    }
+    return ch + 8;
+}
+
 static void sec_keys(const HudState *st, float x, float y)
 {
     const char *keys[] = {
-        "arrows/WASD drive   space pause",
+        st->script ? "save the script to reload   space pause" : "arrows/WASD drive   space pause",
         "1-4 speed   R reset   L reload",
         TextFormat("O overlays [%s]   T trail [%s]", st->overlays ? "on" : "off", st->trail ? "on" : "off"),
     };
@@ -210,6 +247,7 @@ void hud_draw(const Sim *s, Rectangle p, const HudState *st)
         y += sec_ir(s, x, y, w);
         y += sec_dials(s, x, y, w);
         y += sec_ground(s, x, y, w);
+        if (st->script) y += sec_script(st, x, y, w);
         sec_keys(st, x, fmaxf(y + 4, p.y + p.height - 78));
         return;
     }
@@ -220,4 +258,39 @@ void hud_draw(const Sim *s, Rectangle p, const HudState *st)
     sec_ground(s, x, y, w);
     y2 += sec_ir(s, x2, y2, w);
     sec_dials(s, x2, y2, w);
+}
+
+/* word-wrap s (honouring '\n') into lines of at most maxw; returns line count */
+static int wrap(const char *s, float size, float maxw, char lines[][160], int max)
+{
+    int n = 0;
+    while (*s && n < max) {
+        char *ln = lines[n++];
+        int len = 0, brk = 0;
+        while (s[len] && s[len] != '\n' && len < 159) {
+            ln[len] = s[len];
+            ln[len + 1] = '\0';
+            if (len > 0 && text_width(TEXT_UI, ln, size) > maxw) break; /* s[len] overflows */
+            if (s[len] == ' ') brk = len;
+            len++;
+        }
+        if (s[len] && s[len] != '\n' && s[len] != ' ' && brk > 0) len = brk;
+        ln[len] = '\0';
+        s += len;
+        if (*s == '\n' || *s == ' ') s++;
+    }
+    return n;
+}
+
+void hud_draw_error(Rectangle a, const char *msg)
+{
+    static char lines[6][160];
+    float w = fminf(a.width - 32, 640), size = 15;
+    int n = wrap(msg, size, w - 28, lines, 6);
+    float h = 40 + n * 20, x = a.x + (a.width - w) / 2, y = a.y + a.height - h - 16;
+    DrawRectangleRounded((Rectangle){ x, y + 3, w, h }, 12 / h, 6, (Color){ 0, 0, 0, 90 });
+    DrawRectangleRounded((Rectangle){ x, y, w, h }, 12 / h, 6, (Color){ 58, 28, 32, 245 });
+    DrawRectangleRounded((Rectangle){ x, y, 5, h }, 1, 4, C_RED);
+    text_draw(TEXT_BOLD, "Your code stopped", x + 16, y + 8, 15, (Color){ 255, 150, 140, 255 });
+    for (int k = 0; k < n; k++) text_draw(TEXT_UI, lines[k], x + 16, y + 30 + k * 20, size, C_TEXT);
 }

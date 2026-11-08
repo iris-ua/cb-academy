@@ -5,8 +5,11 @@ A simplified, modern take on [ciberRatoTools](https://github.com/iris-ua/ciberRa
 ## Desktop
 
     cmake -S . -B build -G Ninja && cmake --build build
-    ./build/ciberrato [levels/sandbox.json]
+    ./build/ciberrato [levels/sandbox.json] [examples/robot.lua]
     ctest --test-dir build        # simulation tests
+
+With a `.lua` script the robot runs it and reloads whenever the file is saved
+(API in `src/bot/bot.h`); without one, drive with the keyboard.
 
 Keys: arrows/WASD drive · Space pause · 1–4 speed · R reset · L reload level · O sensor overlays · T trail.
 
@@ -21,9 +24,11 @@ Needs [emsdk](https://emscripten.org/docs/getting_started/downloads.html):
 ## Layout
 
     src/sim/    simulation core (no graphics): motion, collisions, sensors, level loader
+    src/bot/    student Lua scripts: sandbox, coroutine per robot, API, friendly errors
     src/gfx/    rendering: camera/primitives (view), arena + mouse (scene), juice (fx), HUD
     src/main.c  raylib app: input, fixed-tick loop, interpolation
     assets/     fonts (OFL)
+    examples/   example robot scripts
     levels/     level JSON (format documented in src/sim/level.h)
     web/        HTML shell for the web build
     tests/      headless tests

@@ -29,7 +29,7 @@ FetchContent_Declare(raylib
   GIT_TAG 5.5 GIT_SHALLOW TRUE
   PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/patch_raylib.cmake)
 
-# --- Lua 5.4 (used from M3) ---------------------------------------------------
+# --- Lua 5.4 -----------------------------------------------------------------
 set(LUA_SRC lapi lauxlib lbaselib lcode lcorolib lctype ldblib ldebug ldo ldump
   lfunc lgc linit liolib llex lmathlib lmem loadlib lobject lopcodes loslib
   lparser lstate lstring lstrlib ltable ltablib ltm lundump lutf8lib lvm lzio)
@@ -52,6 +52,13 @@ if(NOT MSVC)
     PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra;-Wpedantic")
 endif()
 
+# --- robot scripts (Lua, no graphics) ----------------------------------------
+add_library(bot STATIC src/bot/bot.c)
+target_link_libraries(bot PUBLIC sim lua)
+if(NOT MSVC)
+  target_compile_options(bot PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
 # --- app ---------------------------------------------------------------------
 if(EMSCRIPTEN)
   set(PLATFORM Web CACHE STRING "" FORCE)
@@ -61,7 +68,7 @@ FetchContent_MakeAvailable(raylib)
 add_executable(ciberrato src/main.c
   src/gfx/view.c src/gfx/scene.c src/gfx/fx.c src/gfx/hud.c src/gfx/text.c)
 target_include_directories(ciberrato PRIVATE src)
-target_link_libraries(ciberrato PRIVATE sim lua raylib)
+target_link_libraries(ciberrato PRIVATE bot raylib)
 if(NOT MSVC)
   target_compile_options(ciberrato PRIVATE -Wall -Wextra)
 endif()
@@ -85,4 +92,7 @@ else()
   target_link_libraries(test_sim PRIVATE sim)
   target_compile_definitions(test_sim PRIVATE LEVELS_DIR="${CMAKE_SOURCE_DIR}/levels")
   add_test(NAME sim COMMAND test_sim)
+  add_executable(test_bot tests/test_bot.c)
+  target_link_libraries(test_bot PRIVATE bot)
+  add_test(NAME bot COMMAND test_bot)
 endif()
