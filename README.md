@@ -1,5 +1,7 @@
 # CiberRato Jr
 
+> **Note:** this project is developed with the assistance of AI.
+
 A simplified, modern take on [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools): program a mouse robot to find the cheese. Built with C99, raylib, and Lua. Runs on desktop and in the browser.
 
 ## Desktop
@@ -37,6 +39,13 @@ an API cheat-sheet next to the arena. CodeMirror is pre-bundled into
     challenges/ challenge JSON + starter Lua (win rules in src/sim/challenge.h)
     web/        web page: shell.html, app.js (editor/console/bridge), app.css, vendor/ CodeMirror
     tests/      headless tests
+
+## Acknowledgments
+
+CiberRato Jr builds on [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools),
+the CiberRato Robot Simulation Environment from Universidade de Aveiro / IEETA.
+Thanks to its original authors: Nuno Lau, Artur C. Pereira, Andreia Melo,
+António Neves, João Figueiredo, Miguel Rodrigues and Eurico Pedrosa.
 
 ## License
 
