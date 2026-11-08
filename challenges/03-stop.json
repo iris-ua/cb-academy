@@ -1,0 +1,23 @@
+{
+  "title": "Stop before the wall",
+  "goal": [
+    "Drive to the cheese and **stop on it**. It sits right in front of a wall, so do not bump!",
+    "",
+    "`ir(0)` is the front sensor. It reads about `1 / distance`: the closer the wall, the bigger the number."
+  ],
+  "starter": "03-stop.lua",
+  "hints": [
+    "Use a `while` loop: keep driving while `ir(0)` is small.",
+    "The cheese starts where `ir(0)` is about `1`. Stop when it goes over `1.5`.",
+    "When the loop ends the program ends, and the mouse stops."
+  ],
+  "win": { "reach_target": true, "stop_on_target": true, "no_collisions": true },
+  "stars": { "time": 110 },
+  "name": "Stop before the wall",
+  "width": 12,
+  "height": 5,
+  "time_limit": 600,
+  "noise": { "motors": 0, "ir": 0, "compass": 0, "beacon": 0 },
+  "targets": [{ "x": 11, "y": 2.5, "radius": 1 }],
+  "start": [{ "x": 2, "y": 2.5, "dir": 0 }]
+}

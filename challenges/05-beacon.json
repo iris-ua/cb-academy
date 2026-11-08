@@ -1,0 +1,24 @@
+{
+  "title": "Follow the light",
+  "goal": [
+    "The cheese is under the light, somewhere behind you.",
+    "",
+    "`beacon()` gives the angle to the light in degrees: `0` is straight ahead, positive is to the left."
+  ],
+  "starter": "05-beacon.lua",
+  "hints": [
+    "`turn(beacon())` points the mouse at the light.",
+    "Readings are a bit noisy. Look again every few steps and correct.",
+    "In a loop: if `beacon()` is positive, steer left (right wheel faster), otherwise steer right."
+  ],
+  "win": { "reach_target": true },
+  "stars": { "time": 200 },
+  "name": "Follow the light",
+  "width": 16,
+  "height": 12,
+  "time_limit": 900,
+  "noise": { "motors": 0, "ir": 0.1, "compass": 2, "beacon": 2 },
+  "beacons": [{ "x": 13, "y": 9, "height": 4 }],
+  "targets": [{ "x": 13, "y": 9, "radius": 1 }],
+  "start": [{ "x": 4, "y": 3, "dir": 200 }]
+}

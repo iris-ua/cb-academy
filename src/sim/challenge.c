@@ -36,6 +36,7 @@ bool challenge_parse(WinRule *w, const char *json, char *err, size_t errlen)
         else if (cJSON_IsNumber(rt)) w->reach_target = (int)rt->valuedouble;
         w->visit_all = flag(win, "visit_all");
         w->return_home = flag(win, "return_home");
+        w->stop_on_target = flag(win, "stop_on_target");
         w->no_collisions = flag(win, "no_collisions");
         w->under_time = ticks(win, "under_time");
         w->star_time = ticks(cJSON_GetObjectItemCaseSensitive(root, "stars"), "time");
@@ -51,12 +52,16 @@ static bool any_visited(const Sim *s, const Robot *rb)
     return false;
 }
 
-static bool goals_met(const WinRule *w, const Sim *s, int r)
+static bool goals_met(const WinRule *w, const Sim *s, int r, bool ended)
 {
     const Robot *rb = &s->robots[r];
     const Lab *lab = &s->level.lab;
     if (w->reach_target == -1 && !any_visited(s, rb)) return false;
     if (w->reach_target >= 0 && (w->reach_target >= lab->ntargets || !rb->visited[w->reach_target])) return false;
+    if (w->stop_on_target) {
+        int g = rb->ground;
+        if (!ended || g < 0 || (w->reach_target >= 0 && g != w->reach_target)) return false;
+    }
     if (w->visit_all)
         for (int t = 0; t < lab->ntargets; t++)
             if (!rb->visited[t]) return false;
@@ -79,14 +84,18 @@ Outcome challenge_check(const WinRule *w, const Sim *s, int r, bool ended, const
     if (!w->active || r < 0 || r >= s->nrobots) return CH_PENDING;
     const Robot *rb = &s->robots[r];
     if (w->no_collisions && rb->collisions > 0) { *why = "Bumped into something."; return CH_FAIL; }
-    if (goals_met(w, s, r)) {
+    if (goals_met(w, s, r, ended)) {
         if (w->under_time && s->cycle > w->under_time) { *why = "Too slow."; return CH_FAIL; }
         return CH_WIN;
     }
     if (w->under_time && s->cycle >= w->under_time) { *why = "Too slow."; return CH_FAIL; }
     int limit = s->level.params.time_limit;
     if (limit > 0 && s->cycle >= limit) { *why = "Time's up."; return CH_FAIL; }
-    if (ended) { *why = "The program ended before the goal."; return CH_FAIL; }
+    if (ended) {
+        *why = w->stop_on_target && any_visited(s, rb) ? "Stop on the cheese, not past it."
+                                                       : "The program ended before the goal.";
+        return CH_FAIL;
+    }
     return CH_PENDING;
 }
 

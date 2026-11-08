@@ -323,6 +323,18 @@ static void test_challenge(void)
     sim_init(&sim, &lv, 1, 1);
     sim.cycle = 10;
     CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_FAIL); /* level time limit */
+
+    /* stop_on_target: only a run that ends on the cheese wins */
+    lv.params.time_limit = 0;
+    CHECK(challenge_parse(&w, "{\"win\":{\"reach_target\":true,\"stop_on_target\":true}}", err, sizeof err));
+    sim_init(&sim, &lv, 1, 1);
+    sim.robots[0].pose.x = 5;
+    sim_step(&sim);
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING); /* still driving */
+    CHECK(challenge_check(&w, &sim, 0, true, &why) == CH_WIN);
+    sim.robots[0].pose.x = 8;
+    sim_step(&sim);
+    CHECK(challenge_check(&w, &sim, 0, true, &why) == CH_FAIL); /* drove past it */
 }
 
 int main(void)

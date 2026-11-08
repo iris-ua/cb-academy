@@ -18,6 +18,7 @@ whose behavior is already tested.
 ## Git 
 
 Never change branch without asking.
+Never commit without human authorization.
 
 ### Commit Messages
 
@@ -53,7 +54,7 @@ Use short, single-line commit messages following Conventional Commits.
 - `src/gfx/fx.*` shake/flash/particles/popups on frame time. `src/gfx/hud.*` `hud_layout` (side or bottom panel) + cards. Panel is laid out in logical units and drawn under an rlgl scale (`hud_scale`, 1.2-1.5 by screen size); `text_set_scale` keeps atlases sharp.
 - `src/gfx/text.*` all text: `text_draw`/`text_width` with `TEXT_UI`/`TEXT_BOLD` (Nunito) or `TEXT_MONO*` (JetBrains Mono, for changing numbers). Never raw `DrawText`.
 - `web/` page around the canvas. `app.js` holds the API table (autocomplete + cheat-sheet: update it with `bot.h`). Bridge: `web_*` `EMSCRIPTEN_KEEPALIVE` in `main.c`, called via `Module.ccall`; C->JS via `js_emit(kind, text, n)` -> `Module.onEvent` (print/error/state/speed/paused/level/finished/result/ready). `web/vendor/codemirror.js` is a committed esbuild bundle from `web/vendor-src`.
-- Challenges: `challenges/NN-id.json` = level JSON + `title`/`goal`/`starter`/`hints` (page only) + `win`/`stars` (C). File order = play order, id = basename. `src/sim/challenge.*` parses/judges the win rule; `main.c` `judge()` freezes the run and emits `result` (JSON). Page: `ciberrato.progress`, `ciberrato.code.<id>`, `ciberrato.current` in localStorage.
+- Challenges: `challenges/NN-id.json` = level JSON + `title`/`goal`/`starter`/`hints` (page only) + `win`/`stars` (C). File order = play order, id = basename. `src/sim/challenge.*` parses/judges the win rule (`stop_on_target`: judged when the run ends); `main.c` `judge()` freezes the run and emits `result` (JSON). Each challenge needs `tests/solutions/<id>.lua` that wins it on 12 seeds (`test_challenges [dir] [id-prefix]`; tune stars from its tick range). Page: `ciberrato.progress`, `ciberrato.code.<id>`, `ciberrato.current` in localStorage.
 - Dev flags: `*.lua` arg = robot script, `--shot out.png --frames N --size W H --motors L R --overlays` for headless screenshots.
 
 ## Scars

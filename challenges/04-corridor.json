@@ -1,0 +1,35 @@
+{
+  "title": "Follow the corridor",
+  "goal": [
+    "The corridor bends. Keep the mouse in the middle all the way to the cheese, **without bumping**.",
+    "",
+    "`ir(1)` looks front-left and `ir(2)` looks front-right. If one wall gets closer, its reading goes up: steer away from it."
+  ],
+  "starter": "04-corridor.lua",
+  "hints": [
+    "`ir(1) - ir(2)` is positive when the left wall is closer.",
+    "To steer right, make the left wheel faster than the right one.",
+    "Try `local e = ir(1) - ir(2)` then `motors(0.1 + 0.05 * e, 0.1 - 0.05 * e)` in a loop."
+  ],
+  "win": { "reach_target": true, "no_collisions": true },
+  "stars": { "time": 300 },
+  "name": "Follow the corridor",
+  "width": 26,
+  "height": 8,
+  "time_limit": 1200,
+  "noise": { "motors": 0, "ir": 0.1, "compass": 0, "beacon": 0 },
+  "walls": [
+    {"height": 1.5, "corners": [[0.0, 3.15], [6.64, 3.15], [6.54, 3.45], [0.0, 3.45]]},
+    {"height": 1.5, "corners": [[6.64, 3.15], [11.64, 6.65], [11.54, 6.95], [6.54, 3.45]]},
+    {"height": 1.5, "corners": [[11.64, 6.65], [17.38, 6.65], [17.48, 6.95], [11.54, 6.95]]},
+    {"height": 1.5, "corners": [[17.38, 6.65], [21.38, 3.65], [21.48, 3.95], [17.48, 6.95]]},
+    {"height": 1.5, "corners": [[21.38, 3.65], [26.0, 3.65], [26.0, 3.95], [21.48, 3.95]]},
+    {"height": 1.5, "corners": [[0.0, 0.85], [7.36, 0.85], [7.46, 0.55], [0.0, 0.55]]},
+    {"height": 1.5, "corners": [[7.36, 0.85], [12.36, 4.35], [12.46, 4.05], [7.46, 0.55]]},
+    {"height": 1.5, "corners": [[12.36, 4.35], [16.62, 4.35], [16.52, 4.05], [12.46, 4.05]]},
+    {"height": 1.5, "corners": [[16.62, 4.35], [20.62, 1.35], [20.52, 1.05], [16.52, 4.05]]},
+    {"height": 1.5, "corners": [[20.62, 1.35], [26.0, 1.35], [26.0, 1.05], [20.52, 1.05]]}
+  ],
+  "targets": [{ "x": 24.5, "y": 2.5, "radius": 1 }],
+  "start": [{ "x": 1.5, "y": 2, "dir": 0 }]
+}

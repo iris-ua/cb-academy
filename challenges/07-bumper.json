@@ -1,0 +1,28 @@
+{
+  "title": "Bump and go",
+  "goal": [
+    "Rocks block the way to the light. The real world is noisy now: wheels slip and sensors jitter.",
+    "",
+    "`bump()` is `true` right after the mouse hits something. Back up, turn, and try again."
+  ],
+  "starter": "07-bumper.lua",
+  "hints": [
+    "After a bump, `forward(-1)` backs up one step.",
+    "Turn away from the rock (try `turn(90)`), drive a bit, then head for the light again.",
+    "A random turn (`math.random(60, 120)`) stops the mouse from getting stuck in a loop."
+  ],
+  "win": { "reach_target": true },
+  "stars": { "time": 800 },
+  "name": "Bump and go",
+  "width": 16,
+  "height": 10,
+  "time_limit": 1800,
+  "walls": [
+    {"height": 1, "corners": [[5, 3.5], [6.5, 3.5], [6.5, 6.5], [5, 6.5]]},
+    {"height": 1, "corners": [[10, 0], [11.5, 0], [11.5, 4], [10, 4]]},
+    {"height": 1, "corners": [[10, 6.5], [11.5, 6.5], [11.5, 10], [10, 10]]}
+  ],
+  "beacons": [{ "x": 14, "y": 5, "height": 4 }],
+  "targets": [{ "x": 14, "y": 5, "radius": 1 }],
+  "start": [{ "x": 2, "y": 5, "dir": 0 }]
+}
