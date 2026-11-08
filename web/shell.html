@@ -4,27 +4,70 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CiberRato Jr</title>
-  <style>
-    html, body { margin: 0; height: 100%; overflow: hidden; background: #12141a; color: #ccc; font-family: system-ui, sans-serif; }
-    body { display: flex; align-items: center; justify-content: center; }
-    canvas { display: block; width: 100vw; height: 100vh; outline: none; } /* raylib resizes the buffer to the window */
-    #status { position: fixed; top: 50%; width: 100%; text-align: center; }
-  </style>
+  <link rel="stylesheet" href="app.css">
 </head>
 <body>
-  <div id="status">Loading…</div>
-  <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+  <div id="app">
+    <section id="left" class="ui">
+      <header class="bar">
+        <span class="brand">CiberRato <b>Jr</b></span>
+        <select id="level" title="Level"></select>
+        <span class="grow"></span>
+        <button id="help" class="ghost" title="API cheat-sheet" aria-pressed="false">API</button>
+      </header>
+      <div class="bar controls">
+        <button id="run" class="primary" title="Run (Ctrl+Enter)">▶ Run</button>
+        <button id="stop" title="Stop the script" disabled>■ Stop</button>
+        <button id="reset" title="Put the robot back at the start">↺ Reset</button>
+        <span class="grow"></span>
+        <span class="seg" id="speed" title="Simulation speed">
+          <button data-speed="1">×1</button><button data-speed="2">×2</button><button data-speed="4">×4</button>
+        </span>
+      </div>
+      <div id="editor"></div>
+      <div id="console-head" class="bar">
+        <span class="title">Console</span>
+        <span id="state" class="pill">idle</span>
+        <span class="grow"></span>
+        <button id="clear" class="ghost">Clear</button>
+      </div>
+      <div id="console" aria-live="polite"></div>
+    </section>
+    <aside id="cheat" class="ui" hidden>
+      <div class="bar"><span class="title">Robot API</span><span class="grow"></span><button id="cheat-close" class="ghost" title="Close">✕</button></div>
+      <div id="cheat-body"></div>
+    </aside>
+    <main id="stage">
+      <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+      <div id="status">Loading…</div>
+    </main>
+  </div>
   <script>
+    /* Keys typed in the page UI (editor, buttons) must not drive the robot.
+       GLFW listens on window in the capture phase, before the event reaches
+       the editor, so wrap its key handlers (registered later) with a filter. */
+    (function () {
+      var add = window.addEventListener;
+      window.addEventListener = function (type, fn, opt) {
+        if (type === 'keydown' || type === 'keypress') {
+          var inner = fn;
+          fn = function (e) { if (!(e.target.closest && e.target.closest('.ui'))) return inner.call(this, e); };
+        }
+        return add.call(this, type, fn, opt);
+      };
+    })();
+    window.addEventListener('keydown', function (e) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+    });
     var Module = {
       canvas: document.getElementById('canvas'),
       setStatus: function (t) { var el = document.getElementById('status'); el.textContent = t; el.hidden = !t; },
       print: function (t) { console.log(t); },
       printErr: function (t) { console.error(t); }
     };
-    window.addEventListener('keydown', function (e) {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
-    });
   </script>
+  <script src="vendor/codemirror.js"></script>
+  <script src="app.js"></script>
   {{{ SCRIPT }}}
 </body>
 </html>

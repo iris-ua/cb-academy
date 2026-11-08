@@ -34,7 +34,11 @@ static bool load_data(TextKind k)
 static Font get_font(TextKind k, float size)
 {
     if (!load_data(k)) return GetFontDefault();
+#ifdef __EMSCRIPTEN__
+    Vector2 dpi = { 1, 1 }; /* not implemented on the web (logs a warning per call) */
+#else
     Vector2 dpi = GetWindowScaleDPI();
+#endif
     float px = size * fmaxf(1.0f, dpi.x);
     int i = 0;
     while (i < NSTEPS - 1 && STEPS[i] < px) i++;

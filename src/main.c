@@ -1,7 +1,8 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /* CiberRato Jr — app shell: input, fixed-tick stepping, rendering.
  * With a .lua argument the robot runs that script (hot-reloaded on save);
- * otherwise drive it with the keyboard. */
+ * otherwise drive it with the keyboard. On the web the page's editor drives
+ * it through the web_* exports and gets Module.onEvent(kind, text, n) back. */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +33,8 @@ static int   speed = 1;
 /* robot script */
 #define LOG_N 32
 static Bot  *bot;
-static char  script_path[512];
+static bool  script_on;          /* the script drives the robot (else keyboard) */
+static char  script_path[512];   /* desktop: file to hot-reload */
 static long  script_mtime;
 static float script_poll;
 static char  log_buf[LOG_N][160];
@@ -45,9 +47,21 @@ static int    shot_frames = 90, frames;
 static bool   auto_drive;
 static double auto_l, auto_r;
 
+#ifdef __EMSCRIPTEN__
+EM_JS(void, js_emit, (const char *kind, const char *text, int n), {
+    if (Module.onEvent) Module.onEvent(UTF8ToString(kind), UTF8ToString(text), n);
+});
+#else
+static void js_emit(const char *kind, const char *text, int n) { (void)kind, (void)text, (void)n; }
+#endif
+
 static void on_say(void *ud, const char *msg)
 {
     (void)ud;
+#ifdef __EMSCRIPTEN__
+    js_emit("print", msg, 0);
+    return; /* the page has its own console */
+#endif
     printf("[robot] %s\n", msg);
     if (log_n == LOG_N) { /* drop oldest */
         memmove(log_buf[0], log_buf[1], sizeof log_buf[0] * (LOG_N - 1));
@@ -68,7 +82,7 @@ static void reset_world(void)
 static void restart(void)
 {
     reset_world();
-    if (script_path[0]) bot_restart(bot);
+    if (script_on) bot_restart(bot);
 }
 
 static void load_script(void)
@@ -80,6 +94,7 @@ static void load_script(void)
         return;
     }
     reset_world();
+    script_on = true;
     if (!bot_load(bot, code, GetFileName(script_path))) printf("[robot] %s\n", bot_error(bot));
     UnloadFileText(code);
     snprintf(status_msg, sizeof status_msg, "Loaded %s", GetFileName(script_path));
@@ -87,6 +102,7 @@ static void load_script(void)
 
 static const char *script_state(void)
 {
+    if (!script_on) return "idle";
     switch (bot_state(bot)) {
     case BOT_RUNNING: return "running";
     case BOT_DONE:    return "done";
@@ -95,24 +111,30 @@ static const char *script_state(void)
     }
 }
 
-static void load_level(const char *path)
+/* json == NULL: read the file at path. */
+static bool load_level(const char *path, const char *json)
 {
     static Level tmp;
     char err[200];
-    if (level_load_file(&tmp, path, err, sizeof err)) {
+    bool ok = json ? level_load_json(&tmp, json, err, sizeof err) : level_load_file(&tmp, path, err, sizeof err);
+    if (ok) {
         level = tmp;
         snprintf(status_msg, sizeof status_msg, "Loaded %s", level.lab.name);
+        js_emit("level", level.lab.name, 0);
     } else {
         snprintf(status_msg, sizeof status_msg, "Error: %s", err);
+        js_emit("error", TextFormat("Level: %s", err), 0);
         if (level.lab.width <= 0) /* nothing loaded yet: fall back to an empty box */
             level_load_json(&level, "{\"name\":\"Empty\",\"width\":14,\"height\":8}", err, sizeof err);
+        else if (json) return false; /* keep the current level running */
     }
     sim_init(&sim, &level, 1, 12345);
     scene_level(&scene, &sim);
     fx_reset(&fx);
     accum = 0;
     log_n = 0;
-    if (script_path[0] && bot) bot_restart(bot);
+    if (script_on) bot_restart(bot);
+    return ok;
 }
 
 static void layout(Rectangle *arena, Rectangle *panel)
@@ -143,11 +165,11 @@ static void draw_frame(View v, float alpha)
     Rectangle arena, panel;
     layout(&arena, &panel);
     for (int i = 0; i < log_n; i++) log_lines[i] = log_buf[i];
+    const char *name = script_path[0] ? GetFileName(script_path) : bot_state(bot) != BOT_NONE ? "editor" : NULL;
     HudState hs = { paused, scene.overlays, scene.trail, speed, status_msg,
-                    script_path[0] ? GetFileName(script_path) : NULL, script_path[0] ? script_state() : NULL,
-                    log_lines, log_n };
+                    name, name ? script_state() : NULL, log_lines, log_n };
     hud_draw(&sim, panel, &hs);
-    if (script_path[0] && bot_state(bot) == BOT_ERROR) hud_draw_error(arena, bot_error(bot));
+    if (script_on && bot_state(bot) == BOT_ERROR) hud_draw_error(arena, bot_error(bot));
 }
 
 static void save_shot(View v, float alpha)
@@ -164,16 +186,64 @@ static void save_shot(View v, float alpha)
     UnloadRenderTexture(rt);
 }
 
+/* Tell the page about state it shows in its own UI. */
+static const char *last_state; /* NULL: report again */
+
+static void report_changes(void)
+{
+    static int  last_speed;
+    static bool last_over;
+    const char *st = script_state();
+    if (st != last_state) {
+        if (bot_state(bot) == BOT_ERROR && script_on) js_emit("error", bot_error(bot), bot_error_line(bot));
+        js_emit("state", st, 0);
+        last_state = st;
+    }
+    if (speed != last_speed) js_emit("speed", "", last_speed = speed);
+    if (sim.over != last_over && (last_over = sim.over)) js_emit("finished", "", sim.robots[0].score);
+}
+
+#ifdef __EMSCRIPTEN__
+/* ---- page bridge (Module.ccall) ------------------------------------------ */
+EMSCRIPTEN_KEEPALIVE int web_load_level(const char *json) { return load_level(NULL, json); }
+
+/* Start code from the top on a fresh world; compile errors show as state "error". */
+EMSCRIPTEN_KEEPALIVE void web_run(const char *code)
+{
+    reset_world();
+    script_on = true;
+    paused = false;
+    last_state = NULL; /* a rerun that fails the same way still reports */
+    bot_load(bot, code, "robot");
+}
+
+EMSCRIPTEN_KEEPALIVE void web_stop(void)
+{
+    script_on = false;
+    sim_set_motors(&sim, 0, 0, 0);
+}
+
+EMSCRIPTEN_KEEPALIVE void web_reset(void)
+{
+    script_on = false;
+    reset_world();
+}
+
+EMSCRIPTEN_KEEPALIVE void web_set_speed(int n) { speed = n < 1 ? 1 : n > 8 ? 8 : n; }
+#endif
+
 static void frame(void)
 {
     if (IsKeyPressed(KEY_SPACE)) paused = !paused;
     if (IsKeyPressed(KEY_R)) restart();
-    if (IsKeyPressed(KEY_L)) load_level(level_path);
+#ifndef __EMSCRIPTEN__
+    if (IsKeyPressed(KEY_L)) load_level(level_path, NULL);
+#endif
     if (IsKeyPressed(KEY_O)) scene.overlays = !scene.overlays;
     if (IsKeyPressed(KEY_T)) scene.trail = !scene.trail;
     for (int k = 0; k < 4; k++) if (IsKeyPressed(KEY_ONE + k)) speed = 1 << k;
 
-    bool scripted = script_path[0] && !auto_drive;
+    bool scripted = script_on && !auto_drive;
     if (script_path[0] && (script_poll += GetFrameTime()) > 0.5f) { /* hot reload */
         script_poll = 0;
         if (GetFileModTime(script_path) != script_mtime) load_script();
@@ -214,6 +284,8 @@ static void frame(void)
     draw_frame(v, alpha);
     EndDrawing();
 
+    report_changes();
+
     if (shot_file && ++frames == shot_frames) {
         save_shot(v, alpha);
         shot_file = NULL;
@@ -234,12 +306,21 @@ int main(int argc, char **argv)
         else snprintf(level_path, sizeof level_path, "%s", argv[i]);
     }
 
+#ifdef __EMSCRIPTEN__
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT); /* no HiDPI support on the web */
+#else
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
+#endif
     InitWindow(win_w, win_h, "CiberRato Jr");
+#ifdef __EMSCRIPTEN__
+    SetWindowMinSize(320, 240); /* the page's canvas pane can be small */
+#else
     SetWindowMinSize(640, 360);
+#endif
     bot = bot_new(on_say, NULL);
-    load_level(level_path);
+    load_level(level_path, NULL);
     if (script_path[0]) load_script();
+    js_emit("ready", "", 0);
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(frame, 0, 1);

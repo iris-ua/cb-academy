@@ -77,10 +77,16 @@ if(EMSCRIPTEN)
   set_target_properties(ciberrato PROPERTIES OUTPUT_NAME index SUFFIX ".html")
   target_link_options(ciberrato PRIVATE
     -sUSE_GLFW=3 -sALLOW_MEMORY_GROWTH=1 -sSTACK_SIZE=1mb
+    -sEXPORTED_RUNTIME_METHODS=ccall,FS,UTF8ToString
     --shell-file ${CMAKE_SOURCE_DIR}/web/shell.html
     "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/levels@/levels"
     "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/assets/fonts@/assets/fonts")
   set_property(TARGET ciberrato APPEND PROPERTY LINK_DEPENDS ${CMAKE_SOURCE_DIR}/web/shell.html)
+  # page files served next to index.html (copied on every build)
+  add_custom_target(web_page ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/web/app.js ${CMAKE_SOURCE_DIR}/web/app.css ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/web/vendor ${CMAKE_BINARY_DIR}/vendor
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/fonts ${CMAKE_BINARY_DIR}/fonts)
 else()
   # run from build dir: levels/ and assets/ next to the binary
   add_custom_command(TARGET ciberrato POST_BUILD

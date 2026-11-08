@@ -52,6 +52,7 @@ Use short, single-line commit messages following Conventional Commits.
 - `src/gfx/scene.*` arena drawing + per-robot visual state (interp poses, wheels, trail); `scene_after_step` after every `sim_step` (fires fx).
 - `src/gfx/fx.*` shake/flash/particles/popups on frame time. `src/gfx/hud.*` `hud_layout` (side or bottom panel) + cards.
 - `src/gfx/text.*` all text: `text_draw`/`text_width` with `TEXT_UI`/`TEXT_BOLD` (Nunito) or `TEXT_MONO*` (JetBrains Mono, for changing numbers). Never raw `DrawText`.
+- `web/` page around the canvas. `app.js` holds the API table (autocomplete + cheat-sheet: update it with `bot.h`). Bridge: `web_*` `EMSCRIPTEN_KEEPALIVE` in `main.c`, called via `Module.ccall`; C->JS via `js_emit(kind, text, n)` -> `Module.onEvent` (print/error/state/speed/level/finished/ready). `web/vendor/codemirror.js` is a committed esbuild bundle from `web/vendor-src`.
 - Dev flags: `*.lua` arg = robot script, `--shot out.png --frames N --size W H --motors L R --overlays` for headless screenshots.
 
 ## Scars
@@ -63,3 +64,7 @@ Use short, single-line commit messages following Conventional Commits.
 - Web: canvas CSS must be 100vw/100vh; raylib's resize callback sets the buffer to the window size.
 - CMake de-duplicates repeated link flags: multiple `--preload-file` need `"SHELL:--preload-file ..."`.
 - raylib 5.5 HiDPI resize bug (X11/Windows): screen size became pixels -> layout 2x too big. Patched via `cmake/patch_raylib.cmake` (FetchContent PATCH_COMMAND); drop it when upgrading raylib.
+- Web canvas sizing: patched raylib sizes it to `#stage` (canvas parent), not the window; JS fires a window `resize` on ResizeObserver.
+- Emscripten GLFW listens for keys on window in the *capture* phase (and preventDefaults Backspace/Tab): `shell.html` wraps `window.addEventListener` so keydown/keypress from `.ui` elements never reach raylib.
+- `GetWindowScaleDPI()` logs a warning per call on the web: don't call it there (no HIGHDPI flag on web).
+- Web page files are copied by the `web_page` target every build; POST_BUILD only ran when the wasm relinked.

@@ -1,0 +1,81 @@
+/* CiberRato Jr web page: editor + console + API panel beside the raylib canvas.
+   Colours match the in-canvas HUD (src/gfx/hud.c). */
+@font-face { font-family: Nunito; src: url(fonts/Nunito-SemiBold.ttf); font-weight: 400 600; }
+@font-face { font-family: Nunito; src: url(fonts/Nunito-ExtraBold.ttf); font-weight: 700 900; }
+@font-face { font-family: "JetBrains Mono"; src: url(fonts/JetBrainsMono-Medium.ttf); font-weight: 400 600; }
+@font-face { font-family: "JetBrains Mono"; src: url(fonts/JetBrainsMono-Bold.ttf); font-weight: 700 900; }
+
+:root {
+  --bg: #12141a; --panel: #171a23; --card: #202430; --line: #2d3242;
+  --text: #ebecf2; --dim: #8a90a2; --acc: #6ebef0; --gold: #ffc846; --red: #eb5550; --green: #5acd78;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font: 600 14px/1.4 Nunito, system-ui, sans-serif; }
+
+#app { display: grid; grid-template-columns: minmax(340px, 42%) auto 1fr; grid-template-rows: minmax(0, 1fr); height: 100vh; }
+#left { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; min-width: 0; background: var(--panel); border-right: 1px solid var(--line); }
+#stage { grid-column: 3; grid-row: 1; position: relative; min-width: 0; overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; outline: none; } /* raylib sizes the buffer to #stage */
+#status { position: absolute; inset: 50% 0 auto; text-align: center; color: var(--dim); }
+
+.bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+.grow { flex: 1; }
+.brand { font-weight: 800; font-size: 17px; letter-spacing: .2px; }
+.brand b { color: var(--gold); font-weight: 800; }
+.title { font-weight: 800; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); }
+.controls { padding-top: 0; }
+
+button, select {
+  font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--line);
+  border-radius: 8px; padding: 5px 12px; cursor: pointer;
+}
+button:hover:not(:disabled), select:hover { border-color: #4a5170; }
+button:disabled { opacity: .4; cursor: default; }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+button.primary { background: var(--green); border-color: var(--green); color: #10140f; font-weight: 800; }
+button.ghost { background: none; border-color: transparent; color: var(--dim); padding: 4px 8px; }
+button.ghost:hover, button.ghost[aria-pressed="true"] { color: var(--text); background: var(--card); }
+select { max-width: 180px; }
+.seg { display: inline-flex; }
+.seg button { border-radius: 0; margin-left: -1px; font-family: var(--mono); font-size: 13px; padding: 5px 10px; }
+.seg button:first-child { border-radius: 8px 0 0 8px; }
+.seg button:last-child { border-radius: 0 8px 8px 0; }
+.seg button.on { background: var(--acc); border-color: var(--acc); color: #0e1620; }
+
+#editor { flex: 1; min-height: 120px; overflow: hidden; border-top: 1px solid var(--line); }
+#editor .cm-editor { height: 100%; font-size: 14px; }
+#editor .cm-editor.cm-focused { outline: none; }
+#editor .cm-scroller { font-family: var(--mono); }
+#editor .cm-err-line { background: rgba(235, 85, 80, .18); }
+
+#console-head { border-top: 1px solid var(--line); padding-top: 6px; padding-bottom: 6px; }
+#console { height: 26%; min-height: 80px; overflow-y: auto; padding: 4px 12px 10px; font: 500 13px/1.5 var(--mono); }
+#console div { white-space: pre-wrap; word-break: break-word; }
+#console .sys { color: var(--dim); }
+#console .err { color: var(--red); }
+#console .err a { color: inherit; cursor: pointer; text-decoration: underline; }
+#console .win { color: var(--gold); }
+.pill { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; padding: 1px 8px; border-radius: 99px; background: var(--card); color: var(--dim); }
+.pill.running { background: var(--green); color: #10140f; }
+.pill.done { background: var(--acc); color: #0e1620; }
+.pill.error { background: var(--red); color: #1a0d0d; }
+
+#cheat { grid-column: 2; grid-row: 1; width: 300px; display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); }
+#cheat[hidden] { display: none; }
+#cheat-body { overflow-y: auto; padding: 0 12px 16px; }
+#cheat h3 { margin: 14px 0 6px; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); }
+#cheat .fn { padding: 7px 10px; margin-bottom: 6px; background: var(--card); border-radius: 8px; cursor: pointer; }
+#cheat .fn:hover { outline: 1px solid #4a5170; }
+#cheat code { font: 600 13px var(--mono); color: var(--acc); }
+#cheat p { margin: 2px 0 0; color: var(--dim); font-size: 13px; }
+#cheat .tip { color: var(--dim); font-size: 13px; }
+
+/* narrow screens: arena on top, editor below; API panel over the editor */
+@media (max-width: 860px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: 42vh minmax(0, 1fr); }
+  #stage { grid-column: 1; grid-row: 1; }
+  #left { grid-column: 1; grid-row: 2; border-right: 0; border-top: 1px solid var(--line); min-height: 0; }
+  #cheat { position: fixed; inset: 42vh 0 0 auto; width: min(320px, 90vw); z-index: 2; box-shadow: -8px 0 24px #0008; }
+}

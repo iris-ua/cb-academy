@@ -201,8 +201,13 @@ static float sec_script(const HudState *st, float x, float y, float w)
 static void sec_keys(const HudState *st, float x, float y)
 {
     const char *keys[] = {
+#ifdef __EMSCRIPTEN__ /* the page runs the script; no level file to reload */
+        st->script ? "space pause" : "arrows/WASD drive   space pause",
+        "1-4 speed   R reset",
+#else
         st->script ? "save the script to reload   space pause" : "arrows/WASD drive   space pause",
         "1-4 speed   R reset   L reload",
+#endif
         TextFormat("O overlays [%s]   T trail [%s]", st->overlays ? "on" : "off", st->trail ? "on" : "off"),
     };
     for (int k = 0; k < 3; k++) text_draw(TEXT_UI, keys[k], x, y + k * 15 - 4, 13, C_DIM);
