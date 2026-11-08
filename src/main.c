@@ -10,6 +10,7 @@
 #include "raylib.h"
 #include "sim/sim.h"
 #include "sim/level.h"
+#include "sim/challenge.h"
 #include "bot/bot.h"
 #include "gfx/fx.h"
 #include "gfx/hud.h"
@@ -29,6 +30,8 @@ static char  status_msg[256];
 static bool  paused;
 static float accum;
 static float speed = 1;  /* sim time multiplier: 0.5, 1, 2, 4, 8 */
+static WinRule rule;     /* challenge win rule (rule.active: the level is a challenge) */
+static bool  judged;     /* this run got a result; the sim stops */
 
 /* robot script */
 #define LOG_N 32
@@ -77,6 +80,7 @@ static void reset_world(void)
     fx_reset(&fx);
     accum = 0;
     log_n = 0;
+    judged = false;
 }
 
 static void restart(void)
@@ -104,7 +108,7 @@ static const char *script_state(void)
 {
     if (!script_on) return "idle";
     switch (bot_state(bot)) {
-    case BOT_RUNNING: return "running";
+    case BOT_RUNNING: return judged ? "done" : "running"; /* a judged run stops for good */
     case BOT_DONE:    return "done";
     case BOT_ERROR:   return "error";
     default:          return "no code";
@@ -115,10 +119,16 @@ static const char *script_state(void)
 static bool load_level(const char *path, const char *json)
 {
     static Level tmp;
+    WinRule wr;
     char err[200];
-    bool ok = json ? level_load_json(&tmp, json, err, sizeof err) : level_load_file(&tmp, path, err, sizeof err);
+    char *text = json ? NULL : LoadFileText(path);
+    const char *src = json ? json : text;
+    bool ok = src && level_load_json(&tmp, src, err, sizeof err) && challenge_parse(&wr, src, err, sizeof err);
+    if (!src) snprintf(err, sizeof err, "cannot open %.150s", path);
+    if (text) UnloadFileText(text);
     if (ok) {
         level = tmp;
+        rule = wr;
         snprintf(status_msg, sizeof status_msg, "Loaded %s", level.lab.name);
         js_emit("level", level.lab.name, 0);
     } else {
@@ -133,8 +143,30 @@ static bool load_level(const char *path, const char *json)
     fx_reset(&fx);
     accum = 0;
     log_n = 0;
+    judged = false;
     if (script_on) bot_restart(bot);
     return ok;
+}
+
+/* Challenge result, once per run: stops the sim and tells the page. */
+static void judge(void)
+{
+    if (!rule.active || judged) return;
+    BotState bs = bot_state(bot);
+    if (script_on && bs == BOT_ERROR) return; /* the error banner says enough */
+    bool ended = sim.over || sim.robots[0].finished || (script_on && bs != BOT_RUNNING);
+    const char *why;
+    Outcome o = challenge_check(&rule, &sim, 0, ended, &why);
+    if (o == CH_PENDING) return;
+    judged = true;
+    const Robot *rb = &sim.robots[0];
+    int stars = o == CH_WIN ? challenge_stars(&rule, &sim, 0) : 0;
+    if (o == CH_WIN) snprintf(status_msg, sizeof status_msg, "Challenge complete! %d/3 stars", stars);
+    else snprintf(status_msg, sizeof status_msg, "Not yet: %s", why);
+    printf("%s\n", status_msg);
+    js_emit("result", TextFormat("{\"win\":%s,\"stars\":%d,\"ticks\":%d,\"star_time\":%d,\"collisions\":%d,\"score\":%d,\"why\":\"%s\"}",
+                                 o == CH_WIN ? "true" : "false", stars, sim.cycle, rule.star_time,
+                                 rb->collisions, rb->score, why), o == CH_WIN);
 }
 
 static void layout(Rectangle *arena, Rectangle *panel)
@@ -263,7 +295,8 @@ static void frame(void)
 #ifdef __EMSCRIPTEN__
     frozen = !scripted || bot_state(bot) != BOT_RUNNING; /* the clock only runs after Run */
 #endif
-    if (!paused && !sim.over && !frozen) {
+    judge(); /* script ended between ticks */
+    if (!paused && !sim.over && !frozen && !judged) {
         accum += dt_frame * speed;
         int steps = 0;
         while (accum >= dt && steps < 32) {
@@ -272,10 +305,12 @@ static void frame(void)
             scene_after_step(&scene, &sim, &fx);
             accum -= dt;
             steps++;
+            judge();
+            if (judged) break;
         }
-        if (steps == 32) accum = 0; /* fell behind: drop time rather than spiral */
+        if (steps == 32 || judged) accum = 0; /* fell behind: drop time rather than spiral */
     }
-    float alpha = sim.over ? 1.0f : fminf(1.0f, accum / dt);
+    float alpha = sim.over || judged ? 1.0f : fminf(1.0f, accum / dt);
     fx_update(&fx, dt_frame);
     scene_update(&scene, dt_frame);
 

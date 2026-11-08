@@ -34,6 +34,7 @@ an API cheat-sheet next to the arena. CodeMirror is pre-bundled into
     assets/     fonts (OFL)
     examples/   example robot scripts
     levels/     level JSON (format documented in src/sim/level.h)
+    challenges/ challenge JSON + starter Lua (win rules in src/sim/challenge.h)
     web/        web page: shell.html, app.js (editor/console/bridge), app.css, vendor/ CodeMirror
     tests/      headless tests
 

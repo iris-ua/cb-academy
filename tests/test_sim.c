@@ -6,6 +6,7 @@
 #include <string.h>
 #include "sim/sim.h"
 #include "sim/level.h"
+#include "sim/challenge.h"
 
 static int failures, checks;
 
@@ -280,6 +281,50 @@ static void test_level(void)
     CHECK(!level_load_json(&lv, "{\"width\":5,\"height\":5,\"ir_angles\":[1,2]}", err, sizeof err));
 }
 
+static void test_challenge(void)
+{
+    puts("challenge");
+    char err[128];
+    WinRule w;
+    const char *why;
+    CHECK(challenge_parse(&w, "{\"width\":5}", err, sizeof err) && !w.active);
+    CHECK(!challenge_parse(&w, "{\"win\":1}", err, sizeof err));
+
+    /* target 3 ahead; home is the start */
+    box(10, 4, 2, 2, 0);
+    lv.lab.targets[lv.lab.ntargets++] = (Target){ { 5, 2 }, 1.0 };
+    sim_init(&sim, &lv, 1, 1);
+    CHECK(challenge_parse(&w, "{\"win\":{\"reach_target\":true,\"return_home\":true},\"stars\":{\"time\":100}}",
+                          err, sizeof err));
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING);
+    CHECK(challenge_check(&w, &sim, 0, true, &why) == CH_FAIL); /* script ended early */
+    sim.robots[0].pose.x = 5;
+    sim_step(&sim);
+    CHECK(sim.robots[0].visited[0]);
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING); /* not home yet */
+    sim.robots[0].pose.x = 2.3;
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_WIN);
+    CHECK(challenge_stars(&w, &sim, 0) == 3);
+    sim.cycle = 101;
+    sim.robots[0].collisions = 1;
+    CHECK(challenge_stars(&w, &sim, 0) == 1);
+
+    /* constraints fail at once */
+    CHECK(challenge_parse(&w, "{\"win\":{\"visit_all\":true,\"no_collisions\":true,\"under_time\":50}}",
+                          err, sizeof err));
+    sim_init(&sim, &lv, 1, 1);
+    sim.robots[0].collisions = 1;
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_FAIL);
+    sim.robots[0].collisions = 0;
+    sim.cycle = 50;
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_FAIL);
+    sim.cycle = 10;
+    lv.params.time_limit = 10;
+    sim_init(&sim, &lv, 1, 1);
+    sim.cycle = 10;
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_FAIL); /* level time limit */
+}
+
 int main(void)
 {
     test_geom();
@@ -290,6 +335,7 @@ int main(void)
     test_compass_beacon_ground();
     test_time_finish_determinism();
     test_level();
+    test_challenge();
     printf("%d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }

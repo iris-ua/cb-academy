@@ -1,0 +1,23 @@
+{
+  "title": "Around the corner",
+  "goal": [
+    "A wall is in the way. Drive past it, turn, and reach the cheese **without bumping** into anything.",
+    "",
+    "- `forward(n)` drives `n` robot diameters.",
+    "- `turn(deg)` turns in place. Positive turns left."
+  ],
+  "starter": "02-turn.lua",
+  "hints": [
+    "The cheese is 6 to the right and 5 up from the start.",
+    "Drive right first, then turn left by 90 degrees."
+  ],
+  "win": { "reach_target": true, "no_collisions": true },
+  "stars": { "time": 220 },
+  "name": "Around the corner",
+  "width": 10, "height": 9,
+  "time_limit": 900,
+  "noise": { "motors": 0, "ir": 0, "compass": 0, "beacon": 0 },
+  "walls":   [ { "height": 2, "corners": [[0, 4], [6, 4], [6, 5], [0, 5]] } ],
+  "targets": [ { "x": 8, "y": 7, "radius": 1 } ],
+  "start":   [ { "x": 2, "y": 2, "dir": 0 } ]
+}

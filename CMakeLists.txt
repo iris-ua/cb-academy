@@ -43,12 +43,12 @@ endif()
 
 # --- simulation core (no graphics) -------------------------------------------
 add_library(sim STATIC
-  src/sim/rng.c src/sim/geom.c src/sim/sim.c src/sim/level.c
+  src/sim/rng.c src/sim/geom.c src/sim/sim.c src/sim/level.c src/sim/challenge.c
   ${cjson_SOURCE_DIR}/cJSON.c)
 target_include_directories(sim PUBLIC src PRIVATE ${cjson_SOURCE_DIR})
 if(NOT MSVC)
   target_link_libraries(sim PUBLIC m)
-  set_source_files_properties(src/sim/rng.c src/sim/geom.c src/sim/sim.c src/sim/level.c
+  set_source_files_properties(src/sim/rng.c src/sim/geom.c src/sim/sim.c src/sim/level.c src/sim/challenge.c
     PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra;-Wpedantic")
 endif()
 
@@ -80,8 +80,11 @@ if(EMSCRIPTEN)
     -sEXPORTED_RUNTIME_METHODS=ccall,FS,UTF8ToString
     --shell-file ${CMAKE_SOURCE_DIR}/web/shell.html
     "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/levels@/levels"
+    "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/challenges@/challenges"
     "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/assets/fonts@/assets/fonts")
-  set_property(TARGET ciberrato APPEND PROPERTY LINK_DEPENDS ${CMAKE_SOURCE_DIR}/web/shell.html)
+  # preloaded data is packed at link time: relink when it changes
+  file(GLOB PRELOADED CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/levels/* ${CMAKE_SOURCE_DIR}/challenges/*)
+  set_property(TARGET ciberrato APPEND PROPERTY LINK_DEPENDS ${CMAKE_SOURCE_DIR}/web/shell.html ${PRELOADED})
   # page files served next to index.html (copied on every build)
   add_custom_target(web_page ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/web/app.js ${CMAKE_SOURCE_DIR}/web/app.css ${CMAKE_BINARY_DIR}
@@ -91,6 +94,7 @@ else()
   # run from build dir: levels/ and assets/ next to the binary
   add_custom_command(TARGET ciberrato POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/levels $<TARGET_FILE_DIR:ciberrato>/levels
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/challenges $<TARGET_FILE_DIR:ciberrato>/challenges
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:ciberrato>/assets)
 
   enable_testing()

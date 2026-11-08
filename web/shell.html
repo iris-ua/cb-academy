@@ -11,7 +11,7 @@
     <section id="left" class="ui">
       <header class="bar">
         <span class="brand">CiberRato <b>Jr</b></span>
-        <select id="level" title="Level"></select>
+        <button id="pick" title="Choose a challenge or level">☰ <span id="pick-name">…</span></button>
         <span class="grow"></span>
         <button id="help" class="ghost" title="API cheat-sheet" aria-pressed="false">API</button>
       </header>
@@ -22,6 +22,16 @@
         <span class="seg" id="speed" title="Simulation speed">
           <button data-speed="0.5">×0.5</button><button data-speed="1">×1</button><button data-speed="2">×2</button><button data-speed="4">×4</button>
         </span>
+      </div>
+      <div id="goal" hidden>
+        <div class="goal-head">
+          <span id="goal-num" class="title"></span><b id="goal-title"></b>
+          <span id="goal-best" class="stars"></span>
+          <span class="grow"></span>
+          <button id="restore" class="ghost" title="Replace your code with the starter code">↺ Starter code</button>
+        </div>
+        <div id="goal-text" class="md"></div>
+        <details id="hints"><summary>Hints</summary><ol id="hint-list" class="md"></ol></details>
       </div>
       <div id="editor"></div>
       <div id="console-head" class="bar">
@@ -39,7 +49,38 @@
     <main id="stage">
       <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
       <div id="status">Loading…</div>
+      <div id="result" class="ui" hidden>
+        <div class="card">
+          <div id="res-stars" class="stars big"></div>
+          <h2 id="res-title"></h2>
+          <p id="res-text"></p>
+          <ul id="res-detail"></ul>
+          <div class="row">
+            <button id="res-map" class="ghost">☰ Map</button>
+            <span class="grow"></span>
+            <button id="res-retry">↺ Try again</button>
+            <button id="res-next" class="primary">Next ▶</button>
+          </div>
+        </div>
+      </div>
     </main>
+  </div>
+  <div id="map" class="ui" hidden>
+    <div class="sheet">
+      <div class="bar"><span class="brand">Challenges</span><span class="grow"></span><button id="map-close" class="ghost" title="Close">✕</button></div>
+      <div id="map-body">
+        <div id="map-list" class="grid"></div>
+        <h3>Free play</h3>
+        <div id="map-free" class="grid"></div>
+      </div>
+      <div class="bar foot">
+        <span id="map-total" class="dim"></span>
+        <span class="grow"></span>
+        <button id="export" class="ghost" title="Save your progress and code to a file">Export progress</button>
+        <button id="import" class="ghost" title="Load progress from a file">Import…</button>
+        <input id="import-file" type="file" accept=".json,application/json" hidden>
+      </div>
+    </div>
   </div>
   <script>
     /* Keys typed in the page UI (editor, buttons) must not drive the robot.
