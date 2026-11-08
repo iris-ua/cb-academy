@@ -15,7 +15,11 @@ Don't add tests for non-behavioral edits (message or doc wording, renames,
 refactors), for inputs the code can't receive, or for one more case in a guard
 whose behavior is already tested.
 
-## Git Commit Messages
+## Git 
+
+Never change branch without asking.
+
+### Commit Messages
 
 Use short, single-line commit messages following Conventional Commits.
 
