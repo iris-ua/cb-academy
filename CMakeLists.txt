@@ -26,7 +26,8 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 set(CUSTOMIZE_BUILD OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(raylib
   GIT_REPOSITORY https://github.com/raysan5/raylib.git
-  GIT_TAG 5.5 GIT_SHALLOW TRUE)
+  GIT_TAG 5.5 GIT_SHALLOW TRUE
+  PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/patch_raylib.cmake)
 
 # --- Lua 5.4 (used from M3) ---------------------------------------------------
 set(LUA_SRC lapi lauxlib lbaselib lcode lcorolib lctype ldblib ldebug ldo ldump

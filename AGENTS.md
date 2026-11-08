@@ -57,3 +57,4 @@ Use short, single-line commit messages following Conventional Commits.
 - `TakeScreenshot` double-scales on HiDPI (raylib 5.5); `--shot` renders to an RT instead.
 - Web: canvas CSS must be 100vw/100vh; raylib's resize callback sets the buffer to the window size.
 - CMake de-duplicates repeated link flags: multiple `--preload-file` need `"SHELL:--preload-file ..."`.
+- raylib 5.5 HiDPI resize bug (X11/Windows): screen size became pixels -> layout 2x too big. Patched via `cmake/patch_raylib.cmake` (FetchContent PATCH_COMMAND); drop it when upgrading raylib.
