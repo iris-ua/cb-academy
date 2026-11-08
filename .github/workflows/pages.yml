@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir site
           cd build-web
-          cp index.html index.js index.wasm index.data app.js app.css i18n.js sound.js leveledit.js ../site/
+          cp index.html index.js index.wasm index.data app.js app.css i18n.js sound.js leveledit.js favicon.svg apple-touch-icon.png ../site/
           cp -r vendor fonts ../site/
       - uses: actions/upload-pages-artifact@v3
         with:
