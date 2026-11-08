@@ -209,11 +209,11 @@
   };
 
   /* ---- stages: challenges (/challenges, in file order), free-play levels
-   * (/levels), both preloaded in the WASM file system, and one custom level
-   * (loaded in teacher mode or made in the editor, kept in localStorage).
+   * (/levels), both preloaded in the WASM file system, and the user's own
+   * levels (made in the editor or loaded in teacher mode, kept in localStorage).
    * Progress and code per challenge live in localStorage. ------------------ */
-  var challenges = [], levels = [], custom = null, current = null;
-  var PROGRESS = 'ciberrato.progress', CUSTOM = 'ciberrato.custom', TEACHER = 'ciberrato.teacher';
+  var challenges = [], levels = [], mine = [], current = null;
+  var PROGRESS = 'ciberrato.progress', MINE = 'ciberrato.mylevels', TEACHER = 'ciberrato.teacher';
   var teacher = load(TEACHER, '') === '1';
 
   function readText(path) { return Module.FS.readFile(path, { encoding: 'utf8' }); }
@@ -227,7 +227,7 @@
   var progress = (function () { try { return JSON.parse(load(PROGRESS, '{}')) || {}; } catch (e) { return {}; } })();
   function saveProgress() { save(PROGRESS, JSON.stringify(progress)); }
   function unlocked(c) { return teacher || c.index === 0 || !!progress[challenges[c.index - 1].id]; }
-  function codeKeyOf(st) { return st.ch ? 'ciberrato.code.' + st.id : st.custom ? 'ciberrato.code.custom' : 'ciberrato.code'; }
+  function codeKeyOf(st) { return st.ch ? 'ciberrato.code.' + st.id : st.custom ? 'ciberrato.code.my.' + st.id : 'ciberrato.code'; }
   function stageKey(st) { return (st.ch ? 'ch:' : st.custom ? 'cu:' : 'lv:') + st.id; }
   function starterOf(st) { return st.ch ? (st.starters[I18N.lang] || st.starters.en) : starter(); }
 
@@ -259,10 +259,18 @@
   }
   function stars(n) { return '★★★'.slice(0, n) + '<span class="off">' + '★★★'.slice(n) + '</span>'; }
 
-  function makeCustom(src) {
-    var st = { ch: false, custom: true, id: 'custom', src: src, d: JSON.parse(src) };
+  function makeCustom(src, id) {
+    var st = { ch: false, custom: true, id: id, src: src, d: JSON.parse(src) };
     localize(st);
     return st;
+  }
+  function saveMine() { save(MINE, JSON.stringify(mine.map(function (st) { return { id: st.id, src: st.src }; }))); }
+  function mineById(id) { return mine.filter(function (st) { return st.id === id; })[0]; }
+  function loadMine(list) {
+    mine = [];
+    (Array.isArray(list) ? list : []).forEach(function (e) {
+      try { if (e && typeof e.id === 'string' && typeof e.src === 'string') mine.push(makeCustom(e.src, e.id)); } catch (x) { /* skip broken */ }
+    });
   }
 
   function initStages() {
@@ -287,10 +295,9 @@
       if (!d.name) st.title = f;
       levels.push(st);
     });
-    var cs = load(CUSTOM, null);
-    if (cs) { try { custom = makeCustom(cs); } catch (e) { custom = null; } }
+    try { loadMine(JSON.parse(load(MINE, '[]'))); } catch (e) { mine = []; }
     var want = load('ciberrato.current', '');
-    var st = challenges.concat(levels, custom ? [custom] : []).filter(function (s) { return stageKey(s) === want; })[0];
+    var st = challenges.concat(levels, mine).filter(function (s) { return stageKey(s) === want; })[0];
     if (!st || (st.ch && !unlocked(st))) st = challenges[0] || levels[0];
     if (st) openStage(st);
   }
@@ -379,6 +386,25 @@
     var kicker = st.ch ? t('challenge', st.index + 1) : st.custom ? t('custom') : '';
     return tile(st.title, kicker, line, locked, st === current, st.ch && progress[st.id], function () { openStage(st); });
   }
+  /* own level: the tile plus edit / delete buttons */
+  function mineTile(st) {
+    var box = document.createElement('div'), acts = document.createElement('span');
+    box.className = 'tile-box';
+    acts.className = 'acts';
+    box.appendChild(stageTile(st, '', false));
+    [st.d.maze ? null : ['✎', 'mine.edit', function () { showMap(false); openEditor(st); }], /* the editor can't do maze rows */
+     ['✕', 'mine.delete', function () { deleteMine(st); }]].forEach(function (a) {
+      if (!a) return;
+      var b = document.createElement('button');
+      b.className = 'ghost';
+      b.textContent = a[0];
+      b.title = t(a[1]);
+      b.onclick = a[2];
+      acts.appendChild(b);
+    });
+    box.appendChild(acts);
+    return box;
+  }
 
   function renderMap() {
     var list = $('map-list'), free = $('map-free'), got = 0;
@@ -390,8 +416,8 @@
                                       : '<span class="dim">' + esc(t(locked ? 'map.locked' : 'map.todo')) + '</span>', locked));
     });
     levels.forEach(function (l) { free.appendChild(stageTile(l, '', false)); });
-    if (custom) free.appendChild(stageTile(custom, '', false));
-    var mk = tile(t('make'), '', '<span class="dim">' + esc(t('make.sub')) + '</span>', false, false, false, openEditor);
+    mine.forEach(function (st) { free.appendChild(mineTile(st)); });
+    var mk = tile(t('make'), '', '<span class="dim">' + esc(t('make.sub')) + '</span>', false, false, false, function () { openEditor(null); });
     mk.classList.add('make');
     free.appendChild(mk);
     $('map-total').textContent = t('map.total', got, challenges.length * 3);
@@ -406,18 +432,48 @@
     if (on) ($('map').querySelector('.tile.current') || $('map-close')).focus();
   }
 
-  /* ---- custom level: teacher's file or the level editor -------------------- */
-  function playCustom(src) {
-    var st;
-    try { st = makeCustom(src); } catch (e) { alert(t('loadlevel.fail', e.message)); return; }
-    custom = st;
-    save(CUSTOM, src);
-    log(t('log.custom', st.title), 'sys');
-    openStage(st);
+  /* ---- own levels: made in the level editor or a teacher's file ------------ */
+  /* id: replace that level, else add a new one; returns its id */
+  function storeMine(src, id) {
+    var st = makeCustom(src, id || 'u' + Date.now().toString(36)), old = mineById(st.id);
+    if (old) mine[mine.indexOf(old)] = st;
+    else mine.push(st);
+    saveMine();
+    if (current === old) current = st; /* the arena still shows the old version */
+    return st;
   }
 
-  function openEditor() {
-    LevelEdit.open({ current: current ? simSource(current) : null, onPlay: playCustom });
+  function playMine(src, id) {
+    var st;
+    try { st = storeMine(src, id); } catch (e) { alert(t('loadlevel.fail', e.message)); return null; }
+    log(t('log.custom', st.title), 'sys');
+    openStage(st);
+    return st.id;
+  }
+
+  function deleteMine(st) {
+    if (!confirm(t('mine.confirm', st.title))) return;
+    mine.splice(mine.indexOf(st), 1);
+    saveMine();
+    try { localStorage.removeItem(codeKeyOf(st)); } catch (e) { /* private mode */ }
+    if (st === current) openStage(challenges[0] || levels[0]);
+    renderMap();
+  }
+
+  /* edit: one of the user's levels, or null for a new one */
+  function openEditor(edit) {
+    var stale = false;
+    LevelEdit.open({
+      current: current ? simSource(current) : null,
+      currentId: current && current.custom ? current.id : null,
+      edit: edit ? { id: edit.id, src: edit.src } : null,
+      exists: function (id) { return !!mineById(id); },
+      onPlay: playMine,
+      onSave: function (src, id) {
+        try { stale = storeMine(src, id) === current || stale; } catch (e) { /* not valid yet */ }
+      },
+      onClose: function () { if (stale && current && current.custom) openStage(current); stale = false; }
+    });
   }
 
   /* ---- export / import (progress + code per challenge) --------------------- */
@@ -425,7 +481,9 @@
     saveCode();
     var code = {};
     challenges.forEach(function (c) { var v = load(codeKeyOf(c), null); if (v != null) code[c.id] = v; });
-    var data = { app: 'ciberrato-academy', version: 1, progress: progress, code: code, free: load('ciberrato.code', null) };
+    mine.forEach(function (st) { var v = load(codeKeyOf(st), null); if (v != null) code['my.' + st.id] = v; });
+    var data = { app: 'ciberrato-academy', version: 1, progress: progress, code: code, free: load('ciberrato.code', null),
+                 levels: mine.map(function (st) { return { id: st.id, src: st.src }; }) };
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     a.download = 'ciberrato-progress.json';
@@ -446,6 +504,11 @@
       saveProgress();
       Object.keys(d.code || {}).forEach(function (id) { if (typeof d.code[id] === 'string') save('ciberrato.code.' + id, d.code[id]); });
       if (typeof d.free === 'string') save('ciberrato.code', d.free);
+      if (Array.isArray(d.levels)) {
+        loadMine(d.levels);
+        saveMine();
+        if (current.custom) current = mineById(current.id) || current;
+      }
       setDoc(codeKeyOf(current), load(codeKeyOf(current), starterOf(current)), true);
       renderGoal();
       renderMap();
@@ -470,7 +533,7 @@
     $('level-file').onchange = function () {
       var f = this.files[0];
       this.value = '';
-      if (f) f.text().then(function (src) { showMap(false); playCustom(src); });
+      if (f) f.text().then(function (src) { showMap(false); playMine(src, null); });
     };
     $('res-retry').onclick = function () { hideResult(); call('web_reset'); setErr(0); view.focus(); }; /* fix the code, then Run */
     $('res-map').onclick = function () { hideResult(); showMap(true); };
@@ -530,7 +593,7 @@
     I18N.set(l);
     showLang();
     call('web_set_lang', [l]);
-    challenges.concat(levels, custom ? [custom] : []).forEach(localize);
+    challenges.concat(levels, mine).forEach(localize);
     if (current) {
       call('web_set_level_name', [current.title]);
       /* untouched starter code follows the language */

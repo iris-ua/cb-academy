@@ -12,6 +12,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; } /* over display rules like .foot label */
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font: 600 14px/1.4 Nunito, system-ui, sans-serif; }
 
 #app { display: grid; grid-template-columns: minmax(340px, 42%) auto 1fr; grid-template-rows: minmax(0, 1fr); height: 100vh; }
@@ -143,3 +144,8 @@ input[type="number"] { width: 64px; font-family: var(--mono); }
 #ed-canvas { flex: 1; min-height: 0; width: 100%; cursor: crosshair; touch-action: none; }
 #ed-name { width: 180px; }
 #lvled .foot { font-size: 13px; }
+.tile-box { position: relative; display: flex; }
+.tile-box .tile { flex: 1; padding-right: 64px; }
+.tile-box .acts { position: absolute; top: 6px; right: 6px; display: flex; gap: 2px; }
+.tile-box .acts button { padding: 2px 7px; }
+.tile-box .acts button:last-child:hover { color: var(--red); }

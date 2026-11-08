@@ -1,14 +1,18 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /* Simple level editor: draw walls, place cheese, the light and the start pose
  * on a grid, then export the level JSON (format: src/sim/level.h) or play it.
- * LevelEdit.open({ current: <level JSON text or null>, onPlay: fn(jsonText) }). */
+ * LevelEdit.open({ current, currentId, edit: {id, src}, onPlay, onSave, onClose }):
+ *   current/currentId: the open level's JSON (and its id if it is one of the
+ *   user's levels); edit: open that saved level; onPlay(json, id) -> id saves
+ *   it (id null: a new level); onSave(json, id) is called on every change to a
+ *   saved level; onClose() when the editor closes. */
 (function () {
   'use strict';
   var t = function () { return I18N.t.apply(null, arguments); };
   var SNAP = 0.5, THIN = 0.2, WALL_H = 2, TALL_H = 4, BEACON_H = 3, MAX_TARGETS = 8;
-  var DRAFT = 'ciberrato.editor';
+  var DRAFT = 'ciberrato.editor', DRAFT_ID = 'ciberrato.editor.id';
 
-  var root, cv, g, opts = {}, lv, tool = 'wall', tall = false, undo = [];
+  var root, cv, g, opts = {}, lv, editId = null, tool = 'wall', tall = false, undo = [];
   var drag = null, hover = null, cam = { s: 1, ox: 0, oy: 0 };
 
   /* ---- model --------------------------------------------------------------- */
@@ -45,7 +49,12 @@
     return JSON.stringify(d, null, 2).replace(/\[\s+(-?[\d.]+),\s+(-?[\d.]+)\s+\]/g, '[$1, $2]')
       .replace(/\{\s+("x"[^{}]*?)\s+\}/g, function (m, body) { return '{ ' + body.replace(/\s*\n\s*/g, ' ') + ' }'; });
   }
-  function saveDraft() { try { localStorage.setItem(DRAFT, toJSON(lv)); } catch (e) { /* private mode */ } }
+  /* the draft survives reloads; edits to a saved level go straight into it */
+  function saveDraft() {
+    try { localStorage.setItem(DRAFT, toJSON(lv)); localStorage.setItem(DRAFT_ID, editId || ''); } catch (e) { /* private mode */ }
+    if (editId && opts.onSave) opts.onSave(toJSON(lv), editId);
+  }
+  function setLevel(m, id) { lv = m; editId = id || null; undo = []; saveDraft(); syncForm(); draw(); }
   function push() { undo.push(toJSON(lv)); if (undo.length > 100) undo.shift(); }
   function change(fn) { push(); fn(); saveDraft(); syncForm(); draw(); }
 
@@ -254,8 +263,8 @@
     $('ed-w').onchange = function () { var v = Math.max(4, Math.min(40, Math.round(+this.value) || lv.width)); change(function () { lv.width = v; }); };
     $('ed-h').onchange = function () { var v = Math.max(4, Math.min(30, Math.round(+this.value) || lv.height)); change(function () { lv.height = v; }); };
     $('ed-close').onclick = close;
-    $('ed-new').onclick = function () { if (confirm(t('ed.new.confirm'))) change(function () { lv = blank(); }); };
-    $('ed-current').onclick = function () { if (opts.current) loadText(opts.current); };
+    $('ed-new').onclick = function () { if (editId || confirm(t('ed.new.confirm'))) setLevel(blank(), null); };
+    $('ed-current').onclick = function () { if (opts.current) loadText(opts.current, opts.currentId); };
     $('ed-open').onclick = function () { $('ed-file').click(); };
     $('ed-file').onchange = function () {
       var f = this.files[0];
@@ -271,18 +280,20 @@
     };
     $('ed-play').onclick = function () {
       if (!lv.start.length) { alert(t('ed.nostart')); setTool('start'); return; }
+      if (opts.onPlay) { editId = opts.onPlay(toJSON(lv), editId) || editId; saveDraft(); }
       close();
-      if (opts.onPlay) opts.onPlay(toJSON(lv));
     };
     new ResizeObserver(draw).observe(cv);
   }
-  function loadText(text) {
+  /* id: the saved level this text is (edits go into it), else a new draft */
+  function loadText(text, id) {
     try {
       var d = JSON.parse(text);
-      if (d.maze) { alert(t('ed.current.maze')); return; }
+      if (d.maze) { alert(t('ed.current.maze')); return false; }
       if (!(+d.width > 0 && +d.height > 0)) throw new Error('width/height');
-      change(function () { lv = fromJSON(d); });
-    } catch (e) { alert(t('loadlevel.fail', e.message)); }
+      setLevel(fromJSON(d), id);
+      return true;
+    } catch (e) { alert(t('loadlevel.fail', e.message)); return false; }
   }
   function setTool(k) {
     tool = k;
@@ -299,9 +310,12 @@
     if (!root) build();
     if (!lv) {
       var d = null;
-      try { d = JSON.parse(localStorage.getItem(DRAFT) || 'null'); } catch (e) { /* none */ }
+      try { d = JSON.parse(localStorage.getItem(DRAFT) || 'null'); editId = localStorage.getItem(DRAFT_ID) || null; } catch (e) { /* none */ }
       lv = d ? fromJSON(d) : blank();
     }
+    if (editId && opts.exists && !opts.exists(editId)) editId = null; /* deleted meanwhile: keep it as a draft */
+    if (opts.edit) { if (!loadText(opts.edit.src, opts.edit.id)) return; }
+    else if (editId) setLevel(blank(), null); /* "make a level": the last one is already saved */
     I18N.apply(root);
     var cur = null;
     try { cur = opts.current && JSON.parse(opts.current); } catch (e) { /* none */ }
@@ -312,7 +326,7 @@
     draw();
     root.querySelector('[data-tool="' + tool + '"]').focus();
   }
-  function close() { root.hidden = true; }
+  function close() { root.hidden = true; if (opts.onClose) opts.onClose(); }
 
   window.LevelEdit = { open: open };
 })();
