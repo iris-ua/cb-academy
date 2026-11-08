@@ -1,5 +1,5 @@
 -- Example robot: head for the beacon, steer away from walls.
--- Run: ./build/ciberrato examples/robot.lua   (save the file to reload)
+-- Run: ./build/cba examples/robot.lua   (save the file to reload)
 
 say("Hello! Looking for the cheese...")
 led("visiting", false)

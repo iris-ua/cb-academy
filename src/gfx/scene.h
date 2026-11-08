@@ -33,6 +33,8 @@ typedef struct {
     View     shadow_view;
     bool     shadow_dirty;
 
+    Texture2D logo;              /* University of Aveiro watermark (id 0: missing) */
+
     bool     overlays, trail;
     float    time;
 } Scene;

@@ -2,7 +2,7 @@
 #ifndef SIM_SIM_H
 #define SIM_SIM_H
 
-/* CiberRato Jr simulation core. Pure C, no graphics.
+/* CiberRato Academy simulation core. Pure C, no graphics.
  * Model follows the original ciberRatoTools simulator. */
 
 #include <stdbool.h>

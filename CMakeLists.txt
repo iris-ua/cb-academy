@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(ciberrato_jr C)
+project(ciberrato_academy C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -65,26 +65,27 @@ if(EMSCRIPTEN)
 endif()
 FetchContent_MakeAvailable(raylib)
 
-add_executable(ciberrato src/main.c
+add_executable(cba src/main.c
   src/gfx/view.c src/gfx/scene.c src/gfx/fx.c src/gfx/hud.c src/gfx/text.c)
-target_include_directories(ciberrato PRIVATE src)
-target_link_libraries(ciberrato PRIVATE bot raylib)
+target_include_directories(cba PRIVATE src)
+target_link_libraries(cba PRIVATE bot raylib)
 if(NOT MSVC)
-  target_compile_options(ciberrato PRIVATE -Wall -Wextra)
+  target_compile_options(cba PRIVATE -Wall -Wextra)
 endif()
 
 if(EMSCRIPTEN)
-  set_target_properties(ciberrato PROPERTIES OUTPUT_NAME index SUFFIX ".html")
-  target_link_options(ciberrato PRIVATE
+  set_target_properties(cba PROPERTIES OUTPUT_NAME index SUFFIX ".html")
+  target_link_options(cba PRIVATE
     -sUSE_GLFW=3 -sALLOW_MEMORY_GROWTH=1 -sSTACK_SIZE=1mb
     -sEXPORTED_RUNTIME_METHODS=ccall,FS,UTF8ToString
     --shell-file ${CMAKE_SOURCE_DIR}/web/shell.html
     "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/levels@/levels"
     "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/challenges@/challenges"
-    "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/assets/fonts@/assets/fonts")
+    "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/assets/fonts@/assets/fonts"
+    "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/assets/images@/assets/images")
   # preloaded data is packed at link time: relink when it changes
-  file(GLOB PRELOADED CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/levels/* ${CMAKE_SOURCE_DIR}/challenges/*)
-  set_property(TARGET ciberrato APPEND PROPERTY LINK_DEPENDS ${CMAKE_SOURCE_DIR}/web/shell.html ${PRELOADED})
+  file(GLOB PRELOADED CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/levels/* ${CMAKE_SOURCE_DIR}/challenges/* ${CMAKE_SOURCE_DIR}/assets/images/*)
+  set_property(TARGET cba APPEND PROPERTY LINK_DEPENDS ${CMAKE_SOURCE_DIR}/web/shell.html ${PRELOADED})
   # page files served next to index.html (copied on every build)
   add_custom_target(web_page ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/web/app.js ${CMAKE_SOURCE_DIR}/web/app.css ${CMAKE_BINARY_DIR}
@@ -92,10 +93,10 @@ if(EMSCRIPTEN)
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/fonts ${CMAKE_BINARY_DIR}/fonts)
 else()
   # run from build dir: levels/ and assets/ next to the binary
-  add_custom_command(TARGET ciberrato POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/levels $<TARGET_FILE_DIR:ciberrato>/levels
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/challenges $<TARGET_FILE_DIR:ciberrato>/challenges
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:ciberrato>/assets)
+  add_custom_command(TARGET cba POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/levels $<TARGET_FILE_DIR:cba>/levels
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/challenges $<TARGET_FILE_DIR:cba>/challenges
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:cba>/assets)
 
   enable_testing()
   add_executable(test_sim tests/test_sim.c)

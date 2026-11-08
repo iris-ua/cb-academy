@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
-/* CiberRato Jr — app shell: input, fixed-tick stepping, rendering.
+/* CiberRato Academy — app shell: input, fixed-tick stepping, rendering.
  * With a .lua argument the robot runs that script (hot-reloaded on save);
  * otherwise drive it with the keyboard. On the web the page's editor drives
  * it through the web_* exports and gets Module.onEvent(kind, text, n) back. */
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
     }
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
-    InitWindow(win_w, win_h, "CiberRato Jr");
+    InitWindow(win_w, win_h, "CiberRato Academy");
 #ifdef __EMSCRIPTEN__
     SetWindowMinSize(320, 240); /* the page's canvas pane can be small */
 #else

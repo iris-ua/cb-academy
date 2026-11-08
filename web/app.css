@@ -1,4 +1,4 @@
-/* CiberRato Jr web page: editor + console + API panel beside the raylib canvas.
+/* CiberRato Academy web page: editor + console + API panel beside the raylib canvas.
    Colours match the in-canvas HUD (src/gfx/hud.c). */
 @font-face { font-family: Nunito; src: url(fonts/Nunito-SemiBold.ttf); font-weight: 400 600; }
 @font-face { font-family: Nunito; src: url(fonts/Nunito-ExtraBold.ttf); font-weight: 700 900; }

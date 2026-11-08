@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
-/* CiberRato Jr web page: CodeMirror editor, console, API panel and the bridge
+/* CiberRato Academy web page: CodeMirror editor, console, API panel and the bridge
  * to the WASM sim (src/main.c web_* exports, events via Module.onEvent). */
 (function () {
   'use strict';
@@ -376,7 +376,7 @@
     saveCode();
     var code = {};
     challenges.forEach(function (c) { var v = load(codeKeyOf(c), null); if (v != null) code[c.id] = v; });
-    var data = { app: 'ciberrato-jr', version: 1, progress: progress, code: code, free: load('ciberrato.code', null) };
+    var data = { app: 'ciberrato-academy', version: 1, progress: progress, code: code, free: load('ciberrato.code', null) };
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     a.download = 'ciberrato-progress.json';
@@ -387,7 +387,7 @@
   function importProgress(file) {
     file.text().then(function (t) {
       var d = JSON.parse(t);
-      if (!d || d.app !== 'ciberrato-jr' || typeof d.progress !== 'object') throw new Error('not a CiberRato Jr progress file');
+      if (!d || (d.app !== 'ciberrato-academy' && d.app !== 'ciberrato-jr') || typeof d.progress !== 'object') throw new Error('not a CiberRato Academy progress file');
       if (!confirm('Replace your progress and saved code with this file?')) return;
       progress = {};
       Object.keys(d.progress || {}).forEach(function (id) {

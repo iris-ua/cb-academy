@@ -12,6 +12,7 @@
 static const Color C_FLOOR      = { 239, 234, 224, 255 };
 static const Color C_GRID_MINOR = { 230, 224, 212, 255 };
 static const Color C_GRID_MAJOR = { 220, 212, 197, 255 };
+static const Color C_WATERMARK  = { 150, 138, 115, 100 };
 static const Color C_FRAME      = { 62, 74, 114, 255 };
 static const Color C_TALL_SIDE  = { 58, 69, 110, 255 };
 static const Color C_TALL_TOP   = { 101, 119, 176, 255 };
@@ -61,8 +62,23 @@ static void reset_vis(Scene *sc, const Sim *s)
     }
 }
 
+static void load_logo(Scene *sc)
+{
+    if (sc->logo.id) return;
+    const char *paths[] = {
+        "assets/images/ua-logo.png",
+        TextFormat("%sassets/images/ua-logo.png", GetApplicationDirectory()),
+    };
+    for (int i = 0; i < 2 && !sc->logo.id; i++)
+        if (FileExists(paths[i])) sc->logo = LoadTexture(paths[i]);
+    if (!sc->logo.id) { TraceLog(LOG_WARNING, "SCENE: ua-logo.png not found"); return; }
+    GenTextureMipmaps(&sc->logo);
+    SetTextureFilter(sc->logo, TEXTURE_FILTER_TRILINEAR);
+}
+
 void scene_level(Scene *sc, const Sim *s)
 {
+    load_logo(sc);
     const Lab *lab = &s->level.lab;
     sc->tall_h = 0;
     for (int b = 0; b < lab->nbeacons; b++) sc->tall_h = fmax(sc->tall_h, lab->beacons[b].height);
@@ -235,7 +251,7 @@ static Rectangle arena_rect(const View *v, const Lab *lab)
     return (Rectangle){ tl.x, tl.y, (float)lab->width * v->scale, (float)lab->height * v->scale };
 }
 
-static void draw_floor(const Lab *lab, const View *v)
+static void draw_floor(const Scene *sc, const Lab *lab, const View *v)
 {
     Rectangle a = arena_rect(v, lab);
     float m = fmaxf(6, 0.25f * v->scale);
@@ -253,6 +269,13 @@ static void draw_floor(const Lab *lab, const View *v)
     for (int y = 1; y < (int)ceil(lab->height); y++) {
         Color c = y % 2 ? C_GRID_MINOR : C_GRID_MAJOR;
         DrawLineV(view_pt(v, 0, y), view_pt(v, lab->width, y), c);
+    }
+    /* University of Aveiro watermark, bottom-right of the floor */
+    if (sc->logo.id) {
+        float pad = 0.3f * v->scale, h = fminf(1.6f, 0.15f * (float)lab->height) * v->scale;
+        float w = h * sc->logo.width / sc->logo.height;
+        Rectangle src = { 0, 0, (float)sc->logo.width, (float)sc->logo.height };
+        DrawTexturePro(sc->logo, src, (Rectangle){ a.x + a.width - pad - w, a.y + a.height - pad - h, w, h }, (Vector2){ 0 }, 0, C_WATERMARK);
     }
     /* the border casts a soft shadow onto the floor (light from top-left) */
     float e = 0.35f * v->scale;
@@ -533,7 +556,7 @@ void scene_draw(const Scene *sc, const Sim *s, View v, Vector2 shake, float alph
     v.oy += shake.y;
     const Lab *lab = &s->level.lab;
 
-    draw_floor(lab, &v);
+    draw_floor(sc, lab, &v);
     Rectangle a = arena_rect(&v, lab); /* floor-level effects stay on the floor */
     BeginScissorMode((int)a.x, (int)a.y, (int)ceilf(a.width), (int)ceilf(a.height));
     for (int t = 0; t < lab->ntargets; t++) draw_target_area(sc, s, t, &v);
@@ -558,4 +581,6 @@ void scene_unload(Scene *sc)
 {
     if (sc->shadow.id) UnloadRenderTexture(sc->shadow);
     sc->shadow.id = 0;
+    if (sc->logo.id) UnloadTexture(sc->logo);
+    sc->logo.id = 0;
 }

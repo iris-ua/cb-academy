@@ -1,13 +1,13 @@
-# CiberRato Jr
+# CiberRato Academy
 
 > **Note:** this project is developed with the assistance of AI.
 
-A simplified, modern take on [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools): program a mouse robot to find the cheese. Built with C99, raylib, and Lua. Runs on desktop and in the browser.
+A simplified, modern take on [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools) for the kids of the University of Aveiro's Academia de Verão: program a mouse robot to find the cheese. Built with C99, raylib, and Lua. Runs on desktop and in the browser.
 
 ## Desktop
 
     cmake -S . -B build -G Ninja && cmake --build build
-    ./build/ciberrato [levels/sandbox.json] [examples/robot.lua]
+    ./build/cba [levels/sandbox.json] [examples/robot.lua]
     ctest --test-dir build        # simulation tests
 
 With a `.lua` script the robot runs it and reloads whenever the file is saved
@@ -33,7 +33,7 @@ an API cheat-sheet next to the arena. CodeMirror is pre-bundled into
     src/bot/    student Lua scripts: sandbox, coroutine per robot, API, friendly errors
     src/gfx/    rendering: camera/primitives (view), arena + mouse (scene), juice (fx), HUD
     src/main.c  raylib app: input, fixed-tick loop, interpolation
-    assets/     fonts (OFL)
+    assets/     fonts (OFL), University of Aveiro logo
     examples/   example robot scripts
     levels/     level JSON (format documented in src/sim/level.h)
     challenges/ challenge JSON + starter Lua (win rules in src/sim/challenge.h)
@@ -42,9 +42,9 @@ an API cheat-sheet next to the arena. CodeMirror is pre-bundled into
 
 ## Acknowledgments
 
-CiberRato Jr builds on [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools),
+CiberRato Academy builds on [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools),
 the CiberRato Robot Simulation Environment from Universidade de Aveiro / IEETA.
-Thanks to its original authors: Nuno Lau, Artur C. Pereira, Andreia Melo,
+Thanks to the University of Aveiro and to its original authors: Nuno Lau, Artur C. Pereira, Andreia Melo,
 António Neves, João Figueiredo, Miguel Rodrigues and Eurico Pedrosa.
 
 ## License
@@ -55,3 +55,5 @@ The simulation model and `levels/default.json` come from
 [ciberRatoTools](https://github.com/iris-ua/ciberRatoTools) (© 2001–2011 Universidade de Aveiro, GPLv2+).
 Dependencies: raylib (zlib), Lua (MIT), cJSON (MIT).
 Fonts in `assets/fonts/`: Nunito and JetBrains Mono (SIL OFL 1.1, licenses alongside).
+`assets/images/ua-logo.png` is the University of Aveiro symbol, a mark of Universidade de Aveiro,
+shown as a watermark in recognition; it is not covered by the GPL.
