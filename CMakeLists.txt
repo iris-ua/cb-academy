@@ -57,7 +57,9 @@ if(EMSCRIPTEN)
 endif()
 FetchContent_MakeAvailable(raylib)
 
-add_executable(ciberrato src/main.c)
+add_executable(ciberrato src/main.c
+  src/gfx/view.c src/gfx/scene.c src/gfx/fx.c src/gfx/hud.c)
+target_include_directories(ciberrato PRIVATE src)
 target_link_libraries(ciberrato PRIVATE sim lua raylib)
 if(NOT MSVC)
   target_compile_options(ciberrato PRIVATE -Wall -Wextra)

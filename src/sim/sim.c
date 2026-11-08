@@ -4,7 +4,7 @@
 #include <string.h>
 
 #define R SIM_ROBOT_RADIUS
-#define IR_HALF_CONE (M_PI / 6.0)
+#define IR_HALF_CONE SIM_IR_HALF_CONE
 
 void level_default_params(SimParams *p)
 {
@@ -35,7 +35,7 @@ static double lab_point_distance(const Lab *lab, Vec2 p, double min_h)
     return min;
 }
 
-static double lab_ray_distance(const Lab *lab, Vec2 p, double dir, double min_h)
+double lab_ray_distance(const Lab *lab, Vec2 p, double dir, double min_h)
 {
     double min = -1.0;
     for (int i = 0; i < lab->nwalls; i++) {
@@ -134,13 +134,12 @@ static void commit(Robot *r)
 
 /* ---- sensors ----------------------------------------------------------- */
 
-static double ir_distance(const Sim *s, int ri, int k)
+static double ir_distance(const Sim *s, int ri, const Pose *pose, int k)
 {
-    const Robot *r = &s->robots[ri];
     const Lab *lab = &s->level.lab;
     double a = s->level.params.ir_angles[k];
-    Vec2 p = { r->pose.x + R * cos(r->pose.dir + a), r->pose.y + R * sin(r->pose.dir + a) };
-    double th = angle_norm(r->pose.dir + a);
+    Vec2 p = { pose->x + R * cos(pose->dir + a), pose->y + R * sin(pose->dir + a) };
+    double th = angle_norm(pose->dir + a);
 
     double min = lab_ray_distance(lab, p, th, SIM_SOLID_HEIGHT);
     min = min_pos(min, lab_ray_distance(lab, p, th + IR_HALF_CONE, SIM_SOLID_HEIGHT));
@@ -190,7 +189,7 @@ static void update_sensors(Sim *s, int ri)
     Vec2 c = center(&r->pose);
 
     for (int k = 0; k < SIM_NUM_IR; k++)
-        r->ir[k] = ir_value(s, ir_distance(s, ri, k));
+        r->ir[k] = ir_value(s, ir_distance(s, ri, &r->pose, k));
 
     double cv = angle_norm(r->pose.dir + rng_normal(&s->rng, 0.0, pp->noise.compass_deg * DEG2RAD_D));
     r->compass = floor(cv * RAD2DEG_D + 0.5);
@@ -253,6 +252,12 @@ void sim_init(Sim *s, const Level *lv, int nrobots, uint64_t seed)
     }
     for (int i = 0; i < nrobots; i++) update_sensors(s, i);
     for (int i = 0; i < nrobots; i++) update_score(s, &s->robots[i]); /* starting on a target counts */
+}
+
+double sim_ir_distance(const Sim *s, int r, const Pose *pose, int k)
+{
+    if (r < 0 || r >= s->nrobots || k < 0 || k >= SIM_NUM_IR) return -1.0;
+    return ir_distance(s, r, pose ? pose : &s->robots[r].pose, k);
 }
 
 void sim_reset(Sim *s) { sim_init(s, &s->level, s->nrobots, s->seed); }

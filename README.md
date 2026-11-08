@@ -8,7 +8,7 @@ A simplified, modern take on [ciberRatoTools](https://github.com/iris-ua/ciberRa
     ./build/ciberrato [levels/sandbox.json]
     ctest --test-dir build        # simulation tests
 
-Keys: arrows/WASD drive · Space pause · 1–4 speed · R reset · L reload level.
+Keys: arrows/WASD drive · Space pause · 1–4 speed · R reset · L reload level · O sensor overlays · T trail.
 
 ## Web
 
@@ -21,7 +21,8 @@ Needs [emsdk](https://emscripten.org/docs/getting_started/downloads.html):
 ## Layout
 
     src/sim/    simulation core (no graphics): motion, collisions, sensors, level loader
-    src/main.c  raylib app
+    src/gfx/    rendering: camera/primitives (view), arena + mouse (scene), juice (fx), HUD
+    src/main.c  raylib app: input, fixed-tick loop, interpolation
     levels/     level JSON (format documented in src/sim/level.h)
     web/        HTML shell for the web build
     tests/      headless tests

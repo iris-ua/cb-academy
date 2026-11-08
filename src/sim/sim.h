@@ -19,6 +19,7 @@
 #define SIM_MAX_BEACONS  8
 #define SIM_MAX_TARGETS  8
 #define SIM_SOLID_HEIGHT 1e-9  /* "any wall taller than 0" */
+#define SIM_IR_HALF_CONE (M_PI / 6.0) /* IR sensor cone half-angle */
 
 typedef struct { double x, y, dir; } Pose; /* dir in radians, 0 = +x, CCW */
 
@@ -105,5 +106,10 @@ void sim_step(Sim *s);                  /* advance one 50 ms cycle */
 void sim_set_motors(Sim *s, int r, double left, double right);
 void sim_set_led(Sim *s, int r, bool visiting, bool returning);
 void sim_finish(Sim *s, int r);
+
+/* queries (noiseless; used by debug overlays) */
+double lab_ray_distance(const Lab *lab, Vec2 p, double dir, double min_h); /* -1 if no hit */
+/* IR distance for robot r as if it stood at pose (NULL = its current pose); -1 if nothing seen */
+double sim_ir_distance(const Sim *s, int r, const Pose *pose, int k);
 
 #endif
