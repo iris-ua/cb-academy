@@ -2,6 +2,7 @@
 #include "hud.h"
 #include <math.h>
 #include <string.h>
+#include "rlgl.h"
 #include "text.h"
 #include "view.h"
 
@@ -219,7 +220,18 @@ static void sec_keys(const HudState *st, float x, float y)
 #define PAD      14
 #define BOTTOM_H 214
 
-static float side_width(int sw) { return fminf(300.0f, fmaxf(240.0f, sw * 0.24f)); }
+/* panel contents are laid out in logical units and drawn scaled by this */
+static float hud_scale(int sw, int sh, bool bottom)
+{
+    float k = bottom ? fminf(sw / 560.0f, sh / 750.0f) : fminf(sw / 950.0f, sh / 600.0f);
+    return fminf(1.5f, fmaxf(1.2f, k));
+}
+
+static float side_width(int sw, int sh)
+{
+    float k = hud_scale(sw, sh, false);
+    return k * fminf(300.0f, fmaxf(240.0f, sw * 0.24f / k));
+}
 
 static float fit_scale(Rectangle a, double lab_w, double lab_h)
 {
@@ -228,14 +240,16 @@ static float fit_scale(Rectangle a, double lab_w, double lab_h)
 
 void hud_layout(int sw, int sh, double lab_w, double lab_h, Rectangle *arena, Rectangle *panel)
 {
-    float hw = side_width(sw);
+    float hw = side_width(sw, sh), bh = BOTTOM_H * hud_scale(sw, sh, true);
     Rectangle side_a = { 0, 0, sw - hw, (float)sh }, side_p = { sw - hw, 0, hw, (float)sh };
-    Rectangle bot_a = { 0, 0, (float)sw, (float)sh - BOTTOM_H }, bot_p = { 0, (float)sh - BOTTOM_H, (float)sw, BOTTOM_H };
+    Rectangle bot_a = { 0, 0, (float)sw, (float)sh - bh }, bot_p = { 0, (float)sh - bh, (float)sw, bh };
     /* bottom panel only on narrow screens, where it leaves a bigger arena */
-    bool bottom = sw < 2 * 2 * side_width(sw) && fit_scale(bot_a, lab_w, lab_h) > fit_scale(side_a, lab_w, lab_h);
+    bool bottom = sw < 2 * 2 * hw && fit_scale(bot_a, lab_w, lab_h) > fit_scale(side_a, lab_w, lab_h);
     *arena = bottom ? bot_a : side_a;
     *panel = bottom ? bot_p : side_p;
 }
+
+static void draw_panel(const Sim *s, Rectangle p, const HudState *st);
 
 void hud_draw(const Sim *s, Rectangle p, const HudState *st)
 {
@@ -243,6 +257,20 @@ void hud_draw(const Sim *s, Rectangle p, const HudState *st)
     bool bottom = p.y > 0;
     if (bottom) DrawLineEx((Vector2){ p.x, p.y }, (Vector2){ p.x + p.width, p.y }, 1, (Color){ 45, 50, 66, 255 });
     else DrawLineEx((Vector2){ p.x, p.y }, (Vector2){ p.x, p.y + p.height }, 1, (Color){ 45, 50, 66, 255 });
+
+    float k = hud_scale(GetScreenWidth(), GetScreenHeight(), bottom);
+    rlPushMatrix();
+    rlTranslatef(p.x, p.y, 0);
+    rlScalef(k, k, 1);
+    text_set_scale(k);
+    draw_panel(s, (Rectangle){ 0, 0, p.width / k, p.height / k }, st);
+    text_set_scale(1);
+    rlPopMatrix();
+}
+
+static void draw_panel(const Sim *s, Rectangle p, const HudState *st)
+{
+    bool bottom = p.width > p.height;
 
     float x = p.x + PAD, y = p.y + PAD;
     if (!bottom) {

@@ -12,6 +12,9 @@ typedef enum { TEXT_UI, TEXT_BOLD, TEXT_MONO, TEXT_MONO_BOLD, TEXT_KINDS } TextK
 
 void  text_draw(TextKind k, const char *s, float x, float y, float size, Color c);
 float text_width(TextKind k, const char *s, float size);
+/* Extra draw scale applied by the caller's transform (e.g. a scaled HUD), so the
+ * atlas is picked for the final on-screen size. Default 1. */
+void  text_set_scale(float k);
 void  text_unload(void);
 
 #endif

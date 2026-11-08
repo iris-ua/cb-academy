@@ -17,6 +17,10 @@ static struct {
     Font           fonts[NSTEPS];
 } kinds[TEXT_KINDS];
 
+static float draw_scale = 1.0f;
+
+void text_set_scale(float k) { draw_scale = k; }
+
 static bool load_data(TextKind k)
 {
     if (kinds[k].tried) return kinds[k].data != NULL;
@@ -35,7 +39,7 @@ static Font get_font(TextKind k, float size)
 {
     if (!load_data(k)) return GetFontDefault();
     Vector2 dpi = GetWindowScaleDPI();
-    float px = size * fmaxf(1.0f, dpi.x);
+    float px = size * draw_scale * fmaxf(1.0f, dpi.x);
     int i = 0;
     while (i < NSTEPS - 1 && STEPS[i] < px) i++;
     Font *f = &kinds[k].fonts[i];

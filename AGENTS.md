@@ -50,7 +50,7 @@ Use short, single-line commit messages following Conventional Commits.
 - `src/bot/` Lua robot scripts, no raylib. API doc in `bot.h`. Call `bot_tick` before each `sim_step`; motors/wait/finish yield one tick, sensors don't. Helpers (`forward`/`turn`) live in the Lua `PRELUDE` and use a noise-free motor model (`P.speed`).
 - `src/gfx/view.*` camera (`view_fit`, `view_pt`), local frames (`frame_at`/`frame_pt`), `fill_convex` (any winding), `fill_ellipse`, `rounded_outline`.
 - `src/gfx/scene.*` arena drawing + per-robot visual state (interp poses, wheels, trail); `scene_after_step` after every `sim_step` (fires fx).
-- `src/gfx/fx.*` shake/flash/particles/popups on frame time. `src/gfx/hud.*` `hud_layout` (side or bottom panel) + cards.
+- `src/gfx/fx.*` shake/flash/particles/popups on frame time. `src/gfx/hud.*` `hud_layout` (side or bottom panel) + cards. Panel is laid out in logical units and drawn under an rlgl scale (`hud_scale`, 1.2-1.5 by screen size); `text_set_scale` keeps atlases sharp.
 - `src/gfx/text.*` all text: `text_draw`/`text_width` with `TEXT_UI`/`TEXT_BOLD` (Nunito) or `TEXT_MONO*` (JetBrains Mono, for changing numbers). Never raw `DrawText`.
 - `web/` page around the canvas. `app.js` holds the API table (autocomplete + cheat-sheet: update it with `bot.h`). Bridge: `web_*` `EMSCRIPTEN_KEEPALIVE` in `main.c`, called via `Module.ccall`; C->JS via `js_emit(kind, text, n)` -> `Module.onEvent` (print/error/state/speed/paused/level/finished/ready). `web/vendor/codemirror.js` is a committed esbuild bundle from `web/vendor-src`.
 - Dev flags: `*.lua` arg = robot script, `--shot out.png --frames N --size W H --motors L R --overlays` for headless screenshots.
