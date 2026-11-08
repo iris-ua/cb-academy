@@ -338,8 +338,6 @@
     $('res-next').hidden = !r.win || !next;
     $('res-next').onclick = function () { if (next) openStage(next); };
     box.hidden = false;
-    /* back to the start, ready for another go; deferred: we are inside the sim's frame */
-    setTimeout(function () { call('web_reset'); setErr(0); }, 0);
   }
 
   /* ---- map ------------------------------------------------------------------ */
@@ -414,7 +412,7 @@
     $('export').onclick = exportProgress;
     $('import').onclick = function () { $('import-file').click(); };
     $('import-file').onchange = function () { var f = this.files[0]; this.value = ''; if (f) importProgress(f); };
-    $('res-retry').onclick = function () { hideResult(); run(); };
+    $('res-retry').onclick = function () { hideResult(); call('web_reset'); setErr(0); view.focus(); }; /* fix the code, then Run */
     $('res-map').onclick = function () { hideResult(); showMap(true); };
     $('restore').onclick = function () {
       if (!current || !current.ch || !confirm('Replace your code with the starter code? (Ctrl+Z undoes it.)')) return;
