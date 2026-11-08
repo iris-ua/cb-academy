@@ -11,6 +11,20 @@
     "To steer right, make the left wheel faster than the right one.",
     "Try `local e = ir(1) - ir(2)` then `motors(0.1 + 0.05 * e, 0.1 - 0.05 * e)` in a loop."
   ],
+  "pt": {
+    "title": "Segue o corredor",
+    "goal": [
+      "O corredor faz curvas. Mantém o rato no meio até ao queijo, **sem bater**.",
+      "",
+      "`ir(1)` olha para a frente-esquerda e `ir(2)` para a frente-direita. Se uma parede se aproxima, a leitura sobe: afasta-te dela."
+    ],
+    "hints": [
+      "`ir(1) - ir(2)` é positivo quando a parede da esquerda está mais perto.",
+      "Para virar à direita, põe a roda esquerda mais rápida do que a direita.",
+      "Experimenta `local e = ir(1) - ir(2)` e depois `motors(0.1 + 0.05 * e, 0.1 - 0.05 * e)` num ciclo."
+    ],
+    "starter": "04-corridor.pt.lua"
+  },
   "win": { "reach_target": true, "no_collisions": true },
   "stars": { "time": 300 },
   "name": "Follow the corridor",

@@ -11,15 +11,17 @@
     <section id="left" class="ui">
       <header class="bar">
         <span class="brand">CiberRato <b>Academy</b></span>
-        <button id="pick" title="Choose a challenge or level">☰ <span id="pick-name">…</span></button>
+        <button id="pick" data-i18n-title="pick.title">☰ <span id="pick-name">…</span></button>
         <span class="grow"></span>
-        <button id="help" class="ghost" title="API cheat-sheet" aria-pressed="false">API</button>
+        <button id="mute" class="ghost" data-i18n-title="mute.title" aria-pressed="false">🔊</button>
+        <span class="seg small" id="lang" data-i18n-title="lang.title"><button data-lang="en">EN</button><button data-lang="pt">PT</button></span>
+        <button id="help" class="ghost" data-i18n-title="help.title" aria-pressed="false">API</button>
       </header>
       <div class="bar controls">
-        <button id="run" class="primary" title="Run from the start (Ctrl+Enter)">▶ Run</button>
-        <button id="reset" title="Put the robot back at the start">↺ Reset</button>
+        <button id="run" class="primary"></button>
+        <button id="reset" data-i18n="reset" data-i18n-title="reset.title"></button>
         <span class="grow"></span>
-        <span class="seg" id="speed" title="Simulation speed">
+        <span class="seg" id="speed" data-i18n-title="speed.title">
           <button data-speed="0.5">×0.5</button><button data-speed="1">×1</button><button data-speed="2">×2</button><button data-speed="4">×4</button>
         </span>
       </div>
@@ -28,27 +30,27 @@
           <span id="goal-num" class="title"></span><b id="goal-title"></b>
           <span id="goal-best" class="stars"></span>
           <span class="grow"></span>
-          <button id="restore" class="ghost" title="Replace your code with the starter code">↺ Starter code</button>
+          <button id="restore" class="ghost" data-i18n="restore" data-i18n-title="restore.title"></button>
         </div>
         <div id="goal-text" class="md"></div>
-        <details id="hints"><summary>Hints</summary><ol id="hint-list" class="md"></ol></details>
+        <details id="hints"><summary data-i18n="hints"></summary><ol id="hint-list" class="md"></ol></details>
       </div>
       <div id="editor"></div>
       <div id="console-head" class="bar">
-        <span class="title">Console</span>
+        <span class="title" data-i18n="console"></span>
         <span id="state" class="pill">idle</span>
         <span class="grow"></span>
-        <button id="clear" class="ghost">Clear</button>
+        <button id="clear" class="ghost" data-i18n="clear"></button>
       </div>
       <div id="console" aria-live="polite"></div>
     </section>
     <aside id="cheat" class="ui" hidden>
-      <div class="bar"><span class="title">Robot API</span><span class="grow"></span><button id="cheat-close" class="ghost" title="Close">✕</button></div>
+      <div class="bar"><span class="title" data-i18n="api"></span><span class="grow"></span><button id="cheat-close" class="ghost" data-i18n-title="close">✕</button></div>
       <div id="cheat-body"></div>
     </aside>
     <main id="stage">
       <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
-      <div id="status">Loading…</div>
+      <div id="status" data-i18n="loading"></div>
       <div id="result" class="ui" hidden>
         <div class="card">
           <div id="res-stars" class="stars big"></div>
@@ -56,10 +58,10 @@
           <p id="res-text"></p>
           <ul id="res-detail"></ul>
           <div class="row">
-            <button id="res-map" class="ghost">☰ Map</button>
+            <button id="res-map" class="ghost" data-i18n="res.map"></button>
             <span class="grow"></span>
-            <button id="res-retry">↺ Try again</button>
-            <button id="res-next" class="primary">Next ▶</button>
+            <button id="res-retry" data-i18n="res.retry"></button>
+            <button id="res-next" class="primary" data-i18n="res.next"></button>
           </div>
         </div>
       </div>
@@ -67,17 +69,20 @@
   </div>
   <div id="map" class="ui" hidden>
     <div class="sheet">
-      <div class="bar"><span class="brand">Challenges</span><span class="grow"></span><button id="map-close" class="ghost" title="Close">✕</button></div>
+      <div class="bar"><span class="brand" data-i18n="map.title"></span><span class="grow"></span><button id="map-close" class="ghost" data-i18n-title="close">✕</button></div>
       <div id="map-body">
         <div id="map-list" class="grid"></div>
-        <h3>Free play</h3>
+        <h3 data-i18n="map.free"></h3>
         <div id="map-free" class="grid"></div>
       </div>
       <div class="bar foot">
         <span id="map-total" class="dim"></span>
         <span class="grow"></span>
-        <button id="export" class="ghost" title="Save your progress and code to a file">Export progress</button>
-        <button id="import" class="ghost" title="Load progress from a file">Import…</button>
+        <label id="teacher-box" class="dim" data-i18n-title="teacher.title" hidden><input id="teacher" type="checkbox"> <span data-i18n="teacher"></span></label>
+        <button id="load-level" class="ghost" data-i18n="loadlevel" data-i18n-title="loadlevel.title" hidden></button>
+        <input id="level-file" type="file" accept=".json,application/json" hidden>
+        <button id="export" class="ghost" data-i18n="export" data-i18n-title="export.title"></button>
+        <button id="import" class="ghost" data-i18n="import" data-i18n-title="import.title"></button>
         <input id="import-file" type="file" accept=".json,application/json" hidden>
       </div>
     </div>
@@ -107,6 +112,9 @@
     };
   </script>
   <script src="vendor/codemirror.js"></script>
+  <script src="i18n.js"></script>
+  <script src="sound.js"></script>
+  <script src="leveledit.js"></script>
   <script src="app.js"></script>
   {{{ SCRIPT }}}
 </body>

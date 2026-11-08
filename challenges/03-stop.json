@@ -11,6 +11,20 @@
     "The cheese starts where `ir(0)` is about `1`. Stop when it goes over `1.5`.",
     "When the loop ends the program ends, and the mouse stops."
   ],
+  "pt": {
+    "title": "Para antes da parede",
+    "goal": [
+      "Vai até ao queijo e **para em cima dele**. Está mesmo à frente de uma parede, por isso não batas!",
+      "",
+      "`ir(0)` é o sensor da frente. Lê cerca de `1 / distância`: quanto mais perto a parede, maior o número."
+    ],
+    "hints": [
+      "Usa um ciclo `while`: continua a andar enquanto `ir(0)` for pequeno.",
+      "O queijo começa onde `ir(0)` é cerca de `1`. Para quando passar de `1.5`.",
+      "Quando o ciclo acaba, o programa acaba e o rato para."
+    ],
+    "starter": "03-stop.pt.lua"
+  },
   "win": { "reach_target": true, "stop_on_target": true, "no_collisions": true },
   "stars": { "time": 110 },
   "name": "Stop before the wall",

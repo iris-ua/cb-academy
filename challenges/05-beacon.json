@@ -11,6 +11,20 @@
     "Readings are a bit noisy. Look again every few steps and correct.",
     "In a loop: if `beacon()` is positive, steer left (right wheel faster), otherwise steer right."
   ],
+  "pt": {
+    "title": "Segue a luz",
+    "goal": [
+      "O queijo está debaixo da luz, algures atrás de ti.",
+      "",
+      "`beacon()` dá o ângulo até à luz em graus: `0` é mesmo em frente, positivo é para a esquerda."
+    ],
+    "hints": [
+      "`turn(beacon())` aponta o rato para a luz.",
+      "As leituras têm algum ruído. Volta a olhar de poucos em poucos passos e corrige.",
+      "Num ciclo: se `beacon()` for positivo, vira à esquerda (roda direita mais rápida), senão vira à direita."
+    ],
+    "starter": "05-beacon.pt.lua"
+  },
   "win": { "reach_target": true },
   "stars": { "time": 200 },
   "name": "Follow the light",

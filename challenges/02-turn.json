@@ -11,6 +11,20 @@
     "The cheese is 6 to the right and 5 up from the start.",
     "Drive right first, then turn left by 90 degrees."
   ],
+  "pt": {
+    "title": "À volta da esquina",
+    "goal": [
+      "Há uma parede no caminho. Passa por ela, vira e chega ao queijo **sem bater** em nada.",
+      "",
+      "- `forward(n)` anda `n` diâmetros do robô.",
+      "- `turn(graus)` roda no lugar. Positivo vira para a esquerda."
+    ],
+    "hints": [
+      "O queijo está 6 para a direita e 5 para cima da partida.",
+      "Primeiro anda para a direita, depois vira 90 graus à esquerda."
+    ],
+    "starter": "02-turn.pt.lua"
+  },
   "win": { "reach_target": true, "no_collisions": true },
   "stars": { "time": 220 },
   "name": "Around the corner",

@@ -11,6 +11,20 @@
     "Turn away from the rock (try `turn(90)`), drive a bit, then head for the light again.",
     "A random turn (`math.random(60, 120)`) stops the mouse from getting stuck in a loop."
   ],
+  "pt": {
+    "title": "Bate e segue",
+    "goal": [
+      "Há pedras a bloquear o caminho até à luz. Agora o mundo real tem ruído: as rodas escorregam e os sensores tremem.",
+      "",
+      "`bump()` é `true` logo depois de o rato bater em algo. Recua, vira e tenta outra vez."
+    ],
+    "hints": [
+      "Depois de bater, `forward(-1)` recua um passo.",
+      "Afasta-te da pedra (experimenta `turn(90)`), anda um pouco e volta a seguir a luz.",
+      "Uma viragem aleatória (`math.random(60, 120)`) evita que o rato fique preso num ciclo."
+    ],
+    "starter": "07-bumper.pt.lua"
+  },
   "win": { "reach_target": true },
   "stars": { "time": 800 },
   "name": "Bump and go",

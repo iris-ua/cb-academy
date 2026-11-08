@@ -19,6 +19,7 @@ typedef struct {
 /* Split the screen into arena and HUD panel (side, or bottom on narrow screens). */
 void hud_layout(int screen_w, int screen_h, double lab_w, double lab_h, Rectangle *arena, Rectangle *panel);
 void hud_draw(const Sim *s, Rectangle panel, const HudState *st);
+void hud_set_lang(bool portuguese); /* labels in Portuguese (else English) */
 /* Script error banner along the bottom of the arena. */
 void hud_draw_error(Rectangle arena, const char *msg);
 

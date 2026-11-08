@@ -24,7 +24,15 @@ Needs [emsdk](https://emscripten.org/docs/getting_started/downloads.html):
     python3 -m http.server -d build-web 8000   # open http://localhost:8000
 
 The page has a Lua editor (CodeMirror 6, with API autocomplete), a console and
-an API cheat-sheet next to the arena. CodeMirror is pre-bundled into
+an API cheat-sheet next to the arena. The page is in English and Portuguese (EN/PT toggle), has sound effects
+(mute toggle) and a level editor (Map → Free play → Make a level). Open it with
+`?teacher` to show **Teacher mode** in the map: it unlocks every challenge and
+loads a level JSON file.
+
+Pushes to `main` deploy the web build to GitHub Pages (`.github/workflows/pages.yml`;
+set Settings → Pages → Source to "GitHub Actions").
+
+CodeMirror is pre-bundled into
 `web/vendor/codemirror.js`; to update it: `cd web/vendor-src && npm install && npm run build`.
 
 ## Layout

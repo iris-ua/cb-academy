@@ -11,6 +11,20 @@
     "Follow one wall until the light shows up, then head for it.",
     "Noise adds up. After each square, `turn_to` the nearest 90 degrees, and use a wall in front to fix your distance."
   ],
+  "pt": {
+    "title": "O labirinto clássico",
+    "goal": [
+      "O labirinto completo, com ruído e tudo: o desafio original do CiberRato.",
+      "",
+      "Encontra o queijo debaixo da luz. Cada toque custa uma estrela, e ser lento também."
+    ],
+    "hints": [
+      "As paredes são mais altas do que a luz, por isso `beacon()` é `nil` até a luz estar à vista.",
+      "Segue uma parede até a luz aparecer, depois vai na direção dela.",
+      "O ruído acumula-se. Depois de cada quadrado, usa `turn_to` para o múltiplo de 90 graus mais próximo, e usa uma parede à frente para acertar a distância."
+    ],
+    "starter": "09-classic.pt.lua"
+  },
   "win": { "reach_target": true },
   "stars": { "time": 900 },
   "name": "The classic maze",

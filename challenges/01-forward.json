@@ -10,6 +10,19 @@
     "The loop runs `motors` 10 times. Is that enough ticks to get there?",
     "Faster wheels (closer to `0.15`) reach the cheese sooner."
   ],
+  "pt": {
+    "title": "Em frente até ao queijo",
+    "goal": [
+      "O queijo está mesmo à frente. Leva o rato até ele!",
+      "",
+      "`motors(esquerda, direita)` define a potência de cada roda (até `0.15`) e espera um tique. Repete-o para continuares a andar."
+    ],
+    "hints": [
+      "O ciclo executa `motors` 10 vezes. São tiques suficientes para lá chegar?",
+      "Rodas mais rápidas (mais perto de `0.15`) chegam lá mais cedo."
+    ],
+    "starter": "01-forward.pt.lua"
+  },
   "win": { "reach_target": true },
   "stars": { "time": 75 },
   "name": "Straight to the cheese",

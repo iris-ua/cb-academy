@@ -1,5 +1,6 @@
 {
   "name": "Sandbox",
+  "pt": { "name": "Caixa de areia" },
   "width": 14, "height": 8,
   "time_limit": 0,
   "beacons": [ { "x": 11, "y": 4, "height": 6 } ],

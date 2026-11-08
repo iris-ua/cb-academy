@@ -11,6 +11,20 @@
     "Left-hand rule: if there is no wall on the left, turn left. Else if the front is open, go. Else turn right.",
     "A wall right next to you reads more than `1.5`. An open side reads much less."
   ],
+  "pt": {
+    "title": "Um labirinto pequeno",
+    "goal": [
+      "Encontra o queijo no labirinto. Regra de ouro: **mantém uma mão na parede** e nunca te perdes.",
+      "",
+      "Cada quadrado mede `2`. As paredes aparecem em `ir(0)` (frente), `ir(1)` (esquerda) e `ir(2)` (direita)."
+    ],
+    "hints": [
+      "Avança um quadrado de cada vez: `forward(2)`, depois olha à volta.",
+      "Regra da mão esquerda: se não houver parede à esquerda, vira à esquerda. Senão, se a frente estiver livre, avança. Senão vira à direita.",
+      "Uma parede mesmo ao lado lê mais de `1.5`. Um lado livre lê muito menos."
+    ],
+    "starter": "06-maze.pt.lua"
+  },
   "win": { "reach_target": true },
   "stars": { "time": 450 },
   "name": "A small maze",

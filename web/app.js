@@ -4,51 +4,37 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
+  var t = I18N.t;
 
   /* ---- robot API: one table feeds autocomplete and the cheat-sheet --------- */
   var API = [
     { group: 'Move', items: [
-      ['forward(n)', 'forward(${n})', 'Drive n robot diameters straight ahead (negative: backwards).'],
-      ['turn(deg)', 'turn(${deg})', 'Turn in place by deg degrees. Positive turns left.'],
-      ['turn_to(deg)', 'turn_to(${deg})', 'Turn to face a compass heading (degrees).'],
-      ['motors(l, r)', 'motors(${l}, ${r})', 'Set left/right wheel power, -0.15 to 0.15. Waits one tick.'],
-      ['wait(n)', 'wait(${n})', 'Do nothing for n ticks (1 tick = 50 ms). Default 1.'],
-      ['finish()', 'finish()', 'End the run: the robot stops and gets scored.'],
+      ['forward(n)', 'forward(${n})'],
+      ['turn(deg)', 'turn(${deg})'],
+      ['turn_to(deg)', 'turn_to(${deg})'],
+      ['motors(l, r)', 'motors(${l}, ${r})'],
+      ['wait(n)', 'wait(${n})'],
+      ['finish()', 'finish()'],
     ] },
     { group: 'Sense', items: [
-      ['ir(i)', 'ir(${0})', 'IR sensor: 0 front, 1 left, 2 right, 3 back. Bigger = closer (1 / distance).'],
-      ['compass()', 'compass()', 'Heading in degrees, -180 to 180. 0 points right, 90 up.'],
-      ['beacon()', 'beacon()', 'Angle to the beacon from where the robot faces (degrees), or nil if a wall hides it.'],
-      ['ground()', 'ground()', 'Index of the target under the robot (0, 1, …), or -1 if none.'],
-      ['bump()', 'bump()', 'true if the robot hit something on the last tick.'],
-      ['time()', 'time()', 'Ticks since the start (1 tick = 50 ms).'],
+      ['ir(i)', 'ir(${0})'],
+      ['compass()', 'compass()'],
+      ['beacon()', 'beacon()'],
+      ['ground()', 'ground()'],
+      ['bump()', 'bump()'],
+      ['time()', 'time()'],
     ] },
     { group: 'Show', items: [
-      ['say(msg)', 'say(${msg})', 'Print a message in the console. print() does the same.'],
-      ['led(name, on)', 'led("${visiting}", ${true})', 'Turn an LED on or off: "visiting" or "returning".'],
+      ['say(msg)', 'say(${msg})'],
+      ['led(name, on)', 'led("${visiting}", ${true})'],
     ] },
   ];
   var LUA_WORDS = ('and break do else elseif end false for function if in local nil not or repeat return ' +
                    'then true until while').split(' ');
   var MATH = ['abs', 'floor', 'ceil', 'min', 'max', 'sqrt', 'random', 'pi', 'huge', 'sin', 'cos', 'atan'];
 
-  var STARTER = [
-    '-- Welcome! Write your robot program here, then press Run.',
-    '-- Open the API panel for every command.',
-    '',
-    'say("Hello, I am a mouse!")',
-    '',
-    '-- drive until something is close in front',
-    'while ir(0) < 2 do',
-    '  motors(0.1, 0.1)',
-    'end',
-    '',
-    'turn(90)',
-    'forward(2)',
-    'say("Done at tick " .. time())',
-    'finish()',
-    ''
-  ].join('\n');
+  function starter() { return t('starter'); } /* free play */
+  function apiDesc(it) { return t('api.' + it[0].replace(/\(.*/, '')); }
 
   /* ---- per-viewer conveniences (may be unavailable) ------------------------ */
   function load(key, def) { try { var v = localStorage.getItem(key); return v == null ? def : v; } catch (e) { return def; } }
@@ -63,7 +49,7 @@
     API.forEach(function (g) {
       g.items.forEach(function (it) {
         opts.push(CM.snippetCompletion(it[1], { label: it[0].replace(/\(.*/, ''), detail: it[0].replace(/^\w+/, ''),
-                                                info: it[2], type: 'function', boost: 2 }));
+                                                info: apiDesc(it), type: 'function', boost: 2 }));
       });
     });
     LUA_WORDS.forEach(function (w) { opts.push({ label: w, type: 'keyword' }); });
@@ -72,8 +58,9 @@
   }
 
   function makeEditor() {
-    var opts = apiCompletions();
+    var opts, optsLang;
     function complete(ctx) {
+      if (optsLang !== I18N.lang) { opts = apiCompletions(); optsLang = I18N.lang; } /* descriptions */
       var w = ctx.matchBefore(/[\w.]+/);
       if (!w || (w.from === w.to && !ctx.explicit)) return null;
       return { from: w.from, options: opts, validFor: /^[\w.]*$/ };
@@ -121,7 +108,7 @@
         saveTimer = setTimeout(saveCode, 400);
       })
     ];
-    view = new CM.EditorView({ parent: $('editor'), state: CM.EditorState.create({ doc: load(codeKey, STARTER), extensions: extensions }) });
+    view = new CM.EditorView({ parent: $('editor'), state: CM.EditorState.create({ doc: load(codeKey, starter()), extensions: extensions }) });
     /* show another program (its own storage slot, fresh undo history); keep: don't save the old one */
     setDoc = function (key, code, keep) {
       if (!keep) saveCode();
@@ -148,7 +135,7 @@
     if (m) {
       var a = document.createElement('a');
       a.textContent = m[0];
-      a.title = 'Show in the editor';
+      a.title = t('line.link');
       a.onclick = function () { setErr(line, true); };
       el.appendChild(a);
       el.appendChild(document.createTextNode(text.slice(m[0].length)));
@@ -170,22 +157,24 @@
     if (!ready) return;
     setErr(0);
     hideResult();
-    log('▶ Run', 'sys');
+    log(t('log.run'), 'sys');
     call('web_run', [view.state.doc.toString()]);
   }
 
   /* Run button: Run (fresh start) -> Pause -> Resume -> Pause ... until the script ends or Reset. */
-  var runState = 'idle', paused = false;
+  var runState = 'idle', paused = false, lastResult = null;
   function updateRunButton() {
     var b = $('run'), live = runState === 'running';
-    b.textContent = !live ? '▶ Run' : paused ? '▶ Resume' : '❚❚ Pause';
-    b.title = !live ? 'Run from the start (Ctrl+Enter)' : paused ? 'Continue the script' : 'Pause the script';
+    var k = !live ? 'run' : paused ? 'resume' : 'pause';
+    b.textContent = t(k);
+    b.title = t(k + '.title');
     b.classList.toggle('primary', !live || paused);
     var pill = $('state'), shown = live && paused ? 'paused' : runState;
-    pill.textContent = shown;
+    pill.textContent = t('state.' + shown);
     pill.className = 'pill ' + shown;
   }
   function runButton() {
+    Sfx.unlock();
     if (runState !== 'running') run();
     else call('web_pause', [paused ? 0 : 1]);
   }
@@ -203,25 +192,29 @@
     switch (kind) {
     case 'print': log(text); break;
     case 'error': log(text, 'err', n); if (n > 0) setErr(n); break;
-    case 'state': setState(text); if (text === 'done') log('Script finished.', 'sys'); break;
+    case 'state': setState(text); if (text === 'done') log(t('log.finished'), 'sys'); break;
     case 'speed': setSpeed(parseFloat(text)); break;
     case 'paused': paused = !!n; updateRunButton(); break;
-    case 'level': if (ready) log('Level: ' + text, 'sys'); break;
-    case 'finished': if (!current || !current.ch) log('Run over. Score: ' + n, 'win'); break;
-    case 'result': showResult(JSON.parse(text)); break;
+    case 'level': if (ready) log(t('log.level', text), 'sys'); break;
+    case 'finished': if (!current || !current.ch) log(t('log.over', n), 'win'); break;
+    case 'result': lastResult = JSON.parse(text); showResult(lastResult); Sfx.play(lastResult.win ? 'win' : 'fail'); break;
+    case 'sound': Sfx.play(text); break;
     case 'ready': /* main() is set up: window, level, robot */
       ready = true;
+      call('web_set_lang', [I18N.lang]);
       initStages();
-      log('Ready. Write a program and press Run.', 'sys');
+      log(t('log.ready'), 'sys');
       break;
     }
   };
 
-  /* ---- stages: challenges (/challenges, in file order) and free-play levels
-   * (/levels), both preloaded in the WASM file system. Progress and code per
-   * challenge live in localStorage. ----------------------------------------- */
-  var challenges = [], levels = [], current = null;
-  var PROGRESS = 'ciberrato.progress';
+  /* ---- stages: challenges (/challenges, in file order), free-play levels
+   * (/levels), both preloaded in the WASM file system, and one custom level
+   * (loaded in teacher mode or made in the editor, kept in localStorage).
+   * Progress and code per challenge live in localStorage. ------------------ */
+  var challenges = [], levels = [], custom = null, current = null;
+  var PROGRESS = 'ciberrato.progress', CUSTOM = 'ciberrato.custom', TEACHER = 'ciberrato.teacher';
+  var teacher = load(TEACHER, '') === '1';
 
   function readText(path) { return Module.FS.readFile(path, { encoding: 'utf8' }); }
   function jsonFiles(dir) {
@@ -233,8 +226,20 @@
 
   var progress = (function () { try { return JSON.parse(load(PROGRESS, '{}')) || {}; } catch (e) { return {}; } })();
   function saveProgress() { save(PROGRESS, JSON.stringify(progress)); }
-  function unlocked(c) { return c.index === 0 || !!progress[challenges[c.index - 1].id]; }
-  function codeKeyOf(st) { return st.ch ? 'ciberrato.code.' + st.id : 'ciberrato.code'; }
+  function unlocked(c) { return teacher || c.index === 0 || !!progress[challenges[c.index - 1].id]; }
+  function codeKeyOf(st) { return st.ch ? 'ciberrato.code.' + st.id : st.custom ? 'ciberrato.code.custom' : 'ciberrato.code'; }
+  function stageKey(st) { return (st.ch ? 'ch:' : st.custom ? 'cu:' : 'lv:') + st.id; }
+  function starterOf(st) { return st.ch ? (st.starters[I18N.lang] || st.starters.en) : starter(); }
+
+  /* text shown for a stage, in the page language */
+  function localize(st) {
+    var d = st.d;
+    st.title = I18N.pick(d, 'title') || I18N.pick(d, 'name') || (st.custom ? t('custom') : st.id);
+    st.goal = lines(I18N.pick(d, 'goal'));
+    st.hints = [].concat(I18N.pick(d, 'hints') || []);
+  }
+  /* level JSON for the sim, with the shown name */
+  function simSource(st) { return Object.keys(st.d).length ? JSON.stringify(Object.assign({}, st.d, { name: st.title })) : st.src; }
 
   /* tiny markdown: paragraphs, "- " lists, `code`, **bold**, *italic* */
   function esc(t) { return t.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -254,53 +259,69 @@
   }
   function stars(n) { return '★★★'.slice(0, n) + '<span class="off">' + '★★★'.slice(n) + '</span>'; }
 
+  function makeCustom(src) {
+    var st = { ch: false, custom: true, id: 'custom', src: src, d: JSON.parse(src) };
+    localize(st);
+    return st;
+  }
+
   function initStages() {
     jsonFiles('/challenges').forEach(function (f) {
       try {
-        var src = readText('/challenges/' + f), d = JSON.parse(src), starter = '';
-        if (d.starter) {
-          try { starter = readText('/challenges/' + d.starter); } catch (e) { log('Challenge ' + f + ': missing ' + d.starter, 'err'); }
-        }
-        challenges.push({ ch: true, id: f.replace(/\.json$/, ''), index: challenges.length, src: src,
-                          title: d.title || d.name || f, goal: lines(d.goal), hints: [].concat(d.hints || []), starter: starter });
-      } catch (e) { log('Challenge ' + f + ': ' + e.message, 'err'); }
+        var src = readText('/challenges/' + f), d = JSON.parse(src), starters = {};
+        [['en', d.starter], ['pt', d.pt && d.pt.starter]].forEach(function (s) {
+          if (!s[1]) return;
+          try { starters[s[0]] = readText('/challenges/' + s[1]); } catch (e) { log(t('log.missing', f, s[1]), 'err'); }
+        });
+        if (starters.en == null) starters.en = '';
+        var st = { ch: true, id: f.replace(/\.json$/, ''), index: challenges.length, src: src, d: d, starters: starters };
+        localize(st);
+        challenges.push(st);
+      } catch (e) { log(t('log.missing', f, e.message), 'err'); }
     });
     jsonFiles('/levels').forEach(function (f) {
-      var src = readText('/levels/' + f), name = f;
-      try { name = JSON.parse(src).name || f; } catch (e) { /* the sim reports it */ }
-      levels.push({ ch: false, id: f, src: src, title: name });
+      var src = readText('/levels/' + f), d = {};
+      try { d = JSON.parse(src); } catch (e) { /* the sim reports it */ }
+      var st = { ch: false, id: f, src: src, d: d };
+      localize(st);
+      if (!d.name) st.title = f;
+      levels.push(st);
     });
+    var cs = load(CUSTOM, null);
+    if (cs) { try { custom = makeCustom(cs); } catch (e) { custom = null; } }
     var want = load('ciberrato.current', '');
-    var st = challenges.concat(levels).filter(function (s) { return (s.ch ? 'ch:' : 'lv:') + s.id === want; })[0];
+    var st = challenges.concat(levels, custom ? [custom] : []).filter(function (s) { return stageKey(s) === want; })[0];
     if (!st || (st.ch && !unlocked(st))) st = challenges[0] || levels[0];
     if (st) openStage(st);
   }
 
   function openStage(st) {
     current = st;
-    save('ciberrato.current', (st.ch ? 'ch:' : 'lv:') + st.id);
+    save('ciberrato.current', stageKey(st));
     var key = codeKeyOf(st);
-    setDoc(key, load(key, st.ch ? st.starter : STARTER));
-    call('web_load_level', [st.src]);
+    setDoc(key, load(key, starterOf(st)));
+    lastResult = null;
+    call('web_load_level', [simSource(st)]);
     call('web_reset'); /* the old script must not carry over */
     setErr(0);
     hideResult();
-    $('pick-name').textContent = (st.ch ? (st.index + 1) + '. ' : '') + st.title;
+    $('hints').open = false;
     renderGoal();
   }
 
   function renderGoal() {
     var st = current, g = $('goal');
-    g.hidden = !st || !st.ch;
-    if (g.hidden) return;
-    var best = progress[st.id];
-    $('goal-num').textContent = 'Challenge ' + (st.index + 1);
+    $('pick-name').textContent = st ? (st.ch ? (st.index + 1) + '. ' : '') + st.title : '…';
+    g.hidden = !st || !(st.ch || (st.custom && st.goal));
+    if (g.hidden) { window.dispatchEvent(new Event('resize')); return; }
+    var best = st.ch && progress[st.id];
+    $('goal-num').textContent = st.ch ? t('challenge', st.index + 1) : t('custom');
     $('goal-title').textContent = st.title;
     $('goal-best').innerHTML = best ? stars(best.stars) : '';
-    $('goal-best').title = best ? 'Best: ' + best.stars + ' stars in ' + secs(best.ticks) : '';
+    $('goal-best').title = best ? t('best', best.stars, secs(best.ticks)) : '';
+    $('restore').hidden = !st.ch;
     $('goal-text').innerHTML = md(st.goal);
     $('hints').hidden = !st.hints.length;
-    $('hints').open = false;
     $('hint-list').innerHTML = st.hints.map(function (h) { return '<li>' + inline(String(h)) + '</li>'; }).join('');
     window.dispatchEvent(new Event('resize'));
   }
@@ -308,30 +329,32 @@
   /* ---- result (event from the sim when a challenge run is judged) ---------- */
   function hideResult() { $('result').hidden = true; }
 
-  function showResult(r) {
+  /* record: false when re-shown after a language change */
+  function showResult(r, again) {
     var st = current;
-    if (!st || !st.ch) return;
-    var box = $('result'), next = challenges[st.index + 1];
+    if (!st || !(st.ch || st.custom)) return;
+    var box = $('result'), next = st.ch && challenges[st.index + 1];
     box.className = r.win ? 'ui' : 'ui fail';
     if (r.win) {
-      var best = progress[st.id];
-      if (!best || r.stars > best.stars || (r.stars === best.stars && r.ticks < best.ticks)) {
+      var best = st.ch && progress[st.id];
+      if (st.ch && !again && (!best || r.stars > best.stars || (r.stars === best.stars && r.ticks < best.ticks))) {
         progress[st.id] = { stars: r.stars, ticks: r.ticks, score: r.score };
         saveProgress();
         renderGoal();
       }
-      log('Challenge complete! ' + '★★★☆☆☆'.slice(3 - r.stars, 6 - r.stars) + ' in ' + secs(r.ticks), 'win');
+      if (!again) log(t('log.complete', '★★★☆☆☆'.slice(3 - r.stars, 6 - r.stars), secs(r.ticks)), 'win');
       $('res-stars').innerHTML = stars(r.stars);
-      $('res-title').textContent = 'Challenge complete!';
-      $('res-text').textContent = 'Time ' + secs(r.ticks) + (best && best.ticks <= r.ticks && best.stars >= r.stars ? ' · best ' + secs(best.ticks) : '');
+      $('res-title').textContent = t('res.complete');
+      $('res-text').textContent = t('res.time', secs(r.ticks)) +
+        (best && best.ticks <= r.ticks && best.stars >= r.stars ? t('res.best', secs(best.ticks)) : '');
       var fast = !r.star_time || r.ticks <= r.star_time;
-      $('res-detail').innerHTML = '<li>Reached the goal</li>' +
-        '<li class="' + (fast ? '' : 'off') + '">' + (r.star_time ? 'Done within ' + secs(r.star_time) : 'Done') + '</li>' +
-        '<li class="' + (r.collisions ? 'off' : '') + '">No bumps' + (r.collisions ? ' (' + r.collisions + ' this time)' : '') + '</li>';
+      $('res-detail').innerHTML = '<li>' + esc(t('res.reached')) + '</li>' +
+        '<li class="' + (fast ? '' : 'off') + '">' + esc(r.star_time ? t('res.within', secs(r.star_time)) : t('res.done')) + '</li>' +
+        '<li class="' + (r.collisions ? 'off' : '') + '">' + esc(t('res.nobumps') + (r.collisions ? t('res.bumps', r.collisions) : '')) + '</li>';
     } else {
-      log('Not yet: ' + r.why, 'err');
+      if (!again) log(t('log.notyet', r.why), 'err');
       $('res-stars').innerHTML = '';
-      $('res-title').textContent = 'Not yet';
+      $('res-title').textContent = t('res.notyet');
       $('res-text').textContent = r.why;
       $('res-detail').innerHTML = '';
     }
@@ -341,15 +364,20 @@
   }
 
   /* ---- map ------------------------------------------------------------------ */
-  function tile(st, line, locked) {
+  function tile(title, kicker, line, locked, isCurrent, done, onclick) {
     var b = document.createElement('button');
-    b.className = 'tile' + (locked ? ' locked' : '') + (st.ch && progress[st.id] ? ' done' : '') + (st === current ? ' current' : '');
+    b.className = 'tile' + (locked ? ' locked' : '') + (done ? ' done' : '') + (isCurrent ? ' current' : '');
     b.disabled = locked;
-    b.innerHTML = (st.ch ? '<span class="n">Challenge ' + (st.index + 1) + '</span>' : '') + '<b></b><span class="stars"></span>';
-    b.querySelector('b').textContent = st.title;
+    b.innerHTML = (kicker ? '<span class="n"></span>' : '') + '<b></b><span class="stars"></span>';
+    if (kicker) b.firstChild.textContent = kicker;
+    b.querySelector('b').textContent = title;
     b.lastChild.innerHTML = line;
-    b.onclick = function () { showMap(false); openStage(st); };
+    b.onclick = function () { showMap(false); onclick(); };
     return b;
+  }
+  function stageTile(st, line, locked) {
+    var kicker = st.ch ? t('challenge', st.index + 1) : st.custom ? t('custom') : '';
+    return tile(st.title, kicker, line, locked, st === current, st.ch && progress[st.id], function () { openStage(st); });
   }
 
   function renderMap() {
@@ -358,17 +386,38 @@
     challenges.forEach(function (c) {
       var p = progress[c.id], locked = !unlocked(c);
       if (p) got += p.stars;
-      list.appendChild(tile(c, p ? stars(p.stars) + ' <span class="dim">' + secs(p.ticks) + '</span>'
-                                 : '<span class="dim">' + (locked ? 'Finish the one before' : 'Not done yet') + '</span>', locked));
+      list.appendChild(stageTile(c, p ? stars(p.stars) + ' <span class="dim">' + secs(p.ticks) + '</span>'
+                                      : '<span class="dim">' + esc(t(locked ? 'map.locked' : 'map.todo')) + '</span>', locked));
     });
-    levels.forEach(function (l) { free.appendChild(tile(l, '', false)); });
-    $('map-total').textContent = got + ' / ' + challenges.length * 3 + ' stars';
+    levels.forEach(function (l) { free.appendChild(stageTile(l, '', false)); });
+    if (custom) free.appendChild(stageTile(custom, '', false));
+    var mk = tile(t('make'), '', '<span class="dim">' + esc(t('make.sub')) + '</span>', false, false, false, openEditor);
+    mk.classList.add('make');
+    free.appendChild(mk);
+    $('map-total').textContent = t('map.total', got, challenges.length * 3);
+    $('teacher-box').hidden = !(teacher || /[?&#]teacher\b/.test(location.search + location.hash));
+    $('teacher').checked = teacher;
+    $('load-level').hidden = !teacher;
   }
 
   function showMap(on) {
     if (on) renderMap();
     $('map').hidden = !on;
     if (on) ($('map').querySelector('.tile.current') || $('map-close')).focus();
+  }
+
+  /* ---- custom level: teacher's file or the level editor -------------------- */
+  function playCustom(src) {
+    var st;
+    try { st = makeCustom(src); } catch (e) { alert(t('loadlevel.fail', e.message)); return; }
+    custom = st;
+    save(CUSTOM, src);
+    log(t('log.custom', st.title), 'sys');
+    openStage(st);
+  }
+
+  function openEditor() {
+    LevelEdit.open({ current: current ? simSource(current) : null, onPlay: playCustom });
   }
 
   /* ---- export / import (progress + code per challenge) --------------------- */
@@ -385,10 +434,10 @@
   }
 
   function importProgress(file) {
-    file.text().then(function (t) {
-      var d = JSON.parse(t);
-      if (!d || (d.app !== 'ciberrato-academy' && d.app !== 'ciberrato-jr') || typeof d.progress !== 'object') throw new Error('not a CiberRato Academy progress file');
-      if (!confirm('Replace your progress and saved code with this file?')) return;
+    file.text().then(function (txt) {
+      var d = JSON.parse(txt);
+      if (!d || (d.app !== 'ciberrato-academy' && d.app !== 'ciberrato-jr') || typeof d.progress !== 'object') throw new Error(t('import.bad'));
+      if (!confirm(t('import.confirm'))) return;
       progress = {};
       Object.keys(d.progress || {}).forEach(function (id) {
         var p = d.progress[id];
@@ -397,11 +446,11 @@
       saveProgress();
       Object.keys(d.code || {}).forEach(function (id) { if (typeof d.code[id] === 'string') save('ciberrato.code.' + id, d.code[id]); });
       if (typeof d.free === 'string') save('ciberrato.code', d.free);
-      setDoc(codeKeyOf(current), load(codeKeyOf(current), current.ch ? current.starter : STARTER), true);
+      setDoc(codeKeyOf(current), load(codeKeyOf(current), starterOf(current)), true);
       renderGoal();
       renderMap();
-      log('Progress imported.', 'sys');
-    }).catch(function (e) { alert('Import failed: ' + e.message); });
+      log(t('log.imported'), 'sys');
+    }).catch(function (e) { alert(t('import.fail', e.message)); });
   }
 
   function initMap() {
@@ -412,38 +461,53 @@
     $('export').onclick = exportProgress;
     $('import').onclick = function () { $('import-file').click(); };
     $('import-file').onchange = function () { var f = this.files[0]; this.value = ''; if (f) importProgress(f); };
+    $('teacher').onchange = function () {
+      teacher = this.checked;
+      save(TEACHER, teacher ? '1' : '');
+      renderMap();
+    };
+    $('load-level').onclick = function () { $('level-file').click(); };
+    $('level-file').onchange = function () {
+      var f = this.files[0];
+      this.value = '';
+      if (f) f.text().then(function (src) { showMap(false); playCustom(src); });
+    };
     $('res-retry').onclick = function () { hideResult(); call('web_reset'); setErr(0); view.focus(); }; /* fix the code, then Run */
     $('res-map').onclick = function () { hideResult(); showMap(true); };
     $('restore').onclick = function () {
-      if (!current || !current.ch || !confirm('Replace your code with the starter code? (Ctrl+Z undoes it.)')) return;
-      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: current.starter } });
+      if (!current || !current.ch || !confirm(t('restore.confirm'))) return;
+      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: starterOf(current) } });
       view.focus();
     };
   }
 
   /* ---- cheat-sheet --------------------------------------------------------- */
-  function initCheat() {
+  function renderCheat() {
     var body = $('cheat-body');
+    body.textContent = '';
     API.forEach(function (g) {
       var h = document.createElement('h3');
-      h.textContent = g.group;
+      h.textContent = t('g.' + g.group);
       body.appendChild(h);
       g.items.forEach(function (it) {
         var d = document.createElement('div');
         d.className = 'fn';
-        d.title = 'Click to insert';
+        d.title = t('cheat.insert');
         d.innerHTML = '<code></code><p></p>';
         d.firstChild.textContent = it[0];
-        d.lastChild.textContent = it[2];
+        d.lastChild.textContent = apiDesc(it);
         d.onclick = function () { insertAtCursor(it[1].replace(/\$\{([^}]*)\}/g, '$1')); };
         body.appendChild(d);
       });
     });
     var tip = document.createElement('p');
     tip.className = 'tip';
-    tip.innerHTML = 'Tips: press <b>Ctrl+Space</b> in the editor for suggestions, <b>Ctrl+Enter</b> to run.';
+    tip.innerHTML = t('cheat.tip');
     body.appendChild(tip);
+  }
 
+  function initCheat() {
+    renderCheat();
     function show(on) {
       $('cheat').hidden = !on;
       $('help').setAttribute('aria-pressed', on);
@@ -455,18 +519,55 @@
     show(!!load('ciberrato.cheat', ''));
   }
 
+  /* ---- language and sound -------------------------------------------------- */
+  function showLang() {
+    document.querySelectorAll('#lang button').forEach(function (b) { b.classList.toggle('on', b.dataset.lang === I18N.lang); });
+  }
+
+  function setLang(l) {
+    if (l === I18N.lang) return;
+    var oldStarter = current && starterOf(current);
+    I18N.set(l);
+    showLang();
+    call('web_set_lang', [l]);
+    challenges.concat(levels, custom ? [custom] : []).forEach(localize);
+    if (current) {
+      call('web_set_level_name', [current.title]);
+      /* untouched starter code follows the language */
+      if (view.state.doc.toString() === oldStarter) view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: starterOf(current) } });
+    }
+    updateRunButton();
+    renderGoal();
+    renderCheat();
+    if (!$('map').hidden) renderMap();
+    if (!$('result').hidden && lastResult) showResult(lastResult, true);
+  }
+
+  function showMute() {
+    $('mute').textContent = Sfx.muted ? '🔇' : '🔊';
+    $('mute').setAttribute('aria-pressed', Sfx.muted);
+  }
+
   /* ---- wiring ------------------------------------------------------------- */
+  I18N.apply();
   makeEditor();
   initCheat();
   initMap();
   setState('idle');
   setSpeed(1);
+  showLang();
+  showMute();
   $('run').onclick = runButton;
   $('reset').onclick = function () { call('web_reset'); setErr(0); hideResult(); };
   $('clear').onclick = function () { $('console').textContent = ''; };
+  $('mute').onclick = function () { Sfx.setMuted(!Sfx.muted); Sfx.unlock(); showMute(); };
+  document.querySelectorAll('#lang button').forEach(function (b) { b.onclick = function () { setLang(b.dataset.lang); }; });
   document.querySelectorAll('#speed button').forEach(function (b) {
     b.onclick = function () { call('web_set_speed', [+b.dataset.speed]); };
   });
+  /* audio may only start after a user gesture; Ctrl+Enter runs from the keyboard */
+  document.addEventListener('pointerdown', Sfx.unlock, true);
+  document.addEventListener('keydown', Sfx.unlock, true);
   /* raylib sizes the canvas to its parent on window resize events */
   new ResizeObserver(function () { window.dispatchEvent(new Event('resize')); }).observe($('stage'));
 

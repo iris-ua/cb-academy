@@ -1,5 +1,6 @@
 {
   "name": "Classic Maze",
+  "pt": { "name": "Labirinto clássico" },
   "width": 28, "height": 14,
   "time_limit": 1800,
   "noise": { "motors": 1.5, "ir": 0.1, "compass": 2.0, "beacon": 2.0 },

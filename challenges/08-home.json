@@ -11,6 +11,20 @@
     "`turn_to(deg)` faces a compass heading, so small turning errors do not add up.",
     "`led('returning', true)` lights up the mouse on the way home."
   ],
+  "pt": {
+    "title": "Ida e volta",
+    "goal": [
+      "Apanha o queijo e depois **volta a casa**, onde começaste.",
+      "",
+      "Em casa não há luz, por isso lembra-te do caminho. `compass()` dá a tua direção em graus (`0` = este, `90` = norte)."
+    ],
+    "hints": [
+      "Refaz os passos ao contrário: o último movimento primeiro.",
+      "`turn_to(graus)` vira para uma direção da bússola, assim os pequenos erros não se acumulam.",
+      "`led('returning', true)` acende o rato no caminho de volta."
+    ],
+    "starter": "08-home.pt.lua"
+  },
   "win": { "reach_target": true, "return_home": true, "no_collisions": true },
   "stars": { "time": 550 },
   "name": "There and back again",

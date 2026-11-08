@@ -32,6 +32,7 @@ static float accum;
 static float speed = 1;  /* sim time multiplier: 0.5, 1, 2, 4, 8 */
 static WinRule rule;     /* challenge win rule (rule.active: the level is a challenge) */
 static bool  judged;     /* this run got a result; the sim stops */
+static bool  lang_pt;    /* web page language: Portuguese */
 
 /* robot script */
 #define LOG_N 32
@@ -115,6 +116,25 @@ static const char *script_state(void)
     }
 }
 
+/* Page language for the few messages made here (challenge reasons come in English). */
+static const char *tr(const char *en)
+{
+    static const char *pt[][2] = {
+        { "Bumped into something.", "Bateste em alguma coisa." },
+        { "Too slow.", "Demasiado lento." },
+        { "Time's up.", "Acabou o tempo." },
+        { "Stop on the cheese, not past it.", "Para em cima do queijo, não depois dele." },
+        { "The program ended before the goal.", "O programa acabou antes do objetivo." },
+        { "Loaded %s", "Carregado: %s" },
+        { "Challenge complete! %d/3 stars", "Desafio concluído! %d/3 estrelas" },
+        { "Not yet: %s", "Ainda não: %s" },
+    };
+    if (lang_pt)
+        for (size_t k = 0; k < sizeof pt / sizeof pt[0]; k++)
+            if (strcmp(en, pt[k][0]) == 0) return pt[k][1];
+    return en;
+}
+
 /* json == NULL: read the file at path. */
 static bool load_level(const char *path, const char *json)
 {
@@ -129,7 +149,7 @@ static bool load_level(const char *path, const char *json)
     if (ok) {
         level = tmp;
         rule = wr;
-        snprintf(status_msg, sizeof status_msg, "Loaded %s", level.lab.name);
+        snprintf(status_msg, sizeof status_msg, tr("Loaded %s"), level.lab.name);
         js_emit("level", level.lab.name, 0);
     } else {
         snprintf(status_msg, sizeof status_msg, "Error: %s", err);
@@ -148,6 +168,15 @@ static bool load_level(const char *path, const char *json)
     return ok;
 }
 
+/* Sound cues for the page: one event per bump / cheese reached this tick. */
+static void sound_cues(const Robot *rb, int collisions_before, int visited_before)
+{
+    int visited = 0;
+    for (int t = 0; t < sim.level.lab.ntargets; t++) visited += rb->visited[t];
+    if (rb->collisions > collisions_before) js_emit("sound", "bump", 0);
+    if (visited > visited_before) js_emit("sound", "squeak", 0);
+}
+
 /* Challenge result, once per run: stops the sim and tells the page. */
 static void judge(void)
 {
@@ -161,8 +190,8 @@ static void judge(void)
     judged = true;
     const Robot *rb = &sim.robots[0];
     int stars = o == CH_WIN ? challenge_stars(&rule, &sim, 0) : 0;
-    if (o == CH_WIN) snprintf(status_msg, sizeof status_msg, "Challenge complete! %d/3 stars", stars);
-    else snprintf(status_msg, sizeof status_msg, "Not yet: %s", why);
+    if (o == CH_WIN) snprintf(status_msg, sizeof status_msg, tr("Challenge complete! %d/3 stars"), stars);
+    else snprintf(status_msg, sizeof status_msg, tr("Not yet: %s"), why = tr(why));
     printf("%s\n", status_msg);
     js_emit("result", TextFormat("{\"win\":%s,\"stars\":%d,\"ticks\":%d,\"star_time\":%d,\"collisions\":%d,\"score\":%d,\"why\":\"%s\"}",
                                  o == CH_WIN ? "true" : "false", stars, sim.cycle, rule.star_time,
@@ -260,6 +289,19 @@ EMSCRIPTEN_KEEPALIVE void web_reset(void)
 }
 
 EMSCRIPTEN_KEEPALIVE void web_set_speed(double x) { speed = x < 0.25 ? 0.25f : x > 8 ? 8.0f : (float)x; }
+
+EMSCRIPTEN_KEEPALIVE void web_set_lang(const char *code)
+{
+    lang_pt = strcmp(code, "pt") == 0;
+    hud_set_lang(lang_pt);
+}
+
+/* Shown name of the level (the page translates it); keeps the run going. */
+EMSCRIPTEN_KEEPALIVE void web_set_level_name(const char *name)
+{
+    snprintf(level.lab.name, sizeof level.lab.name, "%s", name);
+    snprintf(sim.level.lab.name, sizeof sim.level.lab.name, "%s", name);
+}
 #endif
 
 static void frame(void)
@@ -301,7 +343,11 @@ static void frame(void)
         int steps = 0;
         while (accum >= dt && steps < 32) {
             if (scripted) bot_tick(bot, &sim, 0);
+            const Robot *rb = &sim.robots[0];
+            int hits = rb->collisions, got = 0;
+            for (int t = 0; t < sim.level.lab.ntargets; t++) got += rb->visited[t];
             sim_step(&sim);
+            sound_cues(rb, hits, got);
             scene_after_step(&scene, &sim, &fx);
             accum -= dt;
             steps++;

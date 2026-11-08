@@ -87,8 +87,10 @@ if(EMSCRIPTEN)
   file(GLOB PRELOADED CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/levels/* ${CMAKE_SOURCE_DIR}/challenges/* ${CMAKE_SOURCE_DIR}/assets/images/*)
   set_property(TARGET cba APPEND PROPERTY LINK_DEPENDS ${CMAKE_SOURCE_DIR}/web/shell.html ${PRELOADED})
   # page files served next to index.html (copied on every build)
+  set(WEB_PAGE_FILES app.js app.css i18n.js sound.js leveledit.js)
+  list(TRANSFORM WEB_PAGE_FILES PREPEND ${CMAKE_SOURCE_DIR}/web/)
   add_custom_target(web_page ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/web/app.js ${CMAKE_SOURCE_DIR}/web/app.css ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${WEB_PAGE_FILES} ${CMAKE_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/web/vendor ${CMAKE_BINARY_DIR}/vendor
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/fonts ${CMAKE_BINARY_DIR}/fonts)
 else()

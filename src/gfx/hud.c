@@ -15,6 +15,10 @@ static const Color C_GOLD  = { 255, 200, 70, 255 };
 static const Color C_RED   = { 235, 85, 80, 255 };
 static const Color C_GREEN = { 90, 205, 120, 255 };
 
+static bool pt; /* Portuguese labels */
+#define L(en, pt_) (pt ? (pt_) : (en))
+
+void hud_set_lang(bool portuguese) { pt = portuguese; }
 
 static void card(float x, float y, float w, float h)
 {
@@ -63,7 +67,7 @@ static float sec_title(const Sim *s, const HudState *st, float x, float y, float
     text_draw(TEXT_BOLD, "CiberRato Academy", x, y - 6, 24, C_TEXT);
     text_draw(TEXT_UI, s->level.lab.name, x, y + 22, 13, C_DIM);
     if (st->paused || s->over) {
-        const char *b = s->over ? "FINISHED" : "PAUSED";
+        const char *b = s->over ? L("FINISHED", "TERMINADO") : L("PAUSED", "EM PAUSA");
         float bw = text_width(TEXT_BOLD, b, 11) + 14;
         DrawRectangleRounded((Rectangle){ x + w - bw, y + 22, bw, 18 }, 0.5f, 4, s->over ? C_GOLD : C_ACC);
         text_draw(TEXT_BOLD, b, x + w - bw + 7, y + 23, 11, (Color){ 20, 22, 30, 255 });
@@ -78,7 +82,7 @@ static float sec_time_score(const Sim *s, const HudState *st, float x, float y, 
     float cw = (w - 8) / 2;
     char t[32];
     card(x, y, cw, 64);
-    label("TIME", x + 10, y + 8);
+    label(L("TIME", "TEMPO"), x + 10, y + 8);
     const char *sp = TextFormat("x%g", st->speed);
     text_draw(TEXT_MONO_BOLD, sp, x + cw - 10 - text_width(TEXT_MONO_BOLD, sp, 11), y + 6, 11, C_ACC);
     time_str(t, s->cycle);
@@ -92,9 +96,9 @@ static float sec_time_score(const Sim *s, const HudState *st, float x, float y, 
 
     float sx = x + cw + 8;
     card(sx, y, cw, 64);
-    label("SCORE", sx + 10, y + 8);
+    label(L("SCORE", "PONTOS"), sx + 10, y + 8);
     text_draw(TEXT_MONO_BOLD, TextFormat("%d", r->score), sx + 10, y + 19, 22, C_GOLD);
-    label(TextFormat("hits %d", r->collisions), sx + 10, y + 46);
+    label(TextFormat(L("hits %d", "toques %d"), r->collisions), sx + 10, y + 46);
     if (lab->ntargets > 0) {
         int got = 0;
         for (int k = 0; k < lab->ntargets; k++) got += r->visited[k];
@@ -109,13 +113,13 @@ static float sec_time_score(const Sim *s, const HudState *st, float x, float y, 
 static float sec_ir(const Sim *s, float x, float y, float w)
 {
     const Robot *r = &s->robots[0];
-    static const char *irn[SIM_NUM_IR] = { "front", "left", "right", "back" };
+    static const char *irn[2][SIM_NUM_IR] = { { "front", "left", "right", "back" }, { "frente", "esq.", "dir.", "trás" } };
     float ch = 22 + SIM_NUM_IR * 18;
     card(x, y, w, ch);
-    label("IR SENSORS  (1 / distance)", x + 10, y + 8);
+    label(L("IR SENSORS  (1 / distance)", "SENSORES IR  (1 / distância)"), x + 10, y + 8);
     for (int k = 0; k < SIM_NUM_IR; k++) {
         float ry = y + 24 + k * 18, bx = x + 54, bw = w - 54 - 48;
-        text_draw(TEXT_UI, irn[k], x + 10, ry - 4, 13, C_TEXT);
+        text_draw(TEXT_UI, irn[pt][k], x + 10, ry - 4, 13, C_TEXT);
         float f = fminf(1.0f, (float)r->ir[k] / 5.0f);
         DrawRectangleRounded((Rectangle){ bx, ry + 1, bw, 8 }, 1, 4, (Color){ 22, 25, 34, 255 });
         if (f > 0) DrawRectangleRounded((Rectangle){ bx, ry + 1, fmaxf(8, bw * f), 8 }, 1, 4, color_mix(C_ACC, C_RED, f));
@@ -131,14 +135,14 @@ static float sec_dials(const Sim *s, float x, float y, float w)
     card(x, y, w, 86);
     float dr = 24;
     Vector2 c1 = { x + 10 + dr, y + 46 };
-    label("COMPASS", x + 10, y + 8);
+    label(L("COMPASS", "BÚSSOLA"), x + 10, y + 8);
     dial(c1, dr, r->compass, true, C_ACC);
     text_draw(TEXT_MONO_BOLD, TextFormat("%.0f°", r->compass), c1.x + dr + 10, c1.y - 10, 16, C_TEXT);
     if (s->level.lab.nbeacons > 0) {
         float bx = x + w / 2 + 4;
         Vector2 c2 = { bx + dr, y + 46 };
         bool vis = r->beacon_visible[0];
-        label("BEACON", bx, y + 8);
+        label(L("BEACON", "FAROL"), bx, y + 8);
         /* robot-relative: heading points up on the dial */
         dial(c2, dr, vis ? r->beacon_dir[0] + 90 : 0, vis, C_GOLD);
         text_draw(TEXT_MONO_BOLD, vis ? TextFormat("%.0f°", r->beacon_dir[0]) : "--", c2.x + dr + 10, c2.y - 10, 16, vis ? C_TEXT : C_DIM);
@@ -150,13 +154,13 @@ static float sec_ground(const Sim *s, float x, float y, float w)
 {
     const Robot *r = &s->robots[0];
     card(x, y, w, 62);
-    label("GROUND", x + 10, y + 8);
-    text_draw(TEXT_BOLD, r->ground >= 0 ? TextFormat("target %d", r->ground) : "floor", x + 10, y + 18, 16,
+    label(L("GROUND", "CHÃO"), x + 10, y + 8);
+    text_draw(TEXT_BOLD, r->ground >= 0 ? TextFormat(L("target %d", "alvo %d"), r->ground) : L("floor", "nada"), x + 10, y + 18, 16,
               r->ground >= 0 ? C_GOLD : C_TEXT);
     float bx = x + w / 2 + 4;
-    label("BUMPER", bx, y + 8);
+    label(L("BUMPER", "PARA-CHOQUES"), bx, y + 8);
     DrawRectangleRounded((Rectangle){ bx, y + 20, 54, 18 }, 0.5f, 4, r->bumper ? C_RED : (Color){ 50, 55, 72, 255 });
-    const char *bt = r->bumper ? "HIT" : "ok";
+    const char *bt = r->bumper ? L("HIT", "BATEU") : "ok";
     text_draw(TEXT_BOLD, bt, bx + 27 - text_width(TEXT_BOLD, bt, 12) / 2, y + 20, 12, r->bumper ? WHITE : C_DIM);
     led(x + 16, y + 48, "visiting", r->led_visiting, C_GOLD);
     led(bx + 6, y + 48, "returning", r->led_returning, C_GREEN);
@@ -184,14 +188,20 @@ static float sec_script(const HudState *st, float x, float y, float w)
     int nl = st->nlog < LOG_LINES ? st->nlog : LOG_LINES;
     float ch = 32 + (nl ? nl : 1) * 16;
     card(x, y, w, ch);
-    label("SCRIPT", x + 10, y + 8);
+    label(L("SCRIPT", "PROGRAMA"), x + 10, y + 8);
     text_draw(TEXT_UI, fit(TEXT_UI, st->script, 13, w - 140), x + 60, y + 4, 13, C_TEXT);
     const char *ss = st->script_state;
     Color sc = strcmp(ss, "error") == 0 ? C_RED : strcmp(ss, "running") == 0 ? C_GREEN : C_GOLD;
+    if (pt) {
+        static const char *tr[][2] = { { "idle", "parado" }, { "running", "a correr" }, { "done", "feito" },
+                                       { "error", "erro" }, { "no code", "sem código" } };
+        for (size_t k = 0; k < sizeof tr / sizeof tr[0]; k++)
+            if (strcmp(ss, tr[k][0]) == 0) ss = tr[k][1];
+    }
     float bw = text_width(TEXT_BOLD, ss, 11) + 14;
     DrawRectangleRounded((Rectangle){ x + w - 10 - bw, y + 6, bw, 16 }, 0.5f, 4, sc);
     text_draw(TEXT_BOLD, ss, x + w - 10 - bw + 7, y + 7, 11, (Color){ 20, 22, 30, 255 });
-    if (!nl) text_draw(TEXT_UI, "say(...) shows up here", x + 10, y + 26, 13, C_DIM);
+    if (!nl) text_draw(TEXT_UI, L("say(...) shows up here", "say(...) aparece aqui"), x + 10, y + 26, 13, C_DIM);
     for (int k = 0; k < nl; k++) {
         const char *line = st->log[st->nlog - nl + k];
         text_draw(TEXT_MONO, fit(TEXT_MONO, line, 12, w - 20), x + 10, y + 26 + k * 16, 12, k == nl - 1 ? C_TEXT : C_DIM);
@@ -203,13 +213,13 @@ static void sec_keys(const HudState *st, float x, float y)
 {
     const char *keys[] = {
 #ifdef __EMSCRIPTEN__ /* the page runs the script; no level file to reload */
-        st->script ? "space pause" : "press Run to start",
-        "0-4 speed   R reset",
+        st->script ? L("space pause", "espaço pausa") : L("press Run to start", "carrega em Executar para começar"),
+        L("0-4 speed   R reset", "0-4 velocidade   R reiniciar"),
 #else
         st->script ? "save the script to reload   space pause" : "arrows/WASD drive   space pause",
         "0-4 speed   R reset   L reload",
 #endif
-        TextFormat("O overlays [%s]   T trail [%s]", st->overlays ? "on" : "off", st->trail ? "on" : "off"),
+        TextFormat(L("O overlays [%s]   T trail [%s]", "O sensores [%s]   T rasto [%s]"), st->overlays ? L("on", "sim") : L("off", "não"), st->trail ? L("on", "sim") : L("off", "não")),
     };
     for (int k = 0; k < 3; k++) text_draw(TEXT_UI, keys[k], x, y + k * 15 - 4, 13, C_DIM);
     if (st->status && st->status[0]) text_draw(TEXT_UI, st->status, x, y + 46, 13, (Color){ 100, 106, 124, 255 });
@@ -324,6 +334,6 @@ void hud_draw_error(Rectangle a, const char *msg)
     DrawRectangleRounded((Rectangle){ x, y + 3, w, h }, 12 / h, 6, (Color){ 0, 0, 0, 90 });
     DrawRectangleRounded((Rectangle){ x, y, w, h }, 12 / h, 6, (Color){ 58, 28, 32, 245 });
     DrawRectangleRounded((Rectangle){ x, y, 5, h }, 1, 4, C_RED);
-    text_draw(TEXT_BOLD, "Your code stopped", x + 16, y + 8, 15, (Color){ 255, 150, 140, 255 });
+    text_draw(TEXT_BOLD, L("Your code stopped", "O teu código parou"), x + 16, y + 8, 15, (Color){ 255, 150, 140, 255 });
     for (int k = 0; k < n; k++) text_draw(TEXT_UI, lines[k], x + 16, y + 30 + k * 20, size, C_TEXT);
 }

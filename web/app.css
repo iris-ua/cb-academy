@@ -123,3 +123,23 @@ select { max-width: 180px; }
 .tile.done { border-color: #4a5170; }
 .tile.current { outline: 2px solid var(--acc); }
 .tile.locked b::before { content: "🔒 "; }
+.tile.make { border-style: dashed; }
+.seg.small button { font-size: 12px; padding: 4px 8px; }
+#mute { font-size: 15px; padding: 2px 6px; }
+#map .foot label, #lvled label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+input[type="checkbox"] { accent-color: var(--acc); }
+input:not([type]), input[type="number"] {
+  font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px;
+}
+input[type="number"] { width: 64px; font-family: var(--mono); }
+
+/* ---- level editor ---------------------------------------------------------- */
+#lvled { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center; background: #0b0d12cc; }
+#lvled[hidden] { display: none; }
+#lvled .sheet { width: 96vw; height: 92vh; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 50px #000a; }
+#lvled .bar { flex-wrap: wrap; }
+#lvled .tools { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+#lvled .seg button { font-family: inherit; }
+#ed-canvas { flex: 1; min-height: 0; width: 100%; cursor: crosshair; touch-action: none; }
+#ed-name { width: 180px; }
+#lvled .foot { font-size: 13px; }
