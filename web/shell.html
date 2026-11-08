@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CiberRato Jr</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #12141a; color: #ccc; font-family: system-ui, sans-serif; }
+    body { display: flex; align-items: center; justify-content: center; }
+    canvas { display: block; max-width: 100vw; max-height: 100vh; aspect-ratio: 16 / 9; outline: none; }
+    #status { position: fixed; top: 50%; width: 100%; text-align: center; }
+  </style>
+</head>
+<body>
+  <div id="status">Loading…</div>
+  <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+  <script>
+    var Module = {
+      canvas: document.getElementById('canvas'),
+      setStatus: function (t) { var el = document.getElementById('status'); el.textContent = t; el.hidden = !t; },
+      print: function (t) { console.log(t); },
+      printErr: function (t) { console.error(t); }
+    };
+    window.addEventListener('keydown', function (e) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+    });
+  </script>
+  {{{ SCRIPT }}}
+</body>
+</html>
