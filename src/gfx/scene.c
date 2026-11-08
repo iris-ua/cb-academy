@@ -567,6 +567,8 @@ void scene_draw(const Scene *sc, const Sim *s, View v, Vector2 shake, float alph
 
     if (sc->trail)
         for (int i = 0; i < s->nrobots; i++) draw_trail(&sc->rv[i], &v, color_mix(C_FUR[i], C_INK, 0.35f));
+    /* beacons stand under the cheese: one usually marks the target */
+    for (int b = 0; b < lab->nbeacons; b++) draw_beacon_pillar(sc, &lab->beacons[b], &v);
     for (int t = 0; t < lab->ntargets; t++) draw_cheese(sc, s, t, &v);
 
     for (int i = 0; i < s->nrobots; i++) {
@@ -574,7 +576,6 @@ void scene_draw(const Scene *sc, const Sim *s, View v, Vector2 shake, float alph
         if (sc->overlays) { draw_ir(s, i, p, &v); draw_beacon_lines(s, i, p, &v); }
     }
     for (int i = 0; i < s->nrobots; i++) draw_mouse(sc, s, i, scene_pose(sc, i, alpha), alpha, &v);
-    for (int b = 0; b < lab->nbeacons; b++) draw_beacon_pillar(sc, &lab->beacons[b], &v);
 }
 
 void scene_unload(Scene *sc)
