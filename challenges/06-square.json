@@ -2,7 +2,7 @@
   "chapter": 2,
   "title": "Around the block",
   "goal": [
-    "Drive around the block to the cheese, **without bumping**. Every turn the wheels slip a little, and the small errors add up.",
+    "Drive around the block to the cheese, **without bumping**. The wheels slip a little on every turn, and the small errors add up.",
     "",
     "`turn_to(deg)` turns to face a compass heading (`0` east, `90` north, `180` west, `-90` south), so turning errors do not pile up."
   ],
@@ -15,9 +15,9 @@
   "pt": {
     "title": "À volta do quarteirão",
     "goal": [
-      "Dá a volta ao bloco até ao queijo, **sem bater**. Em cada viragem as rodas escorregam um pouco, e os pequenos erros somam-se.",
+      "Dá a volta ao bloco até ao queijo, **sem bater**. As rodas escorregam um pouco em cada viragem e os pequenos erros somam-se.",
       "",
-      "`turn_to(graus)` vira para uma direção da bússola (`0` este, `90` norte, `180` oeste, `-90` sul), assim os erros das viragens não se acumulam."
+      "`turn_to(graus)` vira para uma direção da bússola (`0` este, `90` norte, `180` oeste, `-90` sul). Assim, os erros das viragens não se acumulam."
     ],
     "hints": [
       "Em vez de contares quadrados, percorre cada troço até `ir(0)` dizer que a parede da frente está perto.",
@@ -36,10 +36,10 @@
   "stages": [
     { "goal": "One corner.", "pt": { "goal": "Uma esquina." },
       "targets": [ { "x": 12.5, "y": 8.5, "radius": 1 } ] },
-    { "goal": "Two corners, and the wheels slip more.", "pt": { "goal": "Duas esquinas, e as rodas escorregam mais." },
+    { "goal": "Two corners, and the wheels slip more.", "pt": { "goal": "Duas esquinas e rodas que escorregam mais." },
       "noise": { "motors": 5, "ir": 0, "compass": 0, "beacon": 0 },
       "targets": [ { "x": 1.5, "y": 8.5, "radius": 1 } ] },
-    { "goal": "Three corners on very slippery wheels.", "pt": { "goal": "Três esquinas com as rodas muito escorregadias." },
+    { "goal": "Three corners on very slippery wheels.", "pt": { "goal": "Três esquinas com as rodas a escorregar muito." },
       "noise": { "motors": 8, "ir": 0, "compass": 0, "beacon": 0 },
       "targets": [ { "x": 1.5, "y": 4.5, "radius": 1 } ] }
   ]

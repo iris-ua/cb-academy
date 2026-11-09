@@ -1,4 +1,4 @@
-say("There are", beacons(), "lights")
+say("There are", beacons(), "beacons")
 for i = 0, beacons() - 1 do
-  say("light", i, "is at", beacon(i), "degrees")
+  say("beacon", i, "is at", beacon(i), "degrees")
 end

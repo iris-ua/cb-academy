@@ -4,25 +4,25 @@
   "goal": [
     "Drive to the cheese and **stop on it**, without bumping. It sits right in front of a wall.",
     "",
-    "`ir(0)` is the front sensor. It reads about `1 / distance` to the wall: the closer the wall, the bigger the number."
+    "`ir(0)` is the front sensor. Its reading is roughly `1 / distance` to the wall. The closer the wall, the higher the reading."
   ],
   "starter": "03-eyes.lua",
   "hints": [
     "Use a `while` loop: keep driving while `ir(0)` is small.",
-    "The cheese starts where `ir(0)` is about `1`. Stop when it goes over `1.5`.",
-    "`ground()` is the cheese under the mouse (`0`), or `-1` if there is none. Stop the program when you are on it."
+    "At the edge of the cheese, `ir(0)` reads about `1`. Stop when the reading exceeds `1.5`.",
+    "`ground()` returns the index of the cheese under the mouse (`0` here), or `-1` if there is none. End the program when you are on it."
   ],
   "pt": {
     "title": "Olhos à frente",
     "goal": [
       "Vai até ao queijo e **para em cima dele**, sem bater. Está mesmo à frente de uma parede.",
       "",
-      "`ir(0)` é o sensor da frente. Lê cerca de `1 / distância` até à parede: quanto mais perto a parede, maior o número."
+      "`ir(0)` é o sensor da frente. A leitura é aproximadamente `1 / distância` até à parede. Quanto mais perto estiver a parede, maior é o valor."
     ],
     "hints": [
       "Usa um ciclo `while`: continua a andar enquanto `ir(0)` for pequeno.",
-      "O queijo começa onde `ir(0)` é cerca de `1`. Para quando passar de `1.5`.",
-      "`ground()` é o queijo debaixo do rato (`0`), ou `-1` se não houver nenhum. Termina o programa quando estiveres em cima dele."
+      "Na borda do queijo, o valor de `ir(0)` é cerca de `1`. Para quando a leitura ultrapassar `1.5`.",
+      "`ground()` devolve o índice do queijo debaixo do rato (`0` neste caso), ou `-1` se não houver nenhum. Termina o programa quando estiveres em cima dele."
     ],
     "starter": "03-eyes.pt.lua"
   },
@@ -37,8 +37,8 @@
       "width": 12, "targets": [ { "x": 11, "y": 2.5, "radius": 1 } ] },
     { "goal": "Same idea, but the room is longer.", "pt": { "goal": "A mesma ideia, mas a sala é mais comprida." },
       "width": 17, "targets": [ { "x": 16, "y": 2.5, "radius": 1 } ] },
-    { "goal": "The cheese is at the **third** wall. At each wall, turn left, until `ground()` says you are on the cheese.",
-      "pt": { "goal": "O queijo está na **terceira** parede. Em cada parede vira à esquerda, até `ground()` dizer que estás em cima do queijo." },
+    { "goal": "The cheese is at the **third** wall. Turn left at each wall until `ground()` says you are on the cheese.",
+      "pt": { "goal": "O queijo está junto à **terceira** parede. Vira à esquerda em cada parede até `ground()` indicar que estás em cima do queijo." },
       "width": 14, "height": 10, "start": [ { "x": 2, "y": 1.5, "dir": 0 } ],
       "walls": [ { "height": 2, "corners": [[4, 4], [4.5, 4], [4.5, 10], [4, 10]] } ],
       "targets": [ { "x": 5.5, "y": 8.9, "radius": 1 } ] }

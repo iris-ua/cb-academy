@@ -15,12 +15,12 @@
   "pt": {
     "title": "Olhos trémulos",
     "goal": [
-      "Para outra vez em cima do queijo à frente da parede, **sem bater**. Mas os sensores a sério têm ruído: `ir(0)` salta um pouco em cada tique, mesmo quando nada se mexe.",
+      "Para outra vez em cima do queijo à frente da parede, **sem bater**. Os sensores reais têm ruído. O valor de `ir(0)` varia um pouco em cada tique, mesmo quando nada se mexe.",
       "",
-      "Uma leitura grande não quer dizer que a parede está perto. Confia na **média** de algumas leituras."
+      "Uma leitura alta não quer dizer que a parede esteja perto. Confia na **média** de algumas leituras."
     ],
     "hints": [
-      "Escreve `ir(0)` com o rato parado (`wait()` entre leituras) para veres o ruído.",
+      "Mostra o valor de `ir(0)` na consola com o rato parado, usando `wait()` entre leituras, para veres o ruído.",
       "Guarda as últimas leituras numa tabela e usa a média: `(a + b + c + d) / 4`.",
       "A etapa 3 é a sala com três paredes: continua a corrigir com `compass()` e vira com `turn_to`."
     ],

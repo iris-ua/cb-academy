@@ -2,9 +2,9 @@
   "chapter": 2,
   "title": "Brakes",
   "goal": [
-    "Stop **on** the cheese, in front of the wall. A moving mouse does not stop at once: when the motors go to `0` it still rolls on a bit, and faster means further.",
+    "Stop **on** the cheese, in front of the wall. A moving mouse takes time to stop. When you set the motor power to `0`, it still rolls a little. The faster it is moving, the further it rolls.",
     "",
-    "`ground()` is the cheese under the mouse (`0`), or `-1`. `ir(0)` tells how close the wall is."
+    "`ground()` returns the index of the cheese under the mouse (`0` here), or `-1` if there is none. `ir(0)` tells you how close the wall is."
   ],
   "starter": "05-brakes.lua",
   "hints": [
@@ -15,14 +15,14 @@
   "pt": {
     "title": "Travões",
     "goal": [
-      "Para **em cima** do queijo, à frente da parede. Um rato em andamento não para logo: quando os motores vão a `0` ainda rola um pouco, e quanto mais depressa, mais longe.",
+      "Para **em cima** do queijo, à frente da parede. Um rato em movimento demora a parar. Quando defines a potência dos motores como `0`, ainda avança um pouco. Quanto mais depressa andar, mais longe vai antes de parar.",
       "",
-      "`ground()` é o queijo debaixo do rato (`0`), ou `-1`. `ir(0)` diz quão perto está a parede."
+      "`ground()` devolve o índice do queijo debaixo do rato (`0` neste caso), ou `-1` se não houver nenhum. `ir(0)` indica a proximidade da parede."
     ],
     "hints": [
-      "Escreve `ir(0)` enquanto andas para veres como cresce perto da parede.",
+      "Mostra o valor de `ir(0)` na consola enquanto andas, para veres como aumenta perto da parede.",
       "Abranda à medida que a parede se aproxima: `local d = 1 / ir(0)` é mais ou menos a distância, por isso uma velocidade como `0.1 * d` fica cada vez mais pequena.",
-      "Mantém uma velocidade mínima pequena, continua a corrigir com `compass()`, e para assim que `ground()` for `0`."
+      "Mantém uma velocidade mínima baixa, continua a corrigir o rumo com `compass()` e para assim que `ground()` for `0`."
     ],
     "starter": "05-brakes.pt.lua"
   },
@@ -37,7 +37,7 @@
       "targets": [ { "x": 13, "y": 2.5, "radius": 1 } ] },
     { "goal": "A tiny cheese, a little away from the wall.", "pt": { "goal": "Um queijo pequenino, um pouco afastado da parede." },
       "targets": [ { "x": 12.3, "y": 2.5, "radius": 0.65 } ] },
-    { "goal": "A tiny cheese, **within 5 seconds** (100 ticks).", "pt": { "goal": "Um queijo pequenino, **em menos de 5 segundos** (100 tiques)." },
+    { "goal": "A tiny cheese, **within 5 seconds** (100 ticks).", "pt": { "goal": "Um queijo pequenino, **em 5 segundos ou menos** (100 tiques)." },
       "targets": [ { "x": 12.6, "y": 2.5, "radius": 0.65 } ],
       "win": { "reach_target": true, "stop_on_target": true, "no_collisions": true, "under_time": 100 } }
   ]

@@ -2,27 +2,27 @@
   "chapter": 5,
   "title": "There and back again",
   "goal": [
-    "Grab the cheese under the light, then **come back home** to where you started. Home has no light, but you have a GPS.",
+    "Grab the cheese under the beacon, then **come back home** to where you started. Home has no beacon, but you have a GPS.",
     "",
-    "Tell the judge what you are doing: the **visiting** LED on while you stand on the cheese (then off), and the **returning** LED on for the trip home."
+    "Signal what you are doing to the judge. Keep the **visiting** LED on while stopped on the cheese, then switch it off. Switch the **returning** LED on for the trip home."
   ],
   "starter": "14-home.lua",
   "hints": [
-    "Remember home first: `local hx, hy = gps()` (better: the average of 20 readings while you stand still).",
-    "Going home is like going to a light, but you compute the angle yourself: `math.deg(math.atan(hy - y, hx - x)) - compass()`, wrapped to -180..180.",
-    "Close to home, stop, average the GPS again and do the last bit carefully."
+    "First, save the position of home with `local hx, hy = gps()`. For better accuracy, average 20 readings while stopped.",
+    "Going home is like going to a beacon, but you calculate the angle yourself: `math.deg(math.atan(hy - y, hx - x)) - compass()`. Wrap the result to the range from -180 to 180 degrees.",
+    "Near home, stop, average the GPS readings again and drive the last stretch carefully."
   ],
   "pt": {
     "title": "Ida e volta",
     "goal": [
-      "Apanha o queijo debaixo da luz e depois **volta a casa**, onde começaste. Em casa não há luz, mas tens um GPS.",
+      "Apanha o queijo debaixo do farol e depois **volta a casa**, onde começaste. Em casa não há farol, mas tens um GPS.",
       "",
-      "Diz ao júri o que estás a fazer: o LED de **visita** aceso enquanto estás em cima do queijo (e depois apagado), e o LED de **regresso** aceso na viagem para casa."
+      "Sinaliza ao júri o que estás a fazer. Mantém o LED de **visita** aceso com o rato parado em cima do queijo e depois apaga-o. Acende o LED de **regresso** para a viagem de volta a casa."
     ],
     "hints": [
-      "Primeiro lembra-te de casa: `local hx, hy = gps()` (melhor: a média de 20 leituras com o rato parado).",
-      "Ir para casa é como ir para uma luz, mas és tu que calculas o ângulo: `math.deg(math.atan(hy - y, hx - x)) - compass()`, ajustado para -180..180.",
-      "Perto de casa, para, faz outra vez a média do GPS e faz o último bocado com cuidado."
+      "Guarda primeiro a posição de casa com `local hx, hy = gps()`. Para maior precisão, usa a média de 20 leituras com o rato parado.",
+      "Ir para casa é como ir até um farol, mas és tu que calculas o ângulo: `math.deg(math.atan(hy - y, hx - x)) - compass()`. Ajusta o resultado para o intervalo entre -180 e 180 graus.",
+      "Perto de casa, para, volta a calcular a média das leituras do GPS e percorre o último troço com cuidado."
     ],
     "starter": "14-home.pt.lua"
   },
@@ -74,7 +74,7 @@
     {
       "goal": "Walls in the way, there and back. **No bumps**.",
       "pt": {
-        "goal": "Paredes no caminho, na ida e na volta. **Sem toques**."
+        "goal": "Paredes no caminho, na ida e na volta. **Sem bater**."
       },
       "walls": [
         {

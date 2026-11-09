@@ -8,21 +8,21 @@
   ],
   "starter": "11-wall.lua",
   "hints": [
-    "Print `ir(2)` at the start: that is a good distance to keep.",
-    "`local e = ir(2) - 1.5` then `motors(0.1 - 0.04 * e, 0.1 + 0.04 * e)` steers left when you get too close.",
-    "If `ir(0)` gets big there is a wall ahead: turn left on the spot until it is clear. When the wall on the right ends, the same rule turns you right around the corner."
+    "Print `ir(2)` at the start. Use that reading to help you keep the same distance from the wall.",
+    "Calculate `local e = ir(2) - 1.5`, then call `motors(0.1 - 0.04 * e, 0.1 + 0.04 * e)`. This steers left when you get too close.",
+    "If `ir(0)` is high, there is a wall ahead. Turn left on the spot until the way is clear. When the wall on the right ends, the same steering rule turns you right around the corner."
   ],
   "pt": {
     "title": "Agarrado à parede",
     "goal": [
       "Mantém a parede **à tua direita** e segue-a até ao queijo, **sem bater**.",
       "",
-      "`ir(2)` olha para a frente-direita. Mantém a leitura estável: grande demais é perto demais (vira à esquerda), pequena demais é a parede a fugir (vira à direita). `ir(0)` avisa-te de uma parede à frente."
+      "`ir(2)` aponta na diagonal para a frente e para a direita. Mantém a leitura estável. Se for demasiado alta, estás muito perto da parede e deves virar à esquerda. Se for demasiado baixa, estás a afastar-te e deves virar à direita. `ir(0)` deteta paredes à frente."
     ],
     "hints": [
-      "Escreve `ir(2)` no início: é uma boa distância para manter.",
-      "`local e = ir(2) - 1.5` e depois `motors(0.1 - 0.04 * e, 0.1 + 0.04 * e)` vira à esquerda quando ficas perto demais.",
-      "Se `ir(0)` ficar grande há uma parede à frente: roda à esquerda no lugar até ficar livre. Quando a parede da direita acaba, a mesma regra faz-te virar à direita à volta da esquina."
+      "Mostra o valor de `ir(2)` na consola no início. Usa essa leitura para manteres a mesma distância da parede.",
+      "Calcula `local e = ir(2) - 1.5` e depois chama `motors(0.1 - 0.04 * e, 0.1 + 0.04 * e)`. O rato vira à esquerda quando se aproxima demasiado da parede.",
+      "Se o valor de `ir(0)` for alto, há uma parede à frente. Roda à esquerda no lugar até o caminho ficar livre. Quando a parede da direita acabar, a mesma regra faz-te virar à direita para contornar a esquina."
     ],
     "starter": "11-wall.pt.lua"
   },

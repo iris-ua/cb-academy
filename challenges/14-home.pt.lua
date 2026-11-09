@@ -1,2 +1,2 @@
 local hx, hy = gps()
-say("A casa é em", hx, hy)
+say("Casa fica em", hx, hy)

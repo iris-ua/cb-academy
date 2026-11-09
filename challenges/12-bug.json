@@ -1,33 +1,33 @@
 {
   "chapter": 4,
-  "title": "The light behind the wall",
+  "title": "The beacon behind the wall",
   "goal": [
-    "Head for the light, but walls are in the way. They are low, so you can always see the light over them, but you cannot drive through them.",
+    "Head for the beacon, but walls are in the way. They are low, so you can always see the beacon over them, but you cannot drive through them.",
     "",
-    "Mix what you know: **go to the light** while the way is clear; when a wall blocks you, **follow it** (wall on your right) until the light is on your other side, then head for it again."
+    "Combine what you know. **Head for the beacon** while the way is clear. When a wall blocks you, **follow it** with the wall on your right. Once the beacon is on your left and the way ahead is clear, head for it again."
   ],
   "starter": "12-bug.lua",
   "hints": [
-    "Write two functions, `to_light()` and `follow_wall()`, one step each. A loop picks one on every tick.",
-    "Switch to following when `ir(0)` gets big. Switch back when `beacon()` is to your left (positive) and the front is clear.",
-    "With the wall on your right, the light being on your left means nothing is between you and the light on that side."
+    "Write two functions, `to_beacon()` and `follow_wall()`, that each perform one step. A loop chooses which one to call on every tick.",
+    "Switch to wall following when `ir(0)` is high. Head for the beacon again when `beacon()` returns a positive angle, meaning the beacon is to your left, and the way ahead is clear.",
+    "With the wall on your right, the beacon being on your left means nothing is between you and the beacon on that side."
   ],
   "pt": {
-    "title": "A luz atrás da parede",
+    "title": "O farol atrás da parede",
     "goal": [
-      "Vai até à luz, mas há paredes no caminho. São baixas, por isso vês sempre a luz por cima delas, mas não as podes atravessar.",
+      "Vai até ao farol, mas há paredes no caminho. São baixas, por isso vês sempre o farol por cima delas, mas não as podes atravessar.",
       "",
-      "Junta o que já sabes: **vai para a luz** enquanto o caminho estiver livre; quando uma parede te bloquear, **segue-a** (parede à tua direita) até a luz ficar do teu outro lado, e depois volta a ir para ela."
+      "Junta o que já sabes. **Avança na direção do farol** enquanto o caminho estiver livre. Quando uma parede te bloquear, **segue-a**, mantendo-a à tua direita. Quando o farol estiver à esquerda e o caminho à frente estiver livre, volta a avançar na direção dele."
     ],
     "hints": [
-      "Escreve duas funções, `to_light()` e `follow_wall()`, um passo cada. Um ciclo escolhe uma delas em cada tique.",
-      "Passa a seguir a parede quando `ir(0)` ficar grande. Volta para a luz quando `beacon()` estiver à tua esquerda (positivo) e a frente estiver livre.",
-      "Com a parede à direita, a luz à esquerda quer dizer que não há nada entre ti e a luz desse lado."
+      "Escreve duas funções, `to_beacon()` e `follow_wall()`, que executam um passo cada uma. Um ciclo escolhe qual chamar em cada tique.",
+      "Passa a seguir a parede quando o valor de `ir(0)` for alto. Volta a avançar para o farol quando o ângulo de `beacon()` for positivo, indicando que o farol está à esquerda, e o caminho à frente estiver livre.",
+      "Com a parede à direita, o farol à esquerda quer dizer que não há nada entre ti e o farol desse lado."
     ],
     "starter": "12-bug.pt.lua"
   },
   "win": { "reach_target": true, "no_collisions": true },
-  "name": "The light behind the wall",
+  "name": "The beacon behind the wall",
   "width": 20, "height": 12,
   "time_limit": 2400,
   "noise": { "motors": 2, "ir": 0, "compass": 0, "beacon": 0 },

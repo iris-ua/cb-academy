@@ -9,15 +9,15 @@
   "starter": "04-drift.lua",
   "hints": [
     "Run the same code a few times: the path is different every time.",
-    "The error is `e = 0 - compass()`. If it is positive you point too far right: speed up the right wheel.",
+    "The error is `e = 0 - compass()`. If it is positive, you are pointing too far to the right. Speed up the right wheel.",
     "In a loop: `motors(0.12 - 0.002 * e, 0.12 + 0.002 * e)`."
   ],
   "pt": {
-    "title": "Não tão a direito",
+    "title": "Nem sempre a direito",
     "goal": [
-      "As rodas a sério escorregam um pouco em cada tique, por isso `forward(n)` não anda numa linha perfeitamente reta. O queijo está bem lá à frente.",
+      "As rodas reais escorregam um pouco em cada tique, por isso `forward(n)` não faz o rato seguir uma linha perfeitamente reta. O queijo está bem lá à frente.",
       "",
-      "`compass()` dá a tua direção em graus: `0` é este (direita), `90` é norte (cima). Usa-a para voltares ao rumo sempre que te desviares."
+      "`compass()` dá a tua direção em graus: `0` é este (direita) e `90` é norte (cima). Usa a bússola para corrigires o rumo sempre que te desviares."
     ],
     "hints": [
       "Executa o mesmo código várias vezes: o caminho é diferente de cada vez.",
@@ -35,10 +35,10 @@
   "targets": [ { "x": 23, "y": 4, "radius": 1.5 } ],
   "stages": [
     { "goal": "The wheels slip just a little.", "pt": { "goal": "As rodas escorregam só um pouco." } },
-    { "goal": "More slip, and a smaller cheese.", "pt": { "goal": "Mais escorregadelas, e um queijo mais pequeno." },
+    { "goal": "More slip, and a smaller cheese.", "pt": { "goal": "As rodas escorregam mais e o queijo é mais pequeno." },
       "noise": { "motors": 4, "ir": 0, "compass": 0, "beacon": 0 },
       "targets": [ { "x": 23, "y": 4, "radius": 1 } ] },
-    { "goal": "Very slippery, and now there is a corridor: **no bumps**.", "pt": { "goal": "Muito escorregadio, e agora há um corredor: **sem toques**." },
+    { "goal": "The wheels slip a lot, and now there is a corridor. **No bumps**.", "pt": { "goal": "As rodas escorregam muito e agora há um corredor. **Sem bater**." },
       "noise": { "motors": 8, "ir": 0, "compass": 0, "beacon": 0 },
       "targets": [ { "x": 23, "y": 4, "radius": 1 } ],
       "walls": [

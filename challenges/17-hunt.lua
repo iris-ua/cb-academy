@@ -1,2 +1,2 @@
--- paste your maze code from "A small maze" here, then look at ground()
--- after every square
+-- Paste your maze code from "A small maze" here.
+-- Check ground() after every square.

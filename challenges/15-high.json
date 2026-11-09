@@ -2,27 +2,27 @@
   "chapter": 5,
   "title": "High walls",
   "goal": [
-    "Some walls are **taller than the light**: behind them `beacon()` is `nil`, because the mouse cannot see the light at all.",
+    "Some walls are **taller than the beacon**: behind them `beacon()` is `nil`, because the mouse cannot see the beacon at all.",
     "",
-    "When you cannot see the light, explore: drive until you meet a wall and follow it, until the light shows up. Then head for it as before."
+    "When you cannot see the beacon, explore. Drive until you meet a wall, then follow it until the beacon comes into view. Head for it as before."
   ],
   "starter": "15-high.lua",
   "hints": [
-    "Your code from *The light behind the wall* already follows walls. Add one more case: `beacon()` is `nil`.",
-    "No light and no wall following yet? Drive straight. Following a wall and still no light? Keep following.",
+    "Your code from *The beacon behind the wall* already follows walls. Add one more case: `beacon()` is `nil`.",
+    "If you cannot see the beacon and are not following a wall yet, drive straight. If you are already following a wall, keep following it until you see the beacon.",
     "Stage 3 has two cheeses: visit both and signal with the visiting LED, as in *Cheese tour*."
   ],
   "pt": {
     "title": "Paredes altas",
     "goal": [
-      "Algumas paredes são **mais altas do que a luz**: atrás delas `beacon()` é `nil`, porque o rato não consegue ver a luz.",
+      "Algumas paredes são **mais altas do que o farol**: atrás delas `beacon()` é `nil`, porque o rato não consegue ver o farol.",
       "",
-      "Quando não vês a luz, explora: anda até encontrares uma parede e segue-a, até a luz aparecer. Depois vai para ela como antes."
+      "Quando não vês o farol, explora. Anda até encontrares uma parede e segue-a até o farol ficar à vista. Depois avança na direção dele, como antes."
     ],
     "hints": [
-      "O teu código de *A luz atrás da parede* já segue paredes. Junta mais um caso: `beacon()` é `nil`.",
-      "Sem luz e ainda sem seguir uma parede? Anda a direito. A seguir uma parede e ainda sem luz? Continua a segui-la.",
-      "A etapa 3 tem dois queijos: visita os dois e avisa com o LED de visita, como na *Volta dos queijos*."
+      "O código que escreveste para *O farol atrás da parede* já segue paredes. Acrescenta o caso em que `beacon()` devolve `nil`.",
+      "Se não vês o farol e ainda não estás a seguir uma parede, anda a direito. Se já estás a seguir uma parede e continuas sem ver o farol, continua a segui-la.",
+      "A etapa 3 tem dois queijos. Visita os dois e sinaliza cada visita com o LED de visita, como na *Volta dos queijos*."
     ],
     "starter": "15-high.pt.lua"
   },
@@ -40,9 +40,9 @@
   },
   "stages": [
     {
-      "goal": "One tall wall between you and the light.",
+      "goal": "One tall wall between you and the beacon.",
       "pt": {
-        "goal": "Uma parede alta entre ti e a luz."
+        "goal": "Uma parede alta entre ti e o farol."
       },
       "width": 20,
       "height": 12,
@@ -230,7 +230,7 @@
     {
       "goal": "Two cheeses, each behind a tall wall, in a noisy world. Signal each visit with the visiting LED.",
       "pt": {
-        "goal": "Dois queijos, cada um atrás de uma parede alta, num mundo com ruído. Avisa cada visita com o LED de visita."
+        "goal": "Dois queijos, cada um atrás de uma parede alta, num mundo com ruído. Sinaliza cada visita com o LED de visita."
       },
       "width": 22,
       "height": 14,

@@ -2,26 +2,26 @@
   "chapter": 6,
   "title": "The great labyrinth",
   "goal": [
-    "The biggest maze, noise and all. The cheese is under the light, but the walls are taller than the light.",
+    "The biggest maze, noise and all. The cheese is under the beacon, but the walls are taller than the beacon.",
     "",
-    "**Hidden mazes:** after a win, your code also runs on 5 hidden versions of the stage (another maze, start and cheese). It must win at least 4 of them, so counting squares will not do."
+    "**Hidden mazes:** after you win, your code also runs on 5 hidden versions of the stage, with different mazes, starting positions and cheese locations. It must win at least 4 of them, so counting squares will not do."
   ],
   "starter": "18-labyrinth.lua",
   "hints": [
-    "Start from your code for *A small maze*. `beacon()` is `nil` until the light is in view: you may use it as a shortcut, but the wall rule always works.",
-    "To come back, remember the way: keep the squares you walked in a list. Stepping back into the previous square removes the last one, so dead ends drop out.",
+    "Start with your code from *A small maze*. `beacon()` returns `nil` until the beacon is in view. When you can see it, you can head towards it if the way is clear. Otherwise, keep following the wall.",
+    "To return home, remember the route. Keep a list of the squares you have visited. Whenever you step back into the previous square, remove the last entry from the list. This removes dead ends from the route.",
     "On the cheese, switch the returning LED on and walk the list backwards to the start."
   ],
   "pt": {
     "title": "O grande labirinto",
     "goal": [
-      "O maior labirinto, com ruído e tudo. O queijo está debaixo da luz, mas as paredes são mais altas do que a luz.",
+      "O maior labirinto, com ruído e tudo. O queijo está debaixo do farol, mas as paredes são mais altas do que o farol.",
       "",
-      "**Labirintos escondidos:** depois de uma vitória, o teu código também corre em 5 versões escondidas da etapa (outro labirinto, partida e queijo). Tem de vencer pelo menos 4, por isso contar quadrados não serve."
+      "**Labirintos escondidos:** depois de venceres, o teu código também é executado em 5 versões escondidas da etapa, com labirintos, posições iniciais e localizações dos queijos diferentes. Tem de vencer pelo menos 4 dessas versões, por isso contar quadrados não basta."
     ],
     "hints": [
-      "Começa pelo teu código de *Um labirinto pequeno*. `beacon()` é `nil` até a luz estar à vista: podes usá-la como atalho, mas a regra da parede funciona sempre.",
-      "Para voltares, lembra-te do caminho: guarda numa lista os quadrados por onde passaste. Voltar ao quadrado anterior tira o último, e assim os becos sem saída desaparecem.",
+      "Começa pelo teu código de *Um labirinto pequeno*. `beacon()` devolve `nil` até o farol estar à vista. Quando o vires, podes avançar na direção dele se o caminho estiver livre. Caso contrário, continua a seguir a parede.",
+      "Para voltares a casa, guarda numa lista os quadrados por onde passaste. Sempre que voltares ao quadrado anterior, remove a última entrada da lista. Assim, eliminas os becos sem saída do percurso.",
       "No queijo, acende o LED de regresso e percorre a lista ao contrário até à partida."
     ],
     "starter": "18-labyrinth.pt.lua"
@@ -285,9 +285,9 @@
       ]
     },
     {
-      "goal": "Find the cheese and signal it with the visiting LED.",
+      "goal": "Find the cheese and signal your visit with the visiting LED.",
       "pt": {
-        "goal": "Encontra o queijo e avisa com o LED de visita."
+        "goal": "Encontra o queijo e sinaliza a visita com o LED de visita."
       },
       "win": {
         "reach_target": true,
@@ -540,9 +540,9 @@
       ]
     },
     {
-      "goal": "The full mission: find the cheese, signal it, and **come back home** with the returning LED on.",
+      "goal": "The full mission: find the cheese, signal your visit and **come back home** with the returning LED on.",
       "pt": {
-        "goal": "A missão completa: encontra o queijo, avisa, e **volta a casa** com o LED de regresso aceso."
+        "goal": "A missão completa: encontra o queijo, sinaliza a visita e **volta a casa** com o LED de regresso aceso."
       },
       "win": {
         "reach_target": true,

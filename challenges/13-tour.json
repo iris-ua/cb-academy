@@ -2,27 +2,27 @@
   "chapter": 5,
   "title": "Cheese tour",
   "goal": [
-    "There is a light over every cheese. Visit **all of them**, and tell the judge: when you stand on a cheese, switch the visiting LED on, then off again before you leave.",
+    "There is a beacon above every cheese. Visit **all of them** and signal each visit to the judge. While stopped on a cheese, switch the visiting LED on, then off again before you leave.",
     "",
-    "`beacons()` is how many lights there are, `beacon(i)` the angle to light `i`. Cheese `i` is under light `i`, and `ground()` is `i` when you stand on it."
+    "`beacons()` returns the number of beacons, and `beacon(i)` returns the angle to beacon `i`. Cheese `i` is under beacon `i`, and `ground()` returns `i` when you are on it."
   ],
   "starter": "13-tour.lua",
   "hints": [
-    "Make your code from the last challenges a function `go_to(i)` that drives to light `i` until `ground() == i`.",
+    "Turn your code from the previous challenges into a function `go_to(i)` that guides the mouse towards beacon `i` and stops when `ground() == i`.",
     "On the cheese: `motors(0, 0)`, `wait(3)` to stand still, `led('visiting', true)`, `wait()`, `led('visiting', false)`.",
-    "Then `for i = 0, beacons() - 1 do ... end`. A visiting LED that is on away from a cheese fails the run."
+    "Use `for i = 0, beacons() - 1 do ... end` to visit each cheese. The run fails if the visiting LED is on while the mouse is off the cheese."
   ],
   "pt": {
     "title": "Volta dos queijos",
     "goal": [
-      "Há uma luz por cima de cada queijo. Visita **todos**, e avisa o júri: quando estiveres em cima de um queijo, acende o LED de visita, e apaga-o antes de saíres.",
+      "Há um farol por cima de cada queijo. Visita **todos** e sinaliza cada visita ao júri. Com o rato parado em cima de um queijo, acende o LED de visita e apaga-o antes de saíres.",
       "",
-      "`beacons()` é quantas luzes há, `beacon(i)` o ângulo até à luz `i`. O queijo `i` está debaixo da luz `i`, e `ground()` é `i` quando estás em cima dele."
+      "`beacons()` devolve o número de faróis e `beacon(i)` devolve o ângulo até ao farol `i`. O queijo `i` está debaixo do farol `i` e `ground()` devolve `i` quando estás em cima dele."
     ],
     "hints": [
-      "Transforma o teu código dos últimos desafios numa função `go_to(i)` que anda até à luz `i` até `ground() == i`.",
+      "Transforma o código dos desafios anteriores numa função `go_to(i)` que guia o rato até ao farol `i` e termina quando `ground() == i`.",
       "No queijo: `motors(0, 0)`, `wait(3)` para ficares parado, `led('visiting', true)`, `wait()`, `led('visiting', false)`.",
-      "Depois `for i = 0, beacons() - 1 do ... end`. Um LED de visita aceso longe de um queijo faz falhar a tentativa."
+      "Usa `for i = 0, beacons() - 1 do ... end` para visitar cada queijo. A tentativa falha se o LED de visita estiver aceso quando o rato estiver fora do queijo."
     ],
     "starter": "13-tour.pt.lua"
   },
@@ -81,7 +81,7 @@
     {
       "goal": "Three cheeses, with walls in the way. **No bumps**.",
       "pt": {
-        "goal": "Três queijos, com paredes no caminho. **Sem toques**."
+        "goal": "Três queijos, com paredes no caminho. **Sem bater**."
       },
       "win": {
         "visit_all": true,
@@ -191,7 +191,7 @@
     {
       "goal": "Four cheeses, more walls and a noisier world. **No bumps**.",
       "pt": {
-        "goal": "Quatro queijos, mais paredes e um mundo com mais ruído. **Sem toques**."
+        "goal": "Quatro queijos, mais paredes e um mundo com mais ruído. **Sem bater**."
       },
       "noise": {
         "motors": 4,

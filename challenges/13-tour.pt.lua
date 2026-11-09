@@ -1,4 +1,4 @@
-say("Há", beacons(), "luzes")
+say("Há", beacons(), "faróis")
 for i = 0, beacons() - 1 do
-  say("a luz", i, "está a", beacon(i), "graus")
+  say("o farol", i, "está a", beacon(i), "graus")
 end

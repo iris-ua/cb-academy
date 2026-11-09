@@ -2,25 +2,25 @@
   "chapter": 3,
   "title": "Shaky compass",
   "goal": [
-    "A treasure map! From the start drive **10 east**, then **8 north**, then **6 west**, and the cheese is there.",
+    "A treasure map! From the start, drive **10 robot diameters east**, then **8 north**, then **6 west** to reach the cheese.",
     "",
-    "The compass is noisy now: one `compass()` reading can be many degrees off. A single reading is a guess; many readings together are a good answer."
+    "The compass is noisy now. A single `compass()` reading can be many degrees off. Average several readings to get a more reliable heading."
   ],
   "starter": "08-compass.lua",
   "hints": [
-    "`turn_to` trusts one reading. After it, stand still, add up the error `(h - compass() + 180) % 360 - 180` over 10 or 20 ticks (`wait()` between reads) and `turn` by the average.",
+    "`turn_to` trusts one reading. After turning, stand still and add up the error `(h - compass() + 180) % 360 - 180` over 10 or 20 ticks, using `wait()` between readings. Then use `turn` to correct by the average error.",
     "While driving, keep steering with `compass()` on every tick, so the errors average out.",
     "Smooth the error before you steer with it: `e = 0.9 * e + 0.1 * new_error`."
   ],
   "pt": {
     "title": "Bússola trémula",
     "goal": [
-      "Um mapa do tesouro! Desde a partida anda **10 para este**, depois **8 para norte**, depois **6 para oeste**, e o queijo está lá.",
+      "Um mapa do tesouro! A partir da posição inicial, anda **10 diâmetros do robô para este**, depois **8 para norte** e depois **6 para oeste** para chegares ao queijo.",
       "",
-      "Agora a bússola tem ruído: uma leitura de `compass()` pode estar muitos graus errada. Uma leitura é um palpite; muitas leituras juntas são uma boa resposta."
+      "Agora a bússola tem ruído. Uma única leitura de `compass()` pode ter um erro de vários graus. Faz a média de várias leituras para obteres uma direção mais fiável."
     ],
     "hints": [
-      "`turn_to` confia numa só leitura. Depois dele, fica parado, soma o erro `(h - compass() + 180) % 360 - 180` durante 10 ou 20 tiques (`wait()` entre leituras) e faz `turn` da média.",
+      "`turn_to` usa uma só leitura. Depois de virares, fica parado e soma o erro `(h - compass() + 180) % 360 - 180` ao longo de 10 ou 20 tiques, usando `wait()` entre leituras. Depois usa `turn` para corrigires pelo erro médio.",
       "Enquanto andas, continua a corrigir com `compass()` em cada tique, para os erros se compensarem.",
       "Suaviza o erro antes de corrigires com ele: `e = 0.9 * e + 0.1 * erro_novo`."
     ],

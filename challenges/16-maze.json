@@ -4,13 +4,13 @@
   "goal": [
     "Find the cheese in the maze. Rule of thumb: **keep one hand on the wall** and you never get lost.",
     "",
-    "Each square is `2` long. Walls show up in `ir(0)` (front), `ir(1)` (left) and `ir(2)` (right).",
+    "Each square is `2` robot diameters wide. Detect walls with `ir(0)` (front), `ir(1)` (left) and `ir(2)` (right).",
     "",
-    "**Hidden mazes:** after a win, your code also runs on 5 hidden versions of the stage (another maze, start and cheese). It must win at least 4 of them, so counting squares will not do."
+    "**Hidden mazes:** after you win, your code also runs on 5 hidden versions of the stage, with different mazes, starting positions and cheese locations. It must win at least 4 of them, so counting squares will not do."
   ],
   "starter": "16-maze.lua",
   "hints": [
-    "Move one square at a time, then look around. Right-hand rule: if the right is open turn right, else if the front is open go on, else if the left is open turn left, else turn back.",
+    "Move one square at a time, then look around. Follow the right-hand rule. If the right is open, turn right. Otherwise, go forward if you can. If both are blocked, turn left if it is open. If all three are blocked, turn back.",
     "Keep the heading as a number `dir` (0 east, 1 north, 2 west, 3 south) and use `turn_to(dir * 90)`, so turning errors never add up.",
     "With noise, keep in the middle: steer with `compass()` and with `ir(1) - ir(2)` while driving, and use a wall in front to stop at the right spot."
   ],
@@ -19,14 +19,14 @@
     "goal": [
       "Encontra o queijo no labirinto. Regra de ouro: **mantém uma mão na parede** e nunca te perdes.",
       "",
-      "Cada quadrado mede `2`. As paredes aparecem em `ir(0)` (frente), `ir(1)` (esquerda) e `ir(2)` (direita).",
+      "Cada quadrado tem a largura de `2` diâmetros do robô. Deteta as paredes com `ir(0)` (frente), `ir(1)` (esquerda) e `ir(2)` (direita).",
       "",
-      "**Labirintos escondidos:** depois de uma vitória, o teu código também corre em 5 versões escondidas da etapa (outro labirinto, partida e queijo). Tem de vencer pelo menos 4, por isso contar quadrados não serve."
+      "**Labirintos escondidos:** depois de venceres, o teu código também é executado em 5 versões escondidas da etapa, com labirintos, posições iniciais e localizações dos queijos diferentes. Tem de vencer pelo menos 4 dessas versões, por isso contar quadrados não basta."
     ],
     "hints": [
-      "Avança um quadrado de cada vez e depois olha à volta. Regra da mão direita: se a direita estiver livre vira à direita, senão se a frente estiver livre avança, senão se a esquerda estiver livre vira à esquerda, senão volta para trás.",
-      "Guarda a direção num número `dir` (0 este, 1 norte, 2 oeste, 3 sul) e usa `turn_to(dir * 90)`, assim os erros das viragens nunca se acumulam.",
-      "Com ruído, mantém-te no meio: corrige com `compass()` e com `ir(1) - ir(2)` enquanto andas, e usa uma parede à frente para parares no sítio certo."
+      "Avança um quadrado de cada vez e depois olha à volta. Segue a regra da mão direita. Se o caminho à direita estiver livre, vira à direita. Caso contrário, avança se puderes. Se os caminhos à direita e à frente estiverem bloqueados, vira à esquerda se puderes. Se os três caminhos estiverem bloqueados, volta para trás.",
+      "Guarda a direção num número `dir` (0 este, 1 norte, 2 oeste, 3 sul) e usa `turn_to(dir * 90)`. Assim, os erros das viragens não se acumulam.",
+      "Com ruído, mantém-te no meio do corredor. Corrige o rumo com `compass()` e com `ir(1) - ir(2)` enquanto andas. Usa a parede à frente para parares no sítio certo."
     ],
     "starter": "16-maze.pt.lua"
   },

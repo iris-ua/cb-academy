@@ -2,9 +2,9 @@
   "chapter": 6,
   "title": "Cheese hunt",
   "goal": [
-    "Several cheeses are hidden in the maze. Find **all of them**, and signal each one: visiting LED on while you stand on it, off before you leave.",
+    "Several cheeses are hidden in the maze. Find **all of them** and signal each visit. Keep the visiting LED on while stopped on a cheese, then switch it off before you leave.",
     "",
-    "**Hidden mazes:** after a win, your code also runs on 5 hidden versions of the stage (another maze, start and cheese). It must win at least 4 of them, so counting squares will not do."
+    "**Hidden mazes:** after you win, your code also runs on 5 hidden versions of the stage, with different mazes, starting positions and cheese locations. It must win at least 4 of them, so counting squares will not do."
   ],
   "starter": "17-hunt.lua",
   "hints": [
@@ -15,14 +15,14 @@
   "pt": {
     "title": "Caça ao queijo",
     "goal": [
-      "Há vários queijos escondidos no labirinto. Encontra **todos**, e avisa cada um: LED de visita aceso enquanto estás em cima dele, apagado antes de saíres.",
+      "Há vários queijos escondidos no labirinto. Encontra **todos** e sinaliza cada visita. Mantém o LED de visita aceso com o rato parado em cima de um queijo e apaga-o antes de saíres.",
       "",
-      "**Labirintos escondidos:** depois de uma vitória, o teu código também corre em 5 versões escondidas da etapa (outro labirinto, partida e queijo). Tem de vencer pelo menos 4, por isso contar quadrados não serve."
+      "**Labirintos escondidos:** depois de venceres, o teu código também é executado em 5 versões escondidas da etapa, com labirintos, posições iniciais e localizações dos queijos diferentes. Tem de vencer pelo menos 4 dessas versões, por isso contar quadrados não basta."
     ],
     "hints": [
       "O teu código de *Um labirinto pequeno* já visita todos os quadrados, se o deixares continuar.",
-      "Depois de cada quadrado, vê `ground()`. Guarda numa tabela os queijos que já avisaste: `feito[ground()] = true`.",
-      "Para um momento antes de acenderes o LED, para ainda estares em cima do queijo."
+      "Depois de cada quadrado, consulta `ground()`. Guarda numa tabela os queijos cuja visita já sinalizaste: `feito[ground()] = true`.",
+      "Espera até o rato estar parado em cima do queijo antes de acenderes o LED."
     ],
     "starter": "17-hunt.pt.lua"
   },
@@ -472,7 +472,7 @@
     {
       "goal": "Three cheeses, a big maze, and **no bumps**.",
       "pt": {
-        "goal": "Três queijos, um labirinto grande, e **sem toques**."
+        "goal": "Três queijos e um labirinto grande. **Sem bater**."
       },
       "win": {
         "visit_all": true,

@@ -10,19 +10,19 @@
   "hints": [
     "At the start: `local x0, y0 = gps()`. The cheese is at `x0 + 12, y0 + 7`.",
     "`math.deg(math.atan(dy, dx))` is the compass heading from you to the cheese. Steer towards it in a loop, reading `gps()` again on every tick.",
-    "GPS is noisy too: average many readings while you stand still before you trust it."
+    "GPS is noisy too. Average several readings while stopped before using the position."
   ],
   "pt": {
     "title": "Onde estou?",
     "goal": [
       "O queijo está **12 diâmetros para este e 7 para norte** de onde começas. As rodas escorregam muito, por isso contar passos não te leva lá.",
       "",
-      "`local x, y = gps()` dá a tua posição. A origem está escondida e muda a cada execução, por isso lembra-te de onde começaste e trabalha com diferenças."
+      "`local x, y = gps()` dá a tua posição. A origem das coordenadas é desconhecida e muda a cada execução. Guarda a posição inicial e calcula os deslocamentos a partir dela."
     ],
     "hints": [
       "No início: `local x0, y0 = gps()`. O queijo está em `x0 + 12, y0 + 7`.",
-      "`math.deg(math.atan(dy, dx))` é a direção da bússola de ti até ao queijo. Vira para ela num ciclo, lendo `gps()` outra vez em cada tique.",
-      "O GPS também tem ruído: faz a média de muitas leituras com o rato parado antes de confiares nele."
+      "`math.deg(math.atan(dy, dx))` dá a direção do rato até ao queijo. Corrige o rumo num ciclo, voltando a ler `gps()` em cada tique.",
+      "O GPS também tem ruído. Faz a média de várias leituras com o rato parado antes de usares a posição."
     ],
     "starter": "09-gps.pt.lua"
   },
@@ -36,9 +36,9 @@
   "targets": [ { "x": 15, "y": 10, "radius": 1 } ],
   "stages": [
     { "goal": "An almost perfect GPS.", "pt": { "goal": "Um GPS quase perfeito." } },
-    { "goal": "Very slippery wheels and a noisier GPS.", "pt": { "goal": "Rodas muito escorregadias e um GPS com mais ruído." },
+    { "goal": "Very slippery wheels and a noisier GPS.", "pt": { "goal": "Rodas que escorregam muito e um GPS com mais ruído." },
       "noise": { "motors": 7, "ir": 0, "compass": 0, "beacon": 0, "gps": 0.5 } },
-    { "goal": "A very noisy GPS, and you must **stop on** the cheese.", "pt": { "goal": "Um GPS com muito ruído, e tens de **parar em cima** do queijo." },
+    { "goal": "A very noisy GPS, and you must **stop on** the cheese.", "pt": { "goal": "Um GPS com muito ruído. Tens de **parar em cima** do queijo." },
       "noise": { "motors": 7, "ir": 0, "compass": 0, "beacon": 0, "gps": 1 },
       "win": { "reach_target": true, "stop_on_target": true } }
   ]
