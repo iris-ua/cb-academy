@@ -1,21 +1,21 @@
 {
   "chapter": 6,
-  "title": "The classic maze",
+  "title": "The great labyrinth",
   "goal": [
-    "The full maze, noise and all: the original CiberRato challenge. The cheese is under the light, but the walls are taller than the light.",
+    "The biggest maze, noise and all. The cheese is under the light, but the walls are taller than the light.",
     "",
     "**Hidden mazes:** after a win, your code also runs on 5 hidden versions of the stage (another maze, start and cheese). It must win at least 4 of them, so counting squares will not do."
   ],
-  "starter": "18-classic.lua",
+  "starter": "18-labyrinth.lua",
   "hints": [
     "Start from your code for *A small maze*. `beacon()` is `nil` until the light is in view: you may use it as a shortcut, but the wall rule always works.",
     "To come back, remember the way: keep the squares you walked in a list. Stepping back into the previous square removes the last one, so dead ends drop out.",
     "On the cheese, switch the returning LED on and walk the list backwards to the start."
   ],
   "pt": {
-    "title": "O labirinto clássico",
+    "title": "O grande labirinto",
     "goal": [
-      "O labirinto completo, com ruído e tudo: o desafio original do CiberRato. O queijo está debaixo da luz, mas as paredes são mais altas do que a luz.",
+      "O maior labirinto, com ruído e tudo. O queijo está debaixo da luz, mas as paredes são mais altas do que a luz.",
       "",
       "**Labirintos escondidos:** depois de uma vitória, o teu código também corre em 5 versões escondidas da etapa (outro labirinto, partida e queijo). Tem de vencer pelo menos 4, por isso contar quadrados não serve."
     ],
@@ -24,13 +24,13 @@
       "Para voltares, lembra-te do caminho: guarda numa lista os quadrados por onde passaste. Voltar ao quadrado anterior tira o último, e assim os becos sem saída desaparecem.",
       "No queijo, acende o LED de regresso e percorre a lista ao contrário até à partida."
     ],
-    "starter": "18-classic.pt.lua"
+    "starter": "18-labyrinth.pt.lua"
   },
   "win": {
     "reach_target": true,
     "variants": 4
   },
-  "name": "The classic maze",
+  "name": "The great labyrinth",
   "time_limit": 11000,
   "noise": { "motors": 1.5, "ir": 0.1, "compass": 2, "beacon": 2 },
   "stages": [
@@ -128,28 +128,28 @@
         }
       ],
       "maze": [
-        "  |        |     |                 |     ",
-        "  +--+  +--+--+  +  +--+--+--+--+  +--+--",
-        "  |        |              |        |     ",
-        "--+--+  +--+  +--+--+--+  +--+--+  +--+  ",
-        "        |        |     |     |     |  |  ",
-        "--+--+--+  +--+  +--+--+--+  +  +  +--+  ",
-        "  |                                      ",
-        "  +--+--+--+--+--+--+  +  +--+  +--+--+--",
-        "     |  |              |     |     |     ",
-        "  +--+  +--+--+--+--+  +--+  +  +--+  +  ",
-        "  |                 |           |     |  ",
-        "  +--+  +--+--+--+  +--+--+  +--+  +--+  ",
-        "  |  |           |           |     |     "
+        "     |        |        |        |        ",
+        "  +  +  +  +  +  +--+  +--+  +  +  +  +  ",
+        "  |     |  |     |  |     |  |  |  |  |  ",
+        "--+--+--+  +--+--+  +--+  +  +  +--+  +  ",
+        "        |  |     |     |     |     |  |  ",
+        "  +--+  +  +  +  +  +--+--+--+--+  +  +  ",
+        "  |        |  |  |              |     |  ",
+        "  +--+--+--+  +  +--+--+  +--+  +--+--+  ",
+        "              |        |     |  |     |  ",
+        "  +--+--+--+--+  +--+  +  +  +--+  +  +  ",
+        "  |  |  |     |     |  |  |        |     ",
+        "  +  +  +  +  +--+--+  +  +--+--+--+--+--",
+        "     |     |           |                 "
       ],
       "start": [
-        { "x": 9, "y": 3, "dir": 0 }
+        { "x": 27, "y": 13, "dir": 180 }
       ],
       "targets": [
-        { "x": 25, "y": 7, "radius": 1 }
+        { "x": 5, "y": 5, "radius": 1 }
       ],
       "beacons": [
-        { "x": 25, "y": 7, "height": 4 }
+        { "x": 5, "y": 5, "height": 4 }
       ],
       "variants": [
         {
@@ -383,28 +383,28 @@
         }
       ],
       "maze": [
-        "  |        |     |                 |     ",
-        "  +--+  +--+--+  +  +--+--+--+--+  +--+--",
-        "  |        |              |        |     ",
-        "--+--+  +--+  +--+--+--+  +--+--+  +--+  ",
-        "        |        |     |     |     |  |  ",
-        "--+--+--+  +--+  +--+--+--+  +  +  +--+  ",
-        "  |                                      ",
-        "  +--+--+--+--+--+--+  +  +--+  +--+--+--",
-        "     |  |              |     |     |     ",
-        "  +--+  +--+--+--+--+  +--+  +  +--+  +  ",
-        "  |                 |           |     |  ",
-        "  +--+  +--+--+--+  +--+--+  +--+  +--+  ",
-        "  |  |           |           |     |     "
+        "     |        |        |        |        ",
+        "  +  +  +  +  +  +--+  +--+  +  +  +  +  ",
+        "  |     |  |     |  |     |  |  |  |  |  ",
+        "--+--+--+  +--+--+  +--+  +  +  +--+  +  ",
+        "        |  |     |     |     |     |  |  ",
+        "  +--+  +  +  +  +  +--+--+--+--+  +  +  ",
+        "  |        |  |  |              |     |  ",
+        "  +--+--+--+  +  +--+--+  +--+  +--+--+  ",
+        "              |        |     |  |     |  ",
+        "  +--+--+--+--+  +--+  +  +  +--+  +  +  ",
+        "  |  |  |     |     |  |  |        |     ",
+        "  +  +  +  +  +--+--+  +  +--+--+--+--+--",
+        "     |     |           |                 "
       ],
       "start": [
-        { "x": 9, "y": 3, "dir": 0 }
+        { "x": 27, "y": 13, "dir": 180 }
       ],
       "targets": [
-        { "x": 25, "y": 7, "radius": 1 }
+        { "x": 5, "y": 5, "radius": 1 }
       ],
       "beacons": [
-        { "x": 25, "y": 7, "height": 4 }
+        { "x": 5, "y": 5, "height": 4 }
       ],
       "variants": [
         {
@@ -640,28 +640,28 @@
         }
       ],
       "maze": [
-        "  |        |     |                 |     ",
-        "  +--+  +--+--+  +  +--+--+--+--+  +--+--",
-        "  |        |              |        |     ",
-        "--+--+  +--+  +--+--+--+  +--+--+  +--+  ",
-        "        |        |     |     |     |  |  ",
-        "--+--+--+  +--+  +--+--+--+  +  +  +--+  ",
-        "  |                                      ",
-        "  +--+--+--+--+--+--+  +  +--+  +--+--+--",
-        "     |  |              |     |     |     ",
-        "  +--+  +--+--+--+--+  +--+  +  +--+  +  ",
-        "  |                 |           |     |  ",
-        "  +--+  +--+--+--+  +--+--+  +--+  +--+  ",
-        "  |  |           |           |     |     "
+        "     |        |        |        |        ",
+        "  +  +  +  +  +  +--+  +--+  +  +  +  +  ",
+        "  |     |  |     |  |     |  |  |  |  |  ",
+        "--+--+--+  +--+--+  +--+  +  +  +--+  +  ",
+        "        |  |     |     |     |     |  |  ",
+        "  +--+  +  +  +  +  +--+--+--+--+  +  +  ",
+        "  |        |  |  |              |     |  ",
+        "  +--+--+--+  +  +--+--+  +--+  +--+--+  ",
+        "              |        |     |  |     |  ",
+        "  +--+--+--+--+  +--+  +  +  +--+  +  +  ",
+        "  |  |  |     |     |  |  |        |     ",
+        "  +  +  +  +  +--+--+  +  +--+--+--+--+--",
+        "     |     |           |                 "
       ],
       "start": [
-        { "x": 9, "y": 3, "dir": 0 }
+        { "x": 27, "y": 13, "dir": 180 }
       ],
       "targets": [
-        { "x": 25, "y": 7, "radius": 1 }
+        { "x": 5, "y": 5, "radius": 1 }
       ],
       "beacons": [
-        { "x": 25, "y": 7, "height": 4 }
+        { "x": 5, "y": 5, "height": 4 }
       ],
       "variants": [
         {

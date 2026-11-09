@@ -281,7 +281,7 @@ static void test_level(void)
     NEAR(lv.lab.width, 28, 0);
     NEAR(lv.lab.walls[0].pts[2].x, 28, 0);
     NEAR(lv.lab.walls[0].pts[2].y, 14, 0);
-    CHECK(lv.lab.nwalls > 50);
+    CHECK(lv.lab.nwalls > 40);
     CHECK(lv.lab.nbeacons == 1 && lv.lab.ntargets == 1 && lv.lab.nstarts == 1);
     NEAR(lv.lab.starts[0].x, 9, 0);
     NEAR(lv.params.noise.motors, 1.5, 0);

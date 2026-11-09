@@ -60,7 +60,8 @@ António Neves, João Figueiredo, Miguel Rodrigues and Eurico Pedrosa.
 GPL-2.0-or-later. See [LICENSE](LICENSE).
 
 The simulation model and `levels/default.json` come from
-[ciberRatoTools](https://github.com/iris-ua/ciberRatoTools) (© 2001–2011 Universidade de Aveiro, GPLv2+).
+[ciberRatoTools](https://github.com/iris-ua/ciberRatoTools) (© 2001–2011 Universidade de Aveiro, GPLv2+);
+the maze has a few walls opened so every square can be reached.
 Dependencies: raylib (zlib), Lua (MIT), cJSON (MIT).
 Fonts in `assets/fonts/`: Nunito and JetBrains Mono (SIL OFL 1.1, licenses alongside).
 `assets/images/ua-logo.png` is the University of Aveiro symbol, a mark of Universidade de Aveiro,
