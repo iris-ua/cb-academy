@@ -290,7 +290,25 @@ static void draw_floor(const Scene *sc, const Lab *lab, const View *v)
     DrawRectangleGradientH((int)a.x, (int)a.y, (int)e, (int)a.height, s0, s1);
 }
 
-/* ---- targets & beacons -------------------------------------------------- */
+/* ---- start pads, targets & beacons ------------------------------------- */
+
+/* painted floor marking: dashed ring with a chevron along the start heading */
+static void draw_start_pad(const Pose *p, const View *v)
+{
+    Vector2 c = view_pt(v, p->x, p->y);
+    float r = view_len(v, SIM_ROBOT_RADIUS * 1.25);
+    DrawCircleV(c, r, color_alpha(C_FRAME, 0.10f));
+    for (int k = 0; k < 16; k++)
+        DrawRing(c, r - 2, r, k * 22.5f, k * 22.5f + 13.0f, 4, color_alpha(C_FRAME, 0.55f));
+    Frame f = frame_at(p->x, p->y, p->dir);
+    Vector2 tip[] = {
+        frame_pt(v, &f, 0.45, 0), frame_pt(v, &f, 0.1, 0.32), frame_pt(v, &f, 0.1, 0.16),
+        frame_pt(v, &f, 0.25, 0), frame_pt(v, &f, 0.1, -0.16), frame_pt(v, &f, 0.1, -0.32),
+    };
+    /* concave chevron: two convex halves */
+    fill_convex((Vector2[]){ tip[0], tip[1], tip[2], tip[3] }, 4, color_alpha(C_FRAME, 0.45f));
+    fill_convex((Vector2[]){ tip[0], tip[3], tip[4], tip[5] }, 4, color_alpha(C_FRAME, 0.45f));
+}
 
 static void draw_target_area(const Scene *sc, const Sim *s, int t, const View *v)
 {
@@ -564,6 +582,7 @@ void scene_draw(const Scene *sc, const Sim *s, View v, Vector2 shake, float alph
     draw_floor(sc, lab, &v);
     Rectangle a = arena_rect(&v, lab); /* floor-level effects stay on the floor */
     BeginScissorMode((int)a.x, (int)a.y, (int)ceilf(a.width), (int)ceilf(a.height));
+    for (int i = 0; i < lab->nstarts; i++) draw_start_pad(&lab->starts[i], &v);
     for (int t = 0; t < lab->ntargets; t++) draw_target_area(sc, s, t, &v);
     draw_wall_shadows(sc, shake);
     for (int b = 0; b < lab->nbeacons; b++) draw_beacon_base(sc, &lab->beacons[b], &v);
