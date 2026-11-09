@@ -396,6 +396,15 @@ static void draw_beacon_pillar(const Scene *sc, const Beacon *b, const View *v)
     DrawCircleV(c, view_len(v, 0.11), (Color){ 255, 236, 210, 255 });
 }
 
+/* index chip, for beacon(i) when there are several */
+static void draw_beacon_label(const Beacon *b, int idx, const View *v)
+{
+    Vector2 c = view_pt(v, b->pos.x + 0.55, b->pos.y + 0.55);
+    DrawCircleV(c, 9, C_BEACON);
+    const char *t = TextFormat("%d", idx);
+    text_draw(TEXT_BOLD, t, c.x - text_width(TEXT_BOLD, t, 13) / 2, c.y - 9, 13, WHITE);
+}
+
 /* ---- overlays ----------------------------------------------------------- */
 
 static void dashed(Vector2 a, Vector2 b, float dash, float thick, Color c)
@@ -594,6 +603,8 @@ void scene_draw(const Scene *sc, const Sim *s, View v, Vector2 shake, float alph
     /* beacons stand under the cheese: one usually marks the target */
     for (int b = 0; b < lab->nbeacons; b++) draw_beacon_pillar(sc, &lab->beacons[b], &v);
     for (int t = 0; t < lab->ntargets; t++) draw_cheese(sc, s, t, &v);
+    if (lab->nbeacons > 1)
+        for (int b = 0; b < lab->nbeacons; b++) draw_beacon_label(&lab->beacons[b], b, &v);
 
     for (int i = 0; i < s->nrobots; i++) {
         Pose p = scene_pose(sc, i, alpha);

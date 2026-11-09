@@ -13,7 +13,8 @@
  *   ir(i)          IR reading, i = 0 front, 1 left, 2 right, 3 back
  *   compass()      heading in degrees
  *   gps()          x, y position (0.1 resolution) from a hidden random origin, nil if the level has no GPS
- *   beacon([i])    beacon angle relative to heading (degrees), nil if hidden
+ *   beacons()      number of beacons in the level
+ *   beacon([i])    angle to beacon i (default 0) relative to heading (degrees), nil if hidden
  *   ground()       target index under the robot, -1 if none
  *   bump()         true if the robot hit something last tick
  *   time()         ticks since start (1 tick = 50 ms)

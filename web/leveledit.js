@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   var t = function () { return I18N.t.apply(null, arguments); };
-  var SNAP = 0.5, THIN = 0.2, WALL_H = 2, TALL_H = 4, BEACON_H = 3, MAX_TARGETS = 8;
+  var SNAP = 0.5, THIN = 0.2, WALL_H = 2, TALL_H = 4, BEACON_H = 3, MAX_TARGETS = 8, MAX_BEACONS = 8;
   var DRAFT = 'ciberrato.editor', DRAFT_ID = 'ciberrato.editor.id';
 
   var root, cv, g, opts = {}, lv, editId = null, tool = 'wall', tall = false, undo = [];
@@ -128,8 +128,9 @@
       disc(p.x, p.y, p.radius, 'rgba(255,200,70,.22)', '#ffc846');
       label(String(i), p.x, p.y, '#ffc846');
     });
-    lv.beacons.forEach(function (b) {
+    lv.beacons.forEach(function (b, i) {
       disc(b.x, b.y, 0.35, '#fff3c4', '#ffc846');
+      if (lv.beacons.length > 1) label(String(i), b.x, b.y + 0.9, '#ffc846');
       g.strokeStyle = 'rgba(255,200,70,.5)';
       g.lineWidth = 1.5;
       for (var k = 1; k <= 2; k++) { g.beginPath(); g.arc(sx(b.x), sy(b.y), cam.s * 0.35 * (1 + k * 0.7), 0, 7); g.stroke(); }
@@ -186,7 +187,10 @@
       if (lv.targets.length >= MAX_TARGETS) lv.targets.shift();
       lv.targets.push({ x: p.x, y: p.y, radius: 1 });
     });
-    else if (tool === 'beacon') change(function () { lv.beacons = [{ x: p.x, y: p.y, height: BEACON_H }]; });
+    else if (tool === 'beacon') change(function () {
+      if (lv.beacons.length >= MAX_BEACONS) lv.beacons.shift();
+      lv.beacons.push({ x: p.x, y: p.y, height: BEACON_H });
+    });
     else if (tool === 'erase') erase(toWorld(e));
   }
   function onMove(e) {

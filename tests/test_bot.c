@@ -21,6 +21,7 @@ static Sim sim;
 static Bot *bot;
 static char said[512];
 static bool gps;
+static const char *beacons = ""; /* extra level JSON */
 
 static void on_say(void *ud, const char *msg)
 {
@@ -33,8 +34,10 @@ static void on_say(void *ud, const char *msg)
 static void run(const char *code, int max)
 {
     char err[128];
-    level_load_json(&lv, "{\"width\":20,\"height\":20,\"noise\":{\"motors\":0,\"ir\":0,\"compass\":0,\"beacon\":0,\"gps\":0},"
-                         "\"start\":[{\"x\":5,\"y\":5,\"dir\":0}]}", err, sizeof err);
+    char json[512];
+    snprintf(json, sizeof json, "{\"width\":20,\"height\":20,\"noise\":{\"motors\":0,\"ir\":0,\"compass\":0,\"beacon\":0,\"gps\":0},"
+             "%s\"start\":[{\"x\":5,\"y\":5,\"dir\":0}]}", beacons);
+    level_load_json(&lv, json, err, sizeof err);
     lv.params.gps = gps;
     sim_init(&sim, &lv, 1, 1);
     said[0] = '\0';
@@ -100,6 +103,22 @@ static void test_gps(void)
     CHECK(strcmp(said, "2 0") == 0);
 }
 
+static void test_beacons(void)
+{
+    puts("beacons");
+    run("say(beacons(), beacon())", 2);
+    CHECK(strcmp(said, "0 nil") == 0);
+
+    beacons = "\"beacons\":[{\"x\":10,\"y\":5},{\"x\":5,\"y\":10}],";
+    run("wait() say(beacons(), beacon() == 0, beacon(0) == 0, beacon(1) == 90)", 3);
+    CHECK(strcmp(said, "2 true true true") == 0);
+    run("wait()\nbeacon(2)", 5);
+    CHECK(bot_state(bot) == BOT_ERROR);
+    CHECK(bot_error_line(bot) == 2);
+    HAS(bot_error(bot), "0 to 1");
+    beacons = "";
+}
+
 static void test_errors(void)
 {
     puts("friendly errors");
@@ -150,6 +169,7 @@ int main(void)
     test_ticks();
     test_sandbox();
     test_gps();
+    test_beacons();
     test_errors();
     test_helpers();
     bot_free(bot);

@@ -33,6 +33,14 @@ static void time_str(char *buf, int cycles)
     TextCopy(buf, TextFormat("%d:%02d.%d", ms / 60000, ms / 1000 % 60, ms / 100 % 10));
 }
 
+static void needle(Vector2 c, float r, double deg, Color col)
+{
+    float a = (float)(-deg * DEG2RAD_D); /* sim CCW -> screen */
+    Vector2 tip = { c.x + cosf(a) * (r - 4), c.y + sinf(a) * (r - 4) };
+    DrawLineEx(c, tip, 2.5f, col);
+    DrawCircleV(tip, 3, col);
+}
+
 static void dial(Vector2 c, float r, double deg, bool on, Color col)
 {
     DrawCircleV(c, r, (Color){ 20, 23, 31, 255 });
@@ -46,10 +54,7 @@ static void dial(Vector2 c, float r, double deg, bool on, Color col)
         text_draw(TEXT_BOLD, "?", c.x - 4, c.y - 10, 16, C_DIM);
         return;
     }
-    float a = (float)(-deg * DEG2RAD_D); /* sim CCW -> screen */
-    Vector2 tip = { c.x + cosf(a) * (r - 4), c.y + sinf(a) * (r - 4) };
-    DrawLineEx(c, tip, 2.5f, col);
-    DrawCircleV(tip, 3, col);
+    needle(c, r, deg, col);
     DrawCircleV(c, 2.5f, col);
 }
 
@@ -143,13 +148,16 @@ static float sec_dials(const Sim *s, float x, float y, float w)
         text_draw(TEXT_MONO, TextFormat("x %.1f", r->gps_x), c1.x + dr + 10, c1.y - 2, 12, C_TEXT);
         text_draw(TEXT_MONO, TextFormat("y %.1f", r->gps_y), c1.x + dr + 10, c1.y + 12, 12, C_TEXT);
     }
-    if (s->level.lab.nbeacons > 0) {
+    int nb = s->level.lab.nbeacons;
+    if (nb > 0) {
         float bx = x + w / 2 + 4;
         Vector2 c2 = { bx + dr, y + 46 };
         bool vis = r->beacon_visible[0];
-        label(L("BEACON", "FAROL"), bx, y + 8);
-        /* robot-relative: heading points up on the dial */
+        label(nb > 1 ? TextFormat(L("BEACON 0 OF %d", "FAROL 0 DE %d"), nb) : L("BEACON", "FAROL"), bx, y + 8);
+        /* robot-relative: heading points up on the dial; the other beacons are faint */
         dial(c2, dr, vis ? r->beacon_dir[0] + 90 : 0, vis, C_GOLD);
+        for (int b = 1; b < nb; b++)
+            if (r->beacon_visible[b]) needle(c2, dr, r->beacon_dir[b] + 90, color_alpha(C_GOLD, 0.35f));
         text_draw(TEXT_MONO_BOLD, vis ? TextFormat("%.0f°", r->beacon_dir[0]) : "--", c2.x + dr + 10, c2.y - 10, 16, vis ? C_TEXT : C_DIM);
     }
     return 94;
