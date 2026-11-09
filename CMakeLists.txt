@@ -18,7 +18,7 @@ FetchContent_Declare(cjson
   GIT_TAG v1.7.19 GIT_SHALLOW TRUE SOURCE_SUBDIR _none)
 FetchContent_Declare(lua
   GIT_REPOSITORY https://github.com/lua/lua.git
-  GIT_TAG v5.4.9 GIT_SHALLOW TRUE SOURCE_SUBDIR _none)
+  GIT_TAG v5.5.1 GIT_SHALLOW TRUE SOURCE_SUBDIR _none)
 FetchContent_MakeAvailable(cjson lua)
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -29,7 +29,7 @@ FetchContent_Declare(raylib
   GIT_TAG 6.2 GIT_SHALLOW TRUE
   PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/patch_raylib.cmake)
 
-# --- Lua 5.4 -----------------------------------------------------------------
+# --- Lua 5.5 -----------------------------------------------------------------
 set(LUA_SRC lapi lauxlib lbaselib lcode lcorolib lctype ldblib ldebug ldo ldump
   lfunc lgc linit liolib llex lmathlib lmem loadlib lobject lopcodes loslib
   lparser lstate lstring lstrlib ltable ltablib ltm lundump lutf8lib lvm lzio)

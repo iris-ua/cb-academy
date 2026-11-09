@@ -294,6 +294,9 @@ static void set_error(Bot *b, lua_State *co, bool runtime)
             const char *s = suggest(var);
             if (s) snprintf(msg, sizeof msg, "'%s' is not defined. Did you mean '%s'?", var, s);
             else snprintf(msg, sizeof msg, "'%s' is not defined. Check the spelling, or define it before using it.", var);
+        } else if ((g = strstr(m, "attempt to assign to const variable '")) && sscanf(g + 37, "%63[^']", var) == 1) {
+            /* Lua 5.5: 'for' loop variables are read-only */
+            snprintf(msg, sizeof msg, "'%s' is the counter of a 'for' loop and cannot be changed. Copy it into another variable first.", var);
         } else {
             snprintf(msg, sizeof msg, "%s", m);
             char *eof = strstr(msg, " near <eof>");
@@ -363,7 +366,7 @@ bool bot_restart(Bot *b)
     if (!b->code) return false;
 
     snprintf(b->chunk, sizeof b->chunk, "=%s", b->name);
-    lua_State *L = b->L = lua_newstate(bot_alloc, b);
+    lua_State *L = b->L = lua_newstate(bot_alloc, b, 0); /* fixed hash seed: deterministic runs */
     if (!L) {
         snprintf(b->err, sizeof b->err, "could not start Lua");
         b->state = BOT_ERROR;

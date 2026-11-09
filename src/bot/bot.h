@@ -2,7 +2,7 @@
 #ifndef BOT_BOT_H
 #define BOT_BOT_H
 
-/* Student robot scripts: sandboxed Lua 5.4 (no io/os/package/debug/load)
+/* Student robot scripts: sandboxed Lua 5.5 (no io/os/package/debug/load)
  * running in a coroutine. bot_tick resumes the script until its next action
  * (motors/wait/finish), which yields; the caller then runs one sim_step.
  * Sensor reads never yield. No graphics dependency.

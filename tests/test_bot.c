@@ -104,6 +104,10 @@ static void test_errors(void)
 
     run("wait()\nir(7)", 5);
     CHECK(bot_error_line(bot) == 2);
+
+    run("for i = 1, 3 do\n  i = i + 1\nend", 5);
+    CHECK(bot_error_line(bot) == 2);
+    HAS(bot_error(bot), "'for' loop");
 }
 
 static void test_helpers(void)
