@@ -9,10 +9,11 @@
  * {
  *   "name": "Maze", "width": 28, "height": 14,
  *   "time_limit": 1800,
- *   "noise": { "motors": 1.5, "ir": 0.1, "compass": 2, "beacon": 2 },
+ *   "noise": { "motors": 1.5, "ir": 0.1, "compass": 2, "beacon": 2, "gps": 0.5 },
  *   "ir_angles": [0, 60, -60, 180],              // degrees
  *   "beacon_aperture": 180,                      // degrees
  *   "collision_penalty": 2, "target_reward": 100,
+ *   "gps": true,                                 // enable gps() (default off); origin is a random offset
  *   "maze": ["  |  ...", ...],                   // original Row patterns, top row first
  *   "maze_wall_height": 4,
  *   "walls":   [ { "height": 4, "corners": [[x,y], ...] } ],

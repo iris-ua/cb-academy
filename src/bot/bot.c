@@ -79,7 +79,7 @@ static const char PRELUDE[] =
 
 /* names offered by "did you mean" */
 static const char *KNOWN[] = {
-    "motors", "wait", "ir", "compass", "beacon", "ground", "bump", "time", "led", "finish",
+    "motors", "wait", "ir", "compass", "gps", "beacon", "ground", "bump", "time", "led", "finish",
     "say", "print", "forward", "turn", "turn_to", "math", "string", "table", "pairs", "ipairs",
     "tostring", "tonumber", "type", "error", "assert", "pcall", "select",
 };
@@ -154,6 +154,14 @@ static int l_ir(lua_State *L)
 }
 
 static int l_compass(lua_State *L) { lua_pushnumber(L, robot(L)->compass); return 1; }
+static int l_gps(lua_State *L)
+{
+    if (!bot_of(L)->sim->level.params.gps) { lua_pushnil(L); return 1; }
+    const Robot *rb = robot(L);
+    lua_pushnumber(L, rb->gps_x);
+    lua_pushnumber(L, rb->gps_y);
+    return 2;
+}
 static int l_ground(lua_State *L)  { lua_pushinteger(L, robot(L)->ground); return 1; }
 static int l_bump(lua_State *L)    { lua_pushboolean(L, robot(L)->bumper); return 1; }
 static int l_time(lua_State *L)    { lua_pushinteger(L, bot_of(L)->sim->cycle); return 1; }
@@ -214,7 +222,7 @@ static int l_speed(lua_State *L)
 
 static const luaL_Reg API[] = {
     { "motors", l_motors }, { "wait", l_wait }, { "ir", l_ir }, { "compass", l_compass },
-    { "beacon", l_beacon }, { "ground", l_ground }, { "bump", l_bump }, { "time", l_time },
+    { "gps", l_gps }, { "beacon", l_beacon }, { "ground", l_ground }, { "bump", l_bump }, { "time", l_time },
     { "led", l_led }, { "finish", l_finish }, { "say", l_say }, { "print", l_say },
     { NULL, NULL },
 };

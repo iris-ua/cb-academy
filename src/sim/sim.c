@@ -13,6 +13,7 @@ void level_default_params(SimParams *p)
     p->noise.ir          = 0.1;
     p->noise.compass_deg = 2.0;
     p->noise.beacon_deg  = 2.0;
+    p->noise.gps         = 0.5;
     p->ir_angles[0] = 0.0;
     p->ir_angles[1] = M_PI / 3.0;
     p->ir_angles[2] = -M_PI / 3.0;
@@ -194,6 +195,13 @@ static void update_sensors(Sim *s, int ri)
     double cv = angle_norm(r->pose.dir + rng_normal(&s->rng, 0.0, pp->noise.compass_deg * DEG2RAD_D));
     r->compass = floor(cv * RAD2DEG_D + 0.5);
 
+    /* drawn only when on, so levels without GPS keep their noise sequence */
+    if (pp->gps) {
+        Vec2 o = s->gps_offset;
+        r->gps_x = floor(10.0 * (c.x + o.x + rng_normal(&s->rng, 0.0, pp->noise.gps)) + 0.5) / 10.0;
+        r->gps_y = floor(10.0 * (c.y + o.y + rng_normal(&s->rng, 0.0, pp->noise.gps)) + 0.5) / 10.0;
+    }
+
     for (int b = 0; b < lab->nbeacons; b++) {
         const Beacon *bc = &lab->beacons[b];
         double ang = vec_angle(c, bc->pos);
@@ -240,6 +248,9 @@ void sim_init(Sim *s, const Level *lv, int nrobots, uint64_t seed)
     s->over = false;
     s->seed = seed;
     rng_seed(&s->rng, seed);
+    s->gps_offset = (Vec2){ 0, 0 };
+    if (s->level.params.gps)
+        s->gps_offset = (Vec2){ floor(rng_uniform(&s->rng) * 10000.0) / 10.0, floor(rng_uniform(&s->rng) * 10000.0) / 10.0 };
 
     const Lab *lab = &s->level.lab;
     for (int i = 0; i < nrobots; i++) {
@@ -258,6 +269,17 @@ double sim_ir_distance(const Sim *s, int r, const Pose *pose, int k)
 {
     if (r < 0 || r >= s->nrobots || k < 0 || k >= SIM_NUM_IR) return -1.0;
     return ir_distance(s, r, pose ? pose : &s->robots[r].pose, k);
+}
+
+void sim_set_gps_offset(Sim *s, Vec2 o)
+{
+    o = (Vec2){ floor(o.x * 10.0 + 0.5) / 10.0, floor(o.y * 10.0 + 0.5) / 10.0 };
+    for (int i = 0; i < s->nrobots; i++) {
+        Robot *r = &s->robots[i];
+        r->gps_x = floor((r->gps_x - s->gps_offset.x + o.x) * 10.0 + 0.5) / 10.0;
+        r->gps_y = floor((r->gps_y - s->gps_offset.y + o.y) * 10.0 + 0.5) / 10.0;
+    }
+    s->gps_offset = o;
 }
 
 void sim_reset(Sim *s) { sim_init(s, &s->level, s->nrobots, s->seed); }

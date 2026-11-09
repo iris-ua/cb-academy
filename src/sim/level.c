@@ -116,6 +116,7 @@ bool level_load_json(Level *lv, const char *json, char *err, size_t errlen)
     p->collision_penalty = (int)num(root, "collision_penalty", p->collision_penalty);
     p->target_reward = (int)num(root, "target_reward", p->target_reward);
     p->beacon_aperture = num(root, "beacon_aperture", p->beacon_aperture * RAD2DEG_D) * DEG2RAD_D;
+    p->gps = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(root, "gps"));
 
     const cJSON *noise = cJSON_GetObjectItemCaseSensitive(root, "noise");
     if (cJSON_IsObject(noise)) {
@@ -123,6 +124,7 @@ bool level_load_json(Level *lv, const char *json, char *err, size_t errlen)
         p->noise.ir = num(noise, "ir", p->noise.ir);
         p->noise.compass_deg = num(noise, "compass", p->noise.compass_deg);
         p->noise.beacon_deg = num(noise, "beacon", p->noise.beacon_deg);
+        p->noise.gps = num(noise, "gps", p->noise.gps);
     }
 
     const cJSON *ira = cJSON_GetObjectItemCaseSensitive(root, "ir_angles");

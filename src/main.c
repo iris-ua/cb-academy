@@ -75,9 +75,16 @@ static void on_say(void *ud, const char *msg)
     snprintf(log_buf[log_n++], sizeof log_buf[0], "%s", msg);
 }
 
+/* a fresh GPS origin every run, so scripts can't rely on a fixed one */
+static void new_gps_offset(void)
+{
+    if (sim.level.params.gps) sim_set_gps_offset(&sim, (Vec2){ GetRandomValue(0, 9999) / 10.0, GetRandomValue(0, 9999) / 10.0 });
+}
+
 static void reset_world(void)
 {
     sim_reset(&sim);
+    new_gps_offset();
     scene_reset(&scene, &sim);
     fx_reset(&fx);
     accum = 0;
@@ -160,6 +167,7 @@ static bool load_level(const char *path, const char *json)
         else if (json) return false; /* keep the current level running */
     }
     sim_init(&sim, &level, 1, 12345);
+    new_gps_offset();
     scene_level(&scene, &sim);
     fx_reset(&fx);
     accum = 0;

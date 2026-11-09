@@ -19,6 +19,7 @@
     { group: 'Sense', items: [
       ['ir(i)', 'ir(${0})'],
       ['compass()', 'compass()'],
+      ['gps()', 'gps()'],
       ['beacon()', 'beacon()'],
       ['ground()', 'ground()'],
       ['bump()', 'bump()'],

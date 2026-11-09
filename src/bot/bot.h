@@ -12,6 +12,7 @@
  *   wait([n])      wait n ticks (default 1)
  *   ir(i)          IR reading, i = 0 front, 1 left, 2 right, 3 back
  *   compass()      heading in degrees
+ *   gps()          x, y position (0.1 resolution) from a hidden random origin, nil if the level has no GPS
  *   beacon([i])    beacon angle relative to heading (degrees), nil if hidden
  *   ground()       target index under the robot, -1 if none
  *   bump()         true if the robot hit something last tick

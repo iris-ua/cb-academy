@@ -44,6 +44,7 @@ typedef struct {
     double ir;          /* absolute std-dev on 1/d */
     double compass_deg;
     double beacon_deg;
+    double gps;         /* absolute std-dev on x and y */
 } Noise;
 
 typedef struct {
@@ -53,6 +54,7 @@ typedef struct {
     double beacon_aperture;         /* radians, half-angle */
     int    collision_penalty;
     int    target_reward;
+    bool   gps;                     /* GPS sensor on (off by default, as in the original) */
 } SimParams;
 
 typedef struct {
@@ -73,6 +75,7 @@ typedef struct {
     /* sensors (updated every cycle) */
     double ir[SIM_NUM_IR];              /* ~1/distance, 0.1 resolution */
     double compass;                     /* degrees, integer-rounded */
+    double gps_x, gps_y;                /* 0.1 resolution, includes gps_offset; only with params.gps */
     bool   beacon_visible[SIM_MAX_BEACONS];
     double beacon_dir[SIM_MAX_BEACONS]; /* degrees relative to heading */
     int    ground;                      /* target index under robot or -1 */
@@ -93,6 +96,7 @@ typedef struct {
     bool     over;
     Rng      rng;
     uint64_t seed;
+    Vec2     gps_offset; /* hides the origin, as in the original; multiple of 0.1 in [0, 1000) */
 } Sim;
 
 void level_default_params(SimParams *p);
@@ -106,6 +110,8 @@ void sim_step(Sim *s);                  /* advance one 50 ms cycle */
 void sim_set_motors(Sim *s, int r, double left, double right);
 void sim_set_led(Sim *s, int r, bool visiting, bool returning);
 void sim_finish(Sim *s, int r);
+/* replace the seed-drawn GPS offset (e.g. a fresh one per run); o is rounded to 0.1 */
+void sim_set_gps_offset(Sim *s, Vec2 o);
 
 /* queries (noiseless; used by debug overlays) */
 double lab_ray_distance(const Lab *lab, Vec2 p, double dir, double min_h); /* -1 if no hit */

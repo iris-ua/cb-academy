@@ -20,6 +20,7 @@ static Level lv;
 static Sim sim;
 static Bot *bot;
 static char said[512];
+static bool gps;
 
 static void on_say(void *ud, const char *msg)
 {
@@ -32,8 +33,9 @@ static void on_say(void *ud, const char *msg)
 static void run(const char *code, int max)
 {
     char err[128];
-    level_load_json(&lv, "{\"width\":20,\"height\":20,\"noise\":{\"motors\":0,\"ir\":0,\"compass\":0,\"beacon\":0},"
+    level_load_json(&lv, "{\"width\":20,\"height\":20,\"noise\":{\"motors\":0,\"ir\":0,\"compass\":0,\"beacon\":0,\"gps\":0},"
                          "\"start\":[{\"x\":5,\"y\":5,\"dir\":0}]}", err, sizeof err);
+    lv.params.gps = gps;
     sim_init(&sim, &lv, 1, 1);
     said[0] = '\0';
     bot_load(bot, code, "robot.lua");
@@ -85,6 +87,19 @@ static void test_sandbox(void)
     NEAR(sim.robots[0].left.in, 0.0, 0);
 }
 
+static void test_gps(void)
+{
+    puts("gps");
+    run("say(gps())", 2);
+    CHECK(strcmp(said, "nil") == 0);
+
+    gps = true;
+    run("local x0, y0 = gps() forward(2) local x, y = gps()\n"
+        "say(math.floor(x - x0 + 0.5), math.floor(y - y0 + 0.5))", 200);
+    gps = false;
+    CHECK(strcmp(said, "2 0") == 0);
+}
+
 static void test_errors(void)
 {
     puts("friendly errors");
@@ -134,6 +149,7 @@ int main(void)
     bot = bot_new(on_say, NULL);
     test_ticks();
     test_sandbox();
+    test_gps();
     test_errors();
     test_helpers();
     bot_free(bot);

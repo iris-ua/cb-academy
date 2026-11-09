@@ -135,9 +135,14 @@ static float sec_dials(const Sim *s, float x, float y, float w)
     card(x, y, w, 86);
     float dr = 24;
     Vector2 c1 = { x + 10 + dr, y + 46 };
-    label(L("COMPASS", "BÚSSOLA"), x + 10, y + 8);
+    bool gps = s->level.params.gps;
+    label(gps ? L("COMPASS · GPS", "BÚSSOLA · GPS") : L("COMPASS", "BÚSSOLA"), x + 10, y + 8);
     dial(c1, dr, r->compass, true, C_ACC);
-    text_draw(TEXT_MONO_BOLD, TextFormat("%.0f°", r->compass), c1.x + dr + 10, c1.y - 10, 16, C_TEXT);
+    text_draw(TEXT_MONO_BOLD, TextFormat("%.0f°", r->compass), c1.x + dr + 10, c1.y - (gps ? 22 : 10), 16, C_TEXT);
+    if (gps) {
+        text_draw(TEXT_MONO, TextFormat("x %.1f", r->gps_x), c1.x + dr + 10, c1.y - 2, 12, C_TEXT);
+        text_draw(TEXT_MONO, TextFormat("y %.1f", r->gps_y), c1.x + dr + 10, c1.y + 12, 12, C_TEXT);
+    }
     if (s->level.lab.nbeacons > 0) {
         float bx = x + w / 2 + 4;
         Vector2 c2 = { bx + dr, y + 46 };

@@ -203,6 +203,39 @@ static void test_compass_beacon_ground(void)
     CHECK(sim.robots[0].visit_cycle[0] > 0);
 }
 
+static void test_gps(void)
+{
+    puts("gps");
+    box(10, 10, 3.04, 7.26, 0);
+    lv.params.gps = true;
+    lv.params.noise.gps = 0;
+    sim_init(&sim, &lv, 1, 1);
+    Vec2 o = sim.gps_offset;                     /* hidden origin */
+    CHECK(o.x > 0 && o.x < 1000 && o.y > 0 && o.y < 1000);
+    NEAR(sim.robots[0].gps_x, floor((3.04 + o.x) * 10 + 0.5) / 10, 1e-9); /* 0.1 resolution */
+    NEAR(sim.robots[0].gps_y, floor((7.26 + o.y) * 10 + 0.5) / 10, 1e-9);
+    sim_set_gps_offset(&sim, (Vec2){ 100, 200 });
+    NEAR(sim.robots[0].gps_x, 103.0, 1e-9);
+    NEAR(sim.robots[0].gps_y, 207.3, 1e-9);
+    sim_step(&sim);
+    NEAR(sim.robots[0].gps_x, 103.0, 1e-9);
+
+    /* noise on: readings vary but average to the true position */
+    lv.params.noise.gps = 0.5;
+    sim_init(&sim, &lv, 1, 42);
+    double sx = 0, sy = 0, x0 = sim.robots[0].gps_x;
+    bool varies = false;
+    for (int i = 0; i < 400; i++) {
+        sim_step(&sim);
+        sx += sim.robots[0].gps_x - sim.gps_offset.x;
+        sy += sim.robots[0].gps_y - sim.gps_offset.y;
+        varies |= sim.robots[0].gps_x != x0;
+    }
+    CHECK(varies);
+    NEAR(sx / 400, 3.04, 0.1);
+    NEAR(sy / 400, 7.26, 0.1);
+}
+
 static void test_time_finish_determinism(void)
 {
     puts("time limit, finish, determinism");
@@ -345,6 +378,7 @@ int main(void)
     test_robot_collision();
     test_ir();
     test_compass_beacon_ground();
+    test_gps();
     test_time_finish_determinism();
     test_level();
     test_challenge();
