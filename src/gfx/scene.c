@@ -466,15 +466,9 @@ static void draw_beacon_base(const Scene *sc, const Beacon *b, const View *v)
     DrawCircleGradient(c, view_len(v, 0.9), color_alpha(C_BEACON, 0.45f), color_alpha(C_BEACON, 0));
 }
 
-static void draw_beacon_pillar(const Scene *sc, const Beacon *b, const View *v)
+static void draw_beacon_core(const Beacon *b, const View *v)
 {
     Vector2 c = view_pt(v, b->pos.x, b->pos.y);
-    float flick = 0.85f + 0.15f * sinf(sc->time * 9.0f);
-    float hgt = view_len(v, 0.3 * b->height), w = view_len(v, 0.34), wc = view_len(v, 0.1);
-    DrawRectangleGradientV((int)(c.x - w / 2), (int)(c.y - hgt), (int)w, (int)hgt,
-                           color_alpha(C_BEACON, 0), color_alpha(C_BEACON, 0.55f * flick));
-    DrawRectangleGradientV((int)(c.x - wc / 2), (int)(c.y - hgt * 1.1f), (int)wc, (int)(hgt * 1.1f),
-                           color_alpha(WHITE, 0), color_alpha(WHITE, 0.8f * flick));
     DrawCircleV(c, view_len(v, 0.2), C_BEACON);
     DrawCircleV(c, view_len(v, 0.11), (Color){ 255, 236, 210, 255 });
 }
@@ -684,7 +678,7 @@ void scene_draw(const Scene *sc, const Sim *s, View v, Vector2 shake, float alph
     if (sc->trail)
         for (int i = 0; i < s->nrobots; i++) draw_trail(&sc->rv[i], &v, color_mix(C_FUR[i], C_INK, 0.35f));
     /* beacons stand under the cheese: one usually marks the target */
-    for (int b = 0; b < lab->nbeacons; b++) draw_beacon_pillar(sc, &lab->beacons[b], &v);
+    for (int b = 0; b < lab->nbeacons; b++) draw_beacon_core(&lab->beacons[b], &v);
     for (int t = 0; t < lab->ntargets; t++) draw_cheese(sc, s, t, &v);
     if (lab->nbeacons > 1)
         for (int b = 0; b < lab->nbeacons; b++) draw_beacon_label(&lab->beacons[b], b, &v);
