@@ -83,6 +83,7 @@ typedef struct {
 
     /* stats */
     bool   visited[SIM_MAX_TARGETS];
+    bool   signaled[SIM_MAX_TARGETS];   /* stood on it with the visiting LED on */
     int    visit_cycle[SIM_MAX_TARGETS];
     int    collisions;
     int    score;

@@ -234,6 +234,7 @@ static void update_score(Sim *s, Robot *r)
         r->visit_cycle[r->ground] = s->cycle;
         r->score += s->level.params.target_reward;
     }
+    if (r->ground >= 0 && r->led_visiting) r->signaled[r->ground] = true;
 }
 
 /* ---- public API -------------------------------------------------------- */

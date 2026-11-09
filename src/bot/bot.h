@@ -44,6 +44,7 @@ bool        bot_restart(Bot *b);             /* rerun the loaded code from the t
 void        bot_tick(Bot *b, Sim *s, int r); /* call before each sim_step */
 BotState    bot_state(const Bot *b);
 const char *bot_error(const Bot *b);         /* friendly "Line N: ..." or "" */
+const char *bot_code(const Bot *b);          /* the loaded code, or NULL */
 int         bot_error_line(const Bot *b);    /* 0 if unknown */
 
 #endif

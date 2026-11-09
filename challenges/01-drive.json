@@ -1,0 +1,145 @@
+{
+  "chapter": 1,
+  "title": "Drive and turn",
+  "goal": [
+    "Drive the mouse onto the cheese!",
+    "",
+    "- `motors(left, right)` sets the power of each wheel (up to `0.15`) and waits one tick (50 ms). Repeat it to keep moving.",
+    "- `forward(n)` drives `n` robot diameters, then brakes. `forward(n, 0.15)` goes at full speed.",
+    "- `turn(deg)` turns in place. Positive turns left, negative turns right."
+  ],
+  "starter": "01-drive.lua",
+  "hints": [
+    "The loop runs `motors` 10 times. Is that enough ticks to get there?",
+    "The floor squares are 1 diameter wide: count them to measure each leg. A left turn is `turn(90)`.",
+    "A moving mouse needs a moment to stop. `forward` brakes for you; `forward(n, 0.15)` is the fastest."
+  ],
+  "pt": {
+    "title": "Andar e virar",
+    "goal": [
+      "Leva o rato até ao queijo!",
+      "",
+      "- `motors(esquerda, direita)` define a potência de cada roda (até `0.15`) e espera um tique (50 ms). Repete-o para continuares a andar.",
+      "- `forward(n)` anda `n` diâmetros do robô e depois trava. `forward(n, 0.15)` vai à velocidade máxima.",
+      "- `turn(graus)` roda no lugar. Positivo vira à esquerda, negativo à direita."
+    ],
+    "hints": [
+      "O ciclo executa `motors` 10 vezes. São tiques suficientes para lá chegar?",
+      "Os quadrados do chão têm 1 diâmetro: conta-os para medir cada troço. Virar à esquerda é `turn(90)`.",
+      "Um rato em andamento precisa de um momento para parar. `forward` trava por ti; `forward(n, 0.15)` é o mais rápido."
+    ],
+    "starter": "01-drive.pt.lua"
+  },
+  "win": {
+    "reach_target": true,
+    "no_collisions": true
+  },
+  "name": "Drive and turn",
+  "width": 12,
+  "height": 10,
+  "time_limit": 900,
+  "noise": {
+    "motors": 0,
+    "ir": 0,
+    "compass": 0,
+    "beacon": 0
+  },
+  "walls": [
+    {
+      "height": 2,
+      "corners": [
+        [
+          0,
+          3
+        ],
+        [
+          9.5,
+          3
+        ],
+        [
+          9.5,
+          3.5
+        ],
+        [
+          0,
+          3.5
+        ]
+      ]
+    },
+    {
+      "height": 2,
+      "corners": [
+        [
+          9,
+          3.5
+        ],
+        [
+          9.5,
+          3.5
+        ],
+        [
+          9.5,
+          10
+        ],
+        [
+          9,
+          10
+        ]
+      ]
+    }
+  ],
+  "start": [
+    {
+      "x": 1.5,
+      "y": 1.5,
+      "dir": 0
+    }
+  ],
+  "stages": [
+    {
+      "goal": "The cheese is straight ahead: touch it.",
+      "pt": {
+        "goal": "O queijo está mesmo à frente: toca-lhe."
+      },
+      "targets": [
+        {
+          "x": 8,
+          "y": 1.5,
+          "radius": 1
+        }
+      ]
+    },
+    {
+      "goal": "Now it is around the corner, up a narrow passage. Do not bump into the walls.",
+      "pt": {
+        "goal": "Agora está depois da esquina, numa passagem estreita. Não batas nas paredes."
+      },
+      "targets": [
+        {
+          "x": 10.75,
+          "y": 7.5,
+          "radius": 1
+        }
+      ]
+    },
+    {
+      "goal": "**Stop on it** (when the program ends, the mouse must be on the cheese), **within 7 seconds** (140 ticks).",
+      "pt": {
+        "goal": "**Para em cima dele** (quando o programa acabar, o rato tem de estar em cima do queijo), **em menos de 7 segundos** (140 tiques)."
+      },
+      "targets": [
+        {
+          "x": 10.75,
+          "y": 7.5,
+          "radius": 1
+        }
+      ],
+      "win": {
+        "reach_target": true,
+        "no_collisions": true,
+        "stop_on_target": true,
+        "under_time": 140
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "chapter": 3,
+  "title": "Shaky eyes",
+  "goal": [
+    "Stop on the cheese in front of the wall again, **without bumping**. But real sensors are noisy: `ir(0)` jumps around a little on every tick, even when nothing moves.",
+    "",
+    "One big reading does not mean the wall is close. Trust the **average** of a few readings."
+  ],
+  "starter": "07-shaky-ir.lua",
+  "hints": [
+    "Print `ir(0)` while you stand still (`wait()` between reads) to see the noise.",
+    "Keep the last few readings in a table and use their average: `(a + b + c + d) / 4`.",
+    "Stage 3 is the room with three walls: keep steering with `compass()` and turn with `turn_to`."
+  ],
+  "pt": {
+    "title": "Olhos trémulos",
+    "goal": [
+      "Para outra vez em cima do queijo à frente da parede, **sem bater**. Mas os sensores a sério têm ruído: `ir(0)` salta um pouco em cada tique, mesmo quando nada se mexe.",
+      "",
+      "Uma leitura grande não quer dizer que a parede está perto. Confia na **média** de algumas leituras."
+    ],
+    "hints": [
+      "Escreve `ir(0)` com o rato parado (`wait()` entre leituras) para veres o ruído.",
+      "Guarda as últimas leituras numa tabela e usa a média: `(a + b + c + d) / 4`.",
+      "A etapa 3 é a sala com três paredes: continua a corrigir com `compass()` e vira com `turn_to`."
+    ],
+    "starter": "07-shaky-ir.pt.lua"
+  },
+  "win": { "reach_target": true, "stop_on_target": true, "no_collisions": true },
+  "name": "Shaky eyes",
+  "height": 5,
+  "time_limit": 1500,
+  "noise": { "motors": 2, "ir": 0.25, "compass": 0, "beacon": 0 },
+  "start": [ { "x": 2, "y": 2.5, "dir": 0 } ],
+  "stages": [
+    { "goal": "A little noise.", "pt": { "goal": "Um pouco de ruído." },
+      "width": 14, "targets": [ { "x": 13, "y": 2.5, "radius": 1 } ] },
+    { "goal": "Much more noise, in a longer room.", "pt": { "goal": "Muito mais ruído, numa sala mais comprida." },
+      "noise": { "motors": 2, "ir": 0.5, "compass": 0, "beacon": 0 },
+      "width": 18, "targets": [ { "x": 17, "y": 2.5, "radius": 1 } ] },
+    { "goal": "The cheese is at the **third** wall: turn left at each wall.", "pt": { "goal": "O queijo está na **terceira** parede: vira à esquerda em cada parede." },
+      "noise": { "motors": 2, "ir": 0.5, "compass": 0, "beacon": 0 },
+      "width": 14, "height": 10, "start": [ { "x": 2, "y": 1.5, "dir": 0 } ],
+      "walls": [ { "height": 2, "corners": [[4, 4], [4.5, 4], [4.5, 10], [4, 10]] } ],
+      "targets": [ { "x": 5.5, "y": 8.9, "radius": 1 } ] }
+  ]
+}

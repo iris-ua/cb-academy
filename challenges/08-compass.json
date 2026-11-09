@@ -1,0 +1,43 @@
+{
+  "chapter": 3,
+  "title": "Shaky compass",
+  "goal": [
+    "A treasure map! From the start drive **10 east**, then **8 north**, then **6 west**, and the cheese is there.",
+    "",
+    "The compass is noisy now: one `compass()` reading can be many degrees off. A single reading is a guess; many readings together are a good answer."
+  ],
+  "starter": "08-compass.lua",
+  "hints": [
+    "`turn_to` trusts one reading. After it, stand still, add up the error `(h - compass() + 180) % 360 - 180` over 10 or 20 ticks (`wait()` between reads) and `turn` by the average.",
+    "While driving, keep steering with `compass()` on every tick, so the errors average out.",
+    "Smooth the error before you steer with it: `e = 0.9 * e + 0.1 * new_error`."
+  ],
+  "pt": {
+    "title": "Bússola trémula",
+    "goal": [
+      "Um mapa do tesouro! Desde a partida anda **10 para este**, depois **8 para norte**, depois **6 para oeste**, e o queijo está lá.",
+      "",
+      "Agora a bússola tem ruído: uma leitura de `compass()` pode estar muitos graus errada. Uma leitura é um palpite; muitas leituras juntas são uma boa resposta."
+    ],
+    "hints": [
+      "`turn_to` confia numa só leitura. Depois dele, fica parado, soma o erro `(h - compass() + 180) % 360 - 180` durante 10 ou 20 tiques (`wait()` entre leituras) e faz `turn` da média.",
+      "Enquanto andas, continua a corrigir com `compass()` em cada tique, para os erros se compensarem.",
+      "Suaviza o erro antes de corrigires com ele: `e = 0.9 * e + 0.1 * erro_novo`."
+    ],
+    "starter": "08-compass.pt.lua"
+  },
+  "win": { "reach_target": true },
+  "name": "Shaky compass",
+  "width": 20, "height": 14,
+  "time_limit": 1500,
+  "noise": { "motors": 3, "ir": 0, "compass": 3, "beacon": 0 },
+  "start": [ { "x": 2, "y": 2, "dir": 0 } ],
+  "targets": [ { "x": 6, "y": 10, "radius": 1.5 } ],
+  "stages": [
+    { "goal": "A good compass.", "pt": { "goal": "Uma boa bússola." } },
+    { "goal": "A noisy compass.", "pt": { "goal": "Uma bússola com ruído." },
+      "noise": { "motors": 3, "ir": 0, "compass": 10, "beacon": 0 } },
+    { "goal": "A very noisy compass.", "pt": { "goal": "Uma bússola com muito ruído." },
+      "noise": { "motors": 3, "ir": 0, "compass": 20, "beacon": 0 } }
+  ]
+}

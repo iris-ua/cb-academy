@@ -1,15 +1,17 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
-/* Every challenge must be winnable: tests/solutions/<id>.lua wins it on
- * several seeds, judged like main.c does. */
+/* Every challenge must be winnable: tests/solutions/<id>.lua wins each of its
+ * STAGES stages on several seeds (and their hidden variants), judged like
+ * main.c does. */
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bot/bot.h"
+#include "bot/trial.h"
 #include "sim/challenge.h"
 #include "sim/level.h"
 
-#define SEEDS 12
+#define SEEDS  12
+#define STAGES 3
 
 static char *slurp(const char *path)
 {
@@ -25,46 +27,30 @@ static char *slurp(const char *path)
     return buf;
 }
 
-static void quiet(void *ud, const char *msg) { (void)ud; (void)msg; }
-
 static int cmp(const void *a, const void *b) { return strcmp(*(char *const *)a, *(char *const *)b); }
 
-/* returns the ticks to win, or -1 (prints why) */
-static int play(const char *id, const char *json, const char *code, uint64_t seed)
+/* stage json, seed: the ticks to win, or -1 (prints why) */
+static int play(const char *id, int stage, const char *json, const char *code, uint64_t seed)
 {
     static Level lv;
-    static Sim sim;
-    char err[200];
-    WinRule w;
-    if (!level_load_json(&lv, json, err, sizeof err) || !challenge_parse(&w, json, err, sizeof err) || !w.active) {
-        printf("  FAIL %s: bad level: %s\n", id, w.active ? err : "no win rule");
-        return 1;
+    char err[200] = "";
+    WinRule w = { 0 };
+    if (!json || !level_load_json(&lv, json, err, sizeof err) || !challenge_parse(&w, json, err, sizeof err) || !w.active) {
+        printf("  FAIL %s stage %d: bad level: %s\n", id, stage, w.active ? err : "no win rule");
+        return -1;
     }
-    Bot *bot = bot_new(quiet, NULL);
-    int rc = -1;
-    if (!bot_load(bot, code, "solution.lua")) {
-        printf("  FAIL %s: %s\n", id, bot_error(bot));
-        goto out;
-    }
-    sim_init(&sim, &lv, 1, seed);
-    for (int i = 0; i < 100000; i++) {
-        if (bot_state(bot) == BOT_ERROR) { printf("  FAIL %s seed %llu: %s\n", id, (unsigned long long)seed, bot_error(bot)); goto out; }
-        bool ended = sim.over || sim.robots[0].finished || bot_state(bot) != BOT_RUNNING;
-        const char *why;
-        Outcome o = challenge_check(&w, &sim, 0, ended, &why);
-        if (o == CH_WIN) { rc = sim.cycle; goto out; }
-        if (o == CH_FAIL) {
-            printf("  FAIL %s seed %llu: %s (tick %d, at %.2f, %.2f)\n", id, (unsigned long long)seed, why, sim.cycle,
-                   sim.robots[0].pose.x, sim.robots[0].pose.y);
-            goto out;
+    Trial t = trial_run(&lv, &w, code, seed);
+    if (t.outcome == CH_WIN && w.variants) {
+        int n, won = trial_variants(json, code, seed, &n, t.why, sizeof t.why);
+        if (won < w.variants) {
+            printf("  FAIL %s stage %d seed %llu: won %d/%d variants, needs %d: %s\n", id, stage,
+                   (unsigned long long)seed, won, n, w.variants, t.why);
+            return -1;
         }
-        bot_tick(bot, &sim, 0);
-        sim_step(&sim);
     }
-    printf("  FAIL %s: never judged\n", id);
-out:
-    bot_free(bot);
-    return rc;
+    if (t.outcome == CH_WIN) return t.ticks;
+    printf("  FAIL %s stage %d seed %llu: %s (tick %d)\n", id, stage, (unsigned long long)seed, t.why, t.ticks);
+    return -1;
 }
 
 /* args (for tuning): [challenges dir] [id prefix] */
@@ -78,7 +64,8 @@ int main(int argc, char **argv)
     struct dirent *e;
     while ((e = readdir(d)) && n < 64) {
         size_t len = strlen(e->d_name);
-        if (len > 5 && strcmp(e->d_name + len - 5, ".json") == 0 && strncmp(e->d_name, only, strlen(only)) == 0)
+        if (len > 5 && strcmp(e->d_name + len - 5, ".json") == 0 && strcmp(e->d_name, "chapters.json") != 0 &&
+            strncmp(e->d_name, only, strlen(only)) == 0)
             names[n++] = strdup(e->d_name);
     }
     closedir(d);
@@ -91,16 +78,21 @@ int main(int argc, char **argv)
         snprintf(path, sizeof path, "%s/%s.lua", SOLUTIONS_DIR, id);
         char *code = slurp(path);
         if (!json || !code) { printf("  FAIL %s: missing %s\n", id, json ? path : "json"); failures++; }
+        else if (challenge_stage_count(json) != STAGES) { printf("  FAIL %s: needs %d stages\n", id, STAGES); failures++; }
         else {
-            int lo = 1 << 30, hi = 0, won = 0;
-            for (uint64_t s = 1; s <= SEEDS; s++, runs++) {
-                int t = play(id, json, code, s * 7919);
-                if (t < 0) { failures++; continue; }
-                won++;
-                lo = t < lo ? t : lo;
-                hi = t > hi ? t : hi;
+            for (int st = 0; st < STAGES; st++) {
+                char *sj = challenge_stage(json, st);
+                int lo = 1 << 30, hi = 0, won = 0;
+                for (uint64_t s = 1; s <= SEEDS; s++, runs++) {
+                    int t = play(id, st + 1, sj, code, s * 7919);
+                    if (t < 0) { failures++; continue; }
+                    won++;
+                    lo = t < lo ? t : lo;
+                    hi = t > hi ? t : hi;
+                }
+                if (won) printf("  %-14s %d  won %2d/%d in %d..%d ticks\n", st ? "" : id, st + 1, won, SEEDS, lo, hi);
+                free(sj);
             }
-            if (won) printf("  %-14s won %2d/%d in %d..%d ticks\n", id, won, SEEDS, lo, hi);
         }
         free(json);
         free(code);

@@ -1,0 +1,44 @@
+{
+  "chapter": 2,
+  "title": "Brakes",
+  "goal": [
+    "Stop **on** the cheese, in front of the wall. A moving mouse does not stop at once: when the motors go to `0` it still rolls on a bit, and faster means further.",
+    "",
+    "`ground()` is the cheese under the mouse (`0`), or `-1`. `ir(0)` tells how close the wall is."
+  ],
+  "starter": "05-brakes.lua",
+  "hints": [
+    "Print `ir(0)` while you drive to see how it grows near the wall.",
+    "Slow down as the wall gets close: `local d = 1 / ir(0)` is roughly the distance, so a speed like `0.1 * d` gets smaller and smaller.",
+    "Keep a small minimum speed, keep steering with `compass()`, and stop as soon as `ground()` is `0`."
+  ],
+  "pt": {
+    "title": "Travões",
+    "goal": [
+      "Para **em cima** do queijo, à frente da parede. Um rato em andamento não para logo: quando os motores vão a `0` ainda rola um pouco, e quanto mais depressa, mais longe.",
+      "",
+      "`ground()` é o queijo debaixo do rato (`0`), ou `-1`. `ir(0)` diz quão perto está a parede."
+    ],
+    "hints": [
+      "Escreve `ir(0)` enquanto andas para veres como cresce perto da parede.",
+      "Abranda à medida que a parede se aproxima: `local d = 1 / ir(0)` é mais ou menos a distância, por isso uma velocidade como `0.1 * d` fica cada vez mais pequena.",
+      "Mantém uma velocidade mínima pequena, continua a corrigir com `compass()`, e para assim que `ground()` for `0`."
+    ],
+    "starter": "05-brakes.pt.lua"
+  },
+  "win": { "reach_target": true, "stop_on_target": true, "no_collisions": true },
+  "name": "Brakes",
+  "width": 14, "height": 5,
+  "time_limit": 900,
+  "noise": { "motors": 3, "ir": 0, "compass": 0, "beacon": 0 },
+  "start": [ { "x": 2, "y": 2.5, "dir": 0 } ],
+  "stages": [
+    { "goal": "A big cheese.", "pt": { "goal": "Um queijo grande." },
+      "targets": [ { "x": 13, "y": 2.5, "radius": 1 } ] },
+    { "goal": "A tiny cheese, a little away from the wall.", "pt": { "goal": "Um queijo pequenino, um pouco afastado da parede." },
+      "targets": [ { "x": 12.3, "y": 2.5, "radius": 0.65 } ] },
+    { "goal": "A tiny cheese, **within 5 seconds** (100 ticks).", "pt": { "goal": "Um queijo pequenino, **em menos de 5 segundos** (100 tiques)." },
+      "targets": [ { "x": 12.6, "y": 2.5, "radius": 0.65 } ],
+      "win": { "reach_target": true, "stop_on_target": true, "no_collisions": true, "under_time": 100 } }
+  ]
+}

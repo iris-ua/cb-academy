@@ -53,7 +53,7 @@ if(NOT MSVC)
 endif()
 
 # --- robot scripts (Lua, no graphics) ----------------------------------------
-add_library(bot STATIC src/bot/bot.c)
+add_library(bot STATIC src/bot/bot.c src/bot/trial.c)
 target_link_libraries(bot PUBLIC sim lua)
 if(NOT MSVC)
   target_compile_options(bot PRIVATE -Wall -Wextra -Wpedantic)

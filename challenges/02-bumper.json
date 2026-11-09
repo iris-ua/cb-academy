@@ -1,0 +1,44 @@
+{
+  "chapter": 1,
+  "title": "Bump and turn",
+  "goal": [
+    "The mouse cannot see yet, but it can feel. Drive until you **bump** into a wall, back up a little, turn left and go on.",
+    "",
+    "`bump()` is `true` right after the mouse hits something."
+  ],
+  "starter": "02-bumper.lua",
+  "hints": [
+    "Each stage has a different room, so counting steps will not work for all three. Let the bumper tell you when to turn.",
+    "`while not bump() do motors(0.1, 0.1) end` drives until you hit something.",
+    "After a bump: `forward(-0.5)` backs up, then `turn(90)`. Put it all in a `while true do ... end` loop."
+  ],
+  "pt": {
+    "title": "Bate e vira",
+    "goal": [
+      "O rato ainda não vê, mas sente. Anda até **bateres** numa parede, recua um pouco, vira à esquerda e continua.",
+      "",
+      "`bump()` é `true` logo depois de o rato bater em algo."
+    ],
+    "hints": [
+      "Cada etapa tem uma sala diferente, por isso contar passos não serve para as três. Deixa o para-choques dizer-te quando virar.",
+      "`while not bump() do motors(0.1, 0.1) end` anda até bateres em algo.",
+      "Depois de bater: `forward(-0.5)` recua, depois `turn(90)`. Põe tudo num ciclo `while true do ... end`."
+    ],
+    "starter": "02-bumper.pt.lua"
+  },
+  "win": { "reach_target": true },
+  "name": "Bump and turn",
+  "time_limit": 1500,
+  "noise": { "motors": 0, "ir": 0, "compass": 0, "beacon": 0 },
+  "start": [ { "x": 2, "y": 1.5, "dir": 0 } ],
+  "stages": [
+    { "goal": "One bump, then the cheese is on your left.", "pt": { "goal": "Um toque, e depois o queijo está à tua esquerda." },
+      "width": 10, "height": 6, "targets": [ { "x": 9, "y": 4.5, "radius": 1 } ] },
+    { "goal": "A bigger room: two bumps.", "pt": { "goal": "Uma sala maior: dois toques." },
+      "width": 12, "height": 8, "targets": [ { "x": 6, "y": 7, "radius": 1 } ] },
+    { "goal": "Three bumps, and one of the walls is inside the room.", "pt": { "goal": "Três toques, e uma das paredes está dentro da sala." },
+      "width": 14, "height": 10,
+      "walls": [ { "height": 2, "corners": [[4, 4], [4.5, 4], [4.5, 10], [4, 10]] } ],
+      "targets": [ { "x": 5.5, "y": 5, "radius": 1 } ] }
+  ]
+}

@@ -1,0 +1,339 @@
+{
+  "chapter": 5,
+  "title": "Cheese tour",
+  "goal": [
+    "There is a light over every cheese. Visit **all of them**, and tell the judge: when you stand on a cheese, switch the visiting LED on, then off again before you leave.",
+    "",
+    "`beacons()` is how many lights there are, `beacon(i)` the angle to light `i`. Cheese `i` is under light `i`, and `ground()` is `i` when you stand on it."
+  ],
+  "starter": "13-tour.lua",
+  "hints": [
+    "Make your code from the last challenges a function `go_to(i)` that drives to light `i` until `ground() == i`.",
+    "On the cheese: `motors(0, 0)`, `wait(3)` to stand still, `led('visiting', true)`, `wait()`, `led('visiting', false)`.",
+    "Then `for i = 0, beacons() - 1 do ... end`. A visiting LED that is on away from a cheese fails the run."
+  ],
+  "pt": {
+    "title": "Volta dos queijos",
+    "goal": [
+      "Há uma luz por cima de cada queijo. Visita **todos**, e avisa o júri: quando estiveres em cima de um queijo, acende o LED de visita, e apaga-o antes de saíres.",
+      "",
+      "`beacons()` é quantas luzes há, `beacon(i)` o ângulo até à luz `i`. O queijo `i` está debaixo da luz `i`, e `ground()` é `i` quando estás em cima dele."
+    ],
+    "hints": [
+      "Transforma o teu código dos últimos desafios numa função `go_to(i)` que anda até à luz `i` até `ground() == i`.",
+      "No queijo: `motors(0, 0)`, `wait(3)` para ficares parado, `led('visiting', true)`, `wait()`, `led('visiting', false)`.",
+      "Depois `for i = 0, beacons() - 1 do ... end`. Um LED de visita aceso longe de um queijo faz falhar a tentativa."
+    ],
+    "starter": "13-tour.pt.lua"
+  },
+  "win": {
+    "visit_all": true,
+    "signal": true
+  },
+  "name": "Cheese tour",
+  "width": 20,
+  "height": 12,
+  "time_limit": 3000,
+  "noise": {
+    "motors": 2,
+    "ir": 0,
+    "compass": 0,
+    "beacon": 2
+  },
+  "start": [
+    {
+      "x": 3,
+      "y": 3,
+      "dir": 0
+    }
+  ],
+  "stages": [
+    {
+      "goal": "Two cheeses in an open room.",
+      "pt": {
+        "goal": "Dois queijos numa sala aberta."
+      },
+      "beacons": [
+        {
+          "x": 15,
+          "y": 9,
+          "height": 4
+        },
+        {
+          "x": 5,
+          "y": 9,
+          "height": 4
+        }
+      ],
+      "targets": [
+        {
+          "x": 15,
+          "y": 9,
+          "radius": 1
+        },
+        {
+          "x": 5,
+          "y": 9,
+          "radius": 1
+        }
+      ]
+    },
+    {
+      "goal": "Three cheeses, with walls in the way. **No bumps**.",
+      "pt": {
+        "goal": "Três queijos, com paredes no caminho. **Sem toques**."
+      },
+      "win": {
+        "visit_all": true,
+        "signal": true,
+        "no_collisions": true
+      },
+      "beacons": [
+        {
+          "x": 16,
+          "y": 3,
+          "height": 4
+        },
+        {
+          "x": 16,
+          "y": 9,
+          "height": 4
+        },
+        {
+          "x": 4,
+          "y": 9,
+          "height": 4
+        }
+      ],
+      "targets": [
+        {
+          "x": 16,
+          "y": 3,
+          "radius": 1
+        },
+        {
+          "x": 16,
+          "y": 9,
+          "radius": 1
+        },
+        {
+          "x": 4,
+          "y": 9,
+          "radius": 1
+        }
+      ],
+      "walls": [
+        {
+          "height": 1,
+          "corners": [
+            [
+              9,
+              2
+            ],
+            [
+              10.5,
+              2
+            ],
+            [
+              10.5,
+              4.5
+            ],
+            [
+              9,
+              4.5
+            ]
+          ]
+        },
+        {
+          "height": 1,
+          "corners": [
+            [
+              14,
+              5.5
+            ],
+            [
+              18,
+              5.5
+            ],
+            [
+              18,
+              6.5
+            ],
+            [
+              14,
+              6.5
+            ]
+          ]
+        },
+        {
+          "height": 1,
+          "corners": [
+            [
+              9.5,
+              7
+            ],
+            [
+              10.5,
+              7
+            ],
+            [
+              10.5,
+              10
+            ],
+            [
+              9.5,
+              10
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "goal": "Four cheeses, more walls and a noisier world. **No bumps**.",
+      "pt": {
+        "goal": "Quatro queijos, mais paredes e um mundo com mais ruído. **Sem toques**."
+      },
+      "noise": {
+        "motors": 4,
+        "ir": 0.2,
+        "compass": 2,
+        "beacon": 3
+      },
+      "win": {
+        "visit_all": true,
+        "signal": true,
+        "no_collisions": true
+      },
+      "beacons": [
+        {
+          "x": 16,
+          "y": 3,
+          "height": 4
+        },
+        {
+          "x": 16,
+          "y": 9,
+          "height": 4
+        },
+        {
+          "x": 10.5,
+          "y": 5,
+          "height": 4
+        },
+        {
+          "x": 3.5,
+          "y": 9,
+          "height": 4
+        }
+      ],
+      "targets": [
+        {
+          "x": 16,
+          "y": 3,
+          "radius": 1
+        },
+        {
+          "x": 16,
+          "y": 9,
+          "radius": 1
+        },
+        {
+          "x": 10.5,
+          "y": 5,
+          "radius": 1
+        },
+        {
+          "x": 3.5,
+          "y": 9,
+          "radius": 1
+        }
+      ],
+      "walls": [
+        {
+          "height": 1,
+          "corners": [
+            [
+              7,
+              2
+            ],
+            [
+              8.5,
+              2
+            ],
+            [
+              8.5,
+              4.5
+            ],
+            [
+              7,
+              4.5
+            ]
+          ]
+        },
+        {
+          "height": 1,
+          "corners": [
+            [
+              14,
+              5.5
+            ],
+            [
+              18,
+              5.5
+            ],
+            [
+              18,
+              6.5
+            ],
+            [
+              14,
+              6.5
+            ]
+          ]
+        },
+        {
+          "height": 1,
+          "corners": [
+            [
+              10.5,
+              7.5
+            ],
+            [
+              11.5,
+              7.5
+            ],
+            [
+              11.5,
+              10
+            ],
+            [
+              10.5,
+              10
+            ]
+          ]
+        },
+        {
+          "height": 1,
+          "corners": [
+            [
+              6.5,
+              7
+            ],
+            [
+              7.5,
+              7
+            ],
+            [
+              7.5,
+              10
+            ],
+            [
+              6.5,
+              10
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

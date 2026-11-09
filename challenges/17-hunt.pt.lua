@@ -1,0 +1,2 @@
+-- cola aqui o teu código de "Um labirinto pequeno" e depois vê ground()
+-- depois de cada quadrado

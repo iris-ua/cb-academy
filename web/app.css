@@ -116,6 +116,11 @@ select { max-width: 180px; }
 #map .sheet { width: min(760px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 50px #000a; }
 #map-body { overflow-y: auto; padding: 4px 12px 12px; }
 #map h3 { margin: 16px 0 8px; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); }
+#map .chapter h3 { margin-bottom: 2px; }
+#map .chapter p { margin: 0 0 8px; font-size: 13px; }
+#goal-stages button { white-space: nowrap; }
+#goal-stages button:disabled { opacity: .45; cursor: default; }
+.stage-goal { border-left: 3px solid var(--acc); padding-left: 8px; }
 #map .foot { border-top: 1px solid var(--line); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
 .tile { text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; }

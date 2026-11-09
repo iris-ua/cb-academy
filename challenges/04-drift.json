@@ -1,0 +1,50 @@
+{
+  "chapter": 2,
+  "title": "Not so straight",
+  "goal": [
+    "Real wheels slip a little on every tick, so `forward(n)` does not drive in a perfectly straight line. The cheese is far ahead.",
+    "",
+    "`compass()` gives your heading in degrees: `0` is east (right), `90` is north (up). Use it to steer back whenever you drift."
+  ],
+  "starter": "04-drift.lua",
+  "hints": [
+    "Run the same code a few times: the path is different every time.",
+    "The error is `e = 0 - compass()`. If it is positive you point too far right: speed up the right wheel.",
+    "In a loop: `motors(0.12 - 0.002 * e, 0.12 + 0.002 * e)`."
+  ],
+  "pt": {
+    "title": "Não tão a direito",
+    "goal": [
+      "As rodas a sério escorregam um pouco em cada tique, por isso `forward(n)` não anda numa linha perfeitamente reta. O queijo está bem lá à frente.",
+      "",
+      "`compass()` dá a tua direção em graus: `0` é este (direita), `90` é norte (cima). Usa-a para voltares ao rumo sempre que te desviares."
+    ],
+    "hints": [
+      "Executa o mesmo código várias vezes: o caminho é diferente de cada vez.",
+      "O erro é `e = 0 - compass()`. Se for positivo, estás a apontar demasiado para a direita: acelera a roda direita.",
+      "Num ciclo: `motors(0.12 - 0.002 * e, 0.12 + 0.002 * e)`."
+    ],
+    "starter": "04-drift.pt.lua"
+  },
+  "win": { "reach_target": true },
+  "name": "Not so straight",
+  "width": 26, "height": 8,
+  "time_limit": 900,
+  "noise": { "motors": 1, "ir": 0, "compass": 0, "beacon": 0 },
+  "start": [ { "x": 2, "y": 4, "dir": 0 } ],
+  "targets": [ { "x": 23, "y": 4, "radius": 1.5 } ],
+  "stages": [
+    { "goal": "The wheels slip just a little.", "pt": { "goal": "As rodas escorregam só um pouco." } },
+    { "goal": "More slip, and a smaller cheese.", "pt": { "goal": "Mais escorregadelas, e um queijo mais pequeno." },
+      "noise": { "motors": 4, "ir": 0, "compass": 0, "beacon": 0 },
+      "targets": [ { "x": 23, "y": 4, "radius": 1 } ] },
+    { "goal": "Very slippery, and now there is a corridor: **no bumps**.", "pt": { "goal": "Muito escorregadio, e agora há um corredor: **sem toques**." },
+      "noise": { "motors": 8, "ir": 0, "compass": 0, "beacon": 0 },
+      "targets": [ { "x": 23, "y": 4, "radius": 1 } ],
+      "walls": [
+        { "height": 1, "corners": [[5, 2.4], [21, 2.4], [21, 2.6], [5, 2.6]] },
+        { "height": 1, "corners": [[5, 5.4], [21, 5.4], [21, 5.6], [5, 5.6]] }
+      ],
+      "win": { "reach_target": true, "no_collisions": true } }
+  ]
+}

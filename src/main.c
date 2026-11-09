@@ -12,6 +12,7 @@
 #include "sim/level.h"
 #include "sim/challenge.h"
 #include "bot/bot.h"
+#include "bot/trial.h"
 #include "gfx/fx.h"
 #include "gfx/hud.h"
 #include "gfx/scene.h"
@@ -32,6 +33,7 @@ static bool  step_req; /* paused: advance one tick on the next frame */
 static float accum;
 static float speed = 1;  /* sim time multiplier: 0.5, 1, 2, 4, 8 */
 static WinRule rule;     /* challenge win rule (rule.active: the level is a challenge) */
+static char *level_src;  /* the loaded level JSON (its hidden variants) */
 static bool  judged;     /* this run got a result; the sim stops */
 static bool  lang_pt;    /* web page language: Portuguese */
 
@@ -83,6 +85,7 @@ static void new_gps_offset(void)
 
 static void reset_world(void)
 {
+    sim.seed = (uint64_t)GetRandomValue(1, 1 << 30); /* fresh noise every run, as on a real robot */
     sim_reset(&sim);
     new_gps_offset();
     scene_reset(&scene, &sim);
@@ -134,7 +137,10 @@ static const char *tr(const char *en)
         { "Stop on the cheese, not past it.", "Para em cima do queijo, não depois dele." },
         { "The program ended before the goal.", "O programa acabou antes do objetivo." },
         { "Loaded %s", "Carregado: %s" },
-        { "Challenge complete! %d/3 stars", "Desafio concluído! %d/3 estrelas" },
+        { "The visiting LED is on away from the cheese.", "O LED de visita está aceso longe do queijo." },
+        { "Works here, but won only %d of %d hidden versions of this level (needs %d).",
+          "Funciona aqui, mas só venceu %d de %d versões escondidas deste nível (precisa de %d)." },
+        { "Stage complete!", "Etapa concluída!" },
         { "Not yet: %s", "Ainda não: %s" },
     };
     if (lang_pt)
@@ -153,10 +159,11 @@ static bool load_level(const char *path, const char *json)
     const char *src = json ? json : text;
     bool ok = src && level_load_json(&tmp, src, err, sizeof err) && challenge_parse(&wr, src, err, sizeof err);
     if (!src) snprintf(err, sizeof err, "cannot open %.150s", path);
-    if (text) UnloadFileText(text);
     if (ok) {
         level = tmp;
         rule = wr;
+        free(level_src);
+        if ((level_src = malloc(strlen(src) + 1))) strcpy(level_src, src);
         snprintf(status_msg, sizeof status_msg, tr("Loaded %s"), level.lab.name);
         js_emit("level", level.lab.name, 0);
     } else {
@@ -166,6 +173,7 @@ static bool load_level(const char *path, const char *json)
             level_load_json(&level, "{\"name\":\"Empty\",\"width\":14,\"height\":8}", err, sizeof err);
         else if (json) return false; /* keep the current level running */
     }
+    if (text) UnloadFileText(text);
     sim_init(&sim, &level, 1, 12345);
     new_gps_offset();
     scene_level(&scene, &sim);
@@ -186,7 +194,8 @@ static void sound_cues(const Robot *rb, int collisions_before, int visited_befor
     if (visited > visited_before) js_emit("sound", "squeak", 0);
 }
 
-/* Challenge result, once per run: stops the sim and tells the page. */
+/* Challenge result, once per run: stops the sim and tells the page. A win on
+ * a level with hidden variants counts only if the same code wins enough of them. */
 static void judge(void)
 {
     if (!rule.active || judged) return;
@@ -198,13 +207,24 @@ static void judge(void)
     if (o == CH_PENDING) return;
     judged = true;
     const Robot *rb = &sim.robots[0];
-    int stars = o == CH_WIN ? challenge_stars(&rule, &sim, 0) : 0;
-    if (o == CH_WIN) snprintf(status_msg, sizeof status_msg, tr("Challenge complete! %d/3 stars"), stars);
-    else snprintf(status_msg, sizeof status_msg, tr("Not yet: %s"), why = tr(why));
+    int n = 0, solved = 0;
+    static char vwhy[200];
+    if (o == CH_WIN && rule.variants && level_src) {
+        solved = script_on && bot_code(bot) ? trial_variants(level_src, bot_code(bot), sim.seed, &n, NULL, 0) : 0;
+        if (solved < rule.variants) {
+            o = CH_FAIL;
+            snprintf(vwhy, sizeof vwhy, tr("Works here, but won only %d of %d hidden versions of this level (needs %d)."),
+                     solved, n, rule.variants);
+            why = vwhy;
+        }
+    } else if (o == CH_FAIL) why = tr(why);
+    if (o == CH_WIN) snprintf(status_msg, sizeof status_msg, "%s", tr("Stage complete!"));
+    else snprintf(status_msg, sizeof status_msg, tr("Not yet: %s"), why);
     printf("%s\n", status_msg);
-    js_emit("result", TextFormat("{\"win\":%s,\"stars\":%d,\"ticks\":%d,\"star_time\":%d,\"collisions\":%d,\"score\":%d,\"why\":\"%s\"}",
-                                 o == CH_WIN ? "true" : "false", stars, sim.cycle, rule.star_time,
-                                 rb->collisions, rb->score, why), o == CH_WIN);
+    js_emit("result", TextFormat("{\"win\":%s,\"ticks\":%d,\"collisions\":%d,\"score\":%d,"
+                                 "\"variants\":%d,\"solved\":%d,\"need\":%d,\"why\":\"%s\"}",
+                                 o == CH_WIN ? "true" : "false", sim.cycle, rb->collisions, rb->score,
+                                 n, solved, rule.variants, why), o == CH_WIN);
 }
 
 static void layout(Rectangle *arena, Rectangle *panel)
@@ -277,6 +297,15 @@ static void report_changes(void)
 #ifdef __EMSCRIPTEN__
 /* ---- page bridge (Module.ccall) ------------------------------------------ */
 EMSCRIPTEN_KEEPALIVE int web_load_level(const char *json) { return load_level(NULL, json); }
+
+/* Level JSON of a challenge's stage (see challenge.h), "" if it has none. */
+EMSCRIPTEN_KEEPALIVE const char *web_stage_json(const char *json, int stage)
+{
+    static char *out;
+    free(out);
+    out = challenge_stage(json, stage);
+    return out ? out : "";
+}
 
 /* Start code from the top on a fresh world; compile errors show as state "error". */
 EMSCRIPTEN_KEEPALIVE void web_run(const char *code)

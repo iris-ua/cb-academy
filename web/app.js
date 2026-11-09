@@ -221,12 +221,15 @@
     }
   };
 
-  /* ---- stages: challenges (/challenges, in file order), free-play levels
-   * (/levels), both preloaded in the WASM file system, and the user's own
-   * levels (made in the editor or loaded in teacher mode, kept in localStorage).
-   * Progress and code per challenge live in localStorage. ------------------ */
-  var challenges = [], levels = [], mine = [], current = null;
-  var PROGRESS = 'ciberrato.progress', MINE = 'ciberrato.mylevels', TEACHER = 'ciberrato.teacher';
+  /* ---- stages: challenges (/challenges, in file order, grouped in the
+   * chapters of chapters.json), free-play levels (/levels), both preloaded in
+   * the WASM file system, and the user's own levels (made in the editor or
+   * loaded in teacher mode, kept in localStorage). Each challenge has 3 stages
+   * played with the same code: a star per stage cleared. Progress and code per
+   * challenge live in localStorage. ----------------------------------------- */
+  var STAGES = 3;
+  var challenges = [], chapters = [], levels = [], mine = [], current = null, stage = 0;
+  var PROGRESS = 'ciberrato.stages', MINE = 'ciberrato.mylevels', TEACHER = 'ciberrato.teacher';
   var teacher = load(TEACHER, '') === '1';
 
   function readText(path) { return Module.FS.readFile(path, { encoding: 'utf8' }); }
@@ -239,7 +242,10 @@
 
   var progress = (function () { try { return JSON.parse(load(PROGRESS, '{}')) || {}; } catch (e) { return {}; } })();
   function saveProgress() { save(PROGRESS, JSON.stringify(progress)); }
-  function unlocked(c) { return teacher || c.index === 0 || !!progress[challenges[c.index - 1].id]; }
+  function starsOf(c) { var p = progress[c.id]; return p ? p.stars : 0; }
+  function unlocked(c) { return teacher || c.index === 0 || starsOf(challenges[c.index - 1]) > 0; }
+  function stageOpen(c, i) { return teacher || i <= starsOf(c); }
+  function chNum(c) { return c.chapter + '.' + c.num; }
   function codeKeyOf(st) { return st.ch ? 'ciberrato.code.' + st.id : st.custom ? 'ciberrato.code.my.' + st.id : 'ciberrato.code'; }
   function stageKey(st) { return (st.ch ? 'ch:' : st.custom ? 'cu:' : 'lv:') + st.id; }
   function starterOf(st) { return st.ch ? (st.starters[I18N.lang] || st.starters.en) : starter(); }
@@ -250,9 +256,17 @@
     st.title = I18N.pick(d, 'title') || I18N.pick(d, 'name') || (st.custom ? t('custom') : st.id);
     st.goal = lines(I18N.pick(d, 'goal'));
     st.hints = [].concat(I18N.pick(d, 'hints') || []);
+    if (st.ch) st.stageGoals = (d.stages || []).map(function (sd) { return lines(I18N.pick(sd, 'goal')); });
   }
-  /* level JSON for the sim, with the shown name */
-  function simSource(st) { return Object.keys(st.d).length ? JSON.stringify(Object.assign({}, st.d, { name: st.title })) : st.src; }
+  function shownName(st) { return st.ch ? st.title + ' · ' + (stage + 1) + '/' + STAGES : st.title; }
+  /* level JSON for the sim, with the shown name; a challenge's current stage (merged in C) */
+  function simSource(st) {
+    if (st.ch) {
+      var lv = JSON.parse(Module.ccall('web_stage_json', 'string', ['string', 'number'], [st.src, stage]) || '{}');
+      return JSON.stringify(Object.assign(lv, { name: shownName(st) }));
+    }
+    return Object.keys(st.d).length ? JSON.stringify(Object.assign({}, st.d, { name: st.title })) : st.src;
+  }
 
   /* tiny markdown: paragraphs, "- " lists, `code`, **bold**, *italic* */
   function esc(t) { return t.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -287,7 +301,9 @@
   }
 
   function initStages() {
+    try { chapters = JSON.parse(readText('/challenges/chapters.json')); } catch (e) { chapters = []; }
     jsonFiles('/challenges').forEach(function (f) {
+      if (f === 'chapters.json') return;
       try {
         var src = readText('/challenges/' + f), d = JSON.parse(src), starters = {};
         [['en', d.starter], ['pt', d.pt && d.pt.starter]].forEach(function (s) {
@@ -295,7 +311,9 @@
           try { starters[s[0]] = readText('/challenges/' + s[1]); } catch (e) { log(t('log.missing', f, s[1]), 'err'); }
         });
         if (starters.en == null) starters.en = '';
-        var st = { ch: true, id: f.replace(/\.json$/, ''), index: challenges.length, src: src, d: d, starters: starters };
+        var prev = challenges[challenges.length - 1], chapter = d.chapter || (prev ? prev.chapter : 1);
+        var st = { ch: true, id: f.replace(/\.json$/, ''), index: challenges.length, src: src, d: d, starters: starters,
+                   chapter: chapter, num: prev && prev.chapter === chapter ? prev.num + 1 : 1 };
         localize(st);
         challenges.push(st);
       } catch (e) { log(t('log.missing', f, e.message), 'err'); }
@@ -312,14 +330,22 @@
     var want = load('ciberrato.current', '');
     var st = challenges.concat(levels, mine).filter(function (s) { return stageKey(s) === want; })[0];
     if (!st || (st.ch && !unlocked(st))) st = challenges[0] || levels[0];
-    if (st) openStage(st);
+    if (st) openStage(st, st.ch ? +load('ciberrato.stage', '0') : 0);
   }
 
-  function openStage(st) {
+  /* i: the challenge stage (default: the first one not cleared yet); the code stays the same across stages */
+  function openStage(st, i) {
+    if (st.ch) {
+      if (i == null || !(i >= 0 && i < STAGES)) i = Math.min(starsOf(st), STAGES - 1);
+      while (i > 0 && !stageOpen(st, i)) i--;
+    }
+    var same = st === current;
     current = st;
+    stage = st.ch ? i : 0;
     save('ciberrato.current', stageKey(st));
+    save('ciberrato.stage', String(stage));
     var key = codeKeyOf(st);
-    setDoc(key, load(key, starterOf(st)));
+    if (!same || key !== codeKey) setDoc(key, load(key, starterOf(st)));
     lastResult = null;
     call('web_load_level', [simSource(st)]);
     call('web_reset'); /* the old script must not carry over */
@@ -331,19 +357,38 @@
 
   function renderGoal() {
     var st = current, g = $('goal');
-    $('pick-name').textContent = st ? (st.ch ? (st.index + 1) + '. ' : '') + st.title : '…';
+    $('pick-name').textContent = st ? (st.ch ? chNum(st) + ' ' : '') + st.title : '…';
     g.hidden = !st || !(st.ch || (st.custom && st.goal));
     if (g.hidden) { window.dispatchEvent(new Event('resize')); return; }
-    var best = st.ch && progress[st.id];
-    $('goal-num').textContent = st.ch ? t('challenge', st.index + 1) : t('custom');
+    var n = st.ch ? starsOf(st) : 0;
+    $('goal-num').textContent = st.ch ? t('challenge', chNum(st)) : t('custom');
     $('goal-title').textContent = st.title;
-    $('goal-best').innerHTML = best ? stars(best.stars) : '';
-    $('goal-best').title = best ? t('best', best.stars, secs(best.ticks)) : '';
+    $('goal-best').innerHTML = st.ch ? stars(n) : '';
+    $('goal-best').title = st.ch ? t('best', n, STAGES) : '';
     $('restore').hidden = !st.ch;
-    $('goal-text').innerHTML = md(st.goal);
+    renderStagePicker(st);
+    $('goal-text').innerHTML = md(st.goal) +
+      (st.ch && st.stageGoals[stage] ? '<p class="stage-goal"><b>' + esc(t('stage.n', stage + 1, STAGES)) + '</b> ' + inline(st.stageGoals[stage]) + '</p>' : '');
     $('hints').hidden = !st.hints.length;
     $('hint-list').innerHTML = st.hints.map(function (h) { return '<li>' + inline(String(h)) + '</li>'; }).join('');
     window.dispatchEvent(new Event('resize'));
+  }
+
+  /* stage buttons in the goal card: cleared ones get a star, later ones wait */
+  function renderStagePicker(st) {
+    var box = $('goal-stages');
+    box.textContent = '';
+    box.hidden = !st.ch;
+    if (!st.ch) return;
+    for (var i = 0; i < STAGES; i++) {
+      var b = document.createElement('button'), open = stageOpen(st, i);
+      b.textContent = (i + 1) + (i < starsOf(st) ? ' ★' : open ? '' : ' 🔒');
+      b.className = i === stage ? 'on' : '';
+      b.disabled = !open;
+      b.title = open ? t('stage.n', i + 1, STAGES) : t('stage.locked', i);
+      b.onclick = (function (k) { return function () { if (k !== stage) openStage(st, k); }; })(i);
+      box.appendChild(b);
+    }
   }
 
   /* ---- result (event from the sim when a challenge run is judged) ---------- */
@@ -353,33 +398,36 @@
   function showResult(r, again) {
     var st = current;
     if (!st || !(st.ch || st.custom)) return;
-    var box = $('result'), next = st.ch && challenges[st.index + 1];
+    var box = $('result'), last = !st.ch || stage === STAGES - 1, nextCh = st.ch && challenges[st.index + 1];
     box.className = r.win ? 'ui' : 'ui fail';
+    var detail = [];
+    if (r.variants) detail.push([t('res.variants', r.solved, r.variants, r.need), r.solved >= r.need]);
     if (r.win) {
-      var best = st.ch && progress[st.id];
-      if (st.ch && !again && (!best || r.stars > best.stars || (r.stars === best.stars && r.ticks < best.ticks))) {
-        progress[st.id] = { stars: r.stars, ticks: r.ticks, score: r.score };
+      if (st.ch && !again) {
+        var p = progress[st.id] || { stars: 0, ticks: [] };
+        p.stars = Math.max(p.stars, stage + 1);
+        if (!(p.ticks[stage] <= r.ticks)) p.ticks[stage] = r.ticks;
+        progress[st.id] = p;
         saveProgress();
         renderGoal();
       }
-      if (!again) log(t('log.complete', '★★★☆☆☆'.slice(3 - r.stars, 6 - r.stars), secs(r.ticks)), 'win');
-      $('res-stars').innerHTML = stars(r.stars);
-      $('res-title').textContent = t('res.complete');
-      $('res-text').textContent = t('res.time', secs(r.ticks)) +
-        (best && best.ticks <= r.ticks && best.stars >= r.stars ? t('res.best', secs(best.ticks)) : '');
-      var fast = !r.star_time || r.ticks <= r.star_time;
-      $('res-detail').innerHTML = '<li>' + esc(t('res.reached')) + '</li>' +
-        '<li class="' + (fast ? '' : 'off') + '">' + esc(r.star_time ? t('res.within', secs(r.star_time)) : t('res.done')) + '</li>' +
-        '<li class="' + (r.collisions ? 'off' : '') + '">' + esc(t('res.nobumps') + (r.collisions ? t('res.bumps', r.collisions) : '')) + '</li>';
+      var best = st.ch && progress[st.id].ticks[stage];
+      if (!again) log(t('log.complete', stage + 1, secs(r.ticks)), 'win');
+      $('res-stars').innerHTML = st.ch ? stars(starsOf(st)) : '';
+      $('res-title').textContent = st.ch && !last ? t('res.stage', stage + 1, STAGES) : t('res.complete');
+      $('res-text').textContent = t('res.time', secs(r.ticks)) + (best && best < r.ticks ? t('res.best', secs(best)) : '');
+      detail.unshift([r.collisions ? t('res.bumps', r.collisions) : t('res.nobumps'), !r.collisions]);
     } else {
       if (!again) log(t('log.notyet', r.why), 'err');
       $('res-stars').innerHTML = '';
       $('res-title').textContent = t('res.notyet');
       $('res-text').textContent = r.why;
-      $('res-detail').innerHTML = '';
     }
-    $('res-next').hidden = !r.win || !next;
-    $('res-next').onclick = function () { if (next) openStage(next); };
+    $('res-detail').innerHTML = detail.map(function (d) { return '<li class="' + (d[1] ? '' : 'off') + '">' + esc(d[0]) + '</li>'; }).join('');
+    var next = r.win && st.ch && (!last ? function () { openStage(st, stage + 1); } : nextCh ? function () { openStage(nextCh); } : null);
+    $('res-next').hidden = !next;
+    $('res-next').textContent = t(last ? 'res.next' : 'res.nextstage');
+    $('res-next').onclick = next || null;
     box.hidden = false;
   }
 
@@ -396,8 +444,8 @@
     return b;
   }
   function stageTile(st, line, locked) {
-    var kicker = st.ch ? t('challenge', st.index + 1) : st.custom ? t('custom') : '';
-    return tile(st.title, kicker, line, locked, st === current, st.ch && progress[st.id], function () { openStage(st); });
+    var kicker = st.ch ? t('challenge', chNum(st)) : st.custom ? t('custom') : '';
+    return tile(st.title, kicker, line, locked, st === current, st.ch && starsOf(st) === STAGES, function () { openStage(st); });
   }
   /* own level: the tile plus edit / delete buttons */
   function mineTile(st) {
@@ -420,12 +468,24 @@
   }
 
   function renderMap() {
-    var list = $('map-list'), free = $('map-free'), got = 0;
+    var list = $('map-list'), free = $('map-free'), got = 0, grid = null, at = 0;
     list.textContent = free.textContent = '';
     challenges.forEach(function (c) {
-      var p = progress[c.id], locked = !unlocked(c);
-      if (p) got += p.stars;
-      list.appendChild(stageTile(c, p ? stars(p.stars) + ' <span class="dim">' + secs(p.ticks) + '</span>'
+      if (c.chapter !== at) { /* chapter heading, then its own grid */
+        at = c.chapter;
+        var ch = chapters[at - 1] || {}, h = document.createElement('div');
+        h.className = 'chapter';
+        h.innerHTML = '<h3></h3><p class="dim"></p>';
+        h.firstChild.textContent = t('map.chapter', at) + (I18N.pick(ch, 'title') ? ' · ' + I18N.pick(ch, 'title') : '');
+        h.lastChild.textContent = I18N.pick(ch, 'sub') || '';
+        list.appendChild(h);
+        grid = document.createElement('div');
+        grid.className = 'grid';
+        list.appendChild(grid);
+      }
+      var n = starsOf(c), locked = !unlocked(c);
+      got += n;
+      grid.appendChild(stageTile(c, n ? stars(n) + ' <span class="dim">' + esc(t('map.stages', n, STAGES)) + '</span>'
                                       : '<span class="dim">' + esc(t(locked ? 'map.locked' : 'map.todo')) + '</span>', locked));
     });
     levels.forEach(function (l) { free.appendChild(stageTile(l, '', false)); });
@@ -433,7 +493,7 @@
     var mk = tile(t('make'), '', '<span class="dim">' + esc(t('make.sub')) + '</span>', false, false, false, function () { openEditor(null); });
     mk.classList.add('make');
     free.appendChild(mk);
-    $('map-total').textContent = t('map.total', got, challenges.length * 3);
+    $('map-total').textContent = t('map.total', got, challenges.length * STAGES);
     $('teacher-box').hidden = !(teacher || /[?&#]teacher\b/.test(location.search + location.hash));
     $('teacher').checked = teacher;
     $('load-level').hidden = !teacher;
@@ -495,7 +555,7 @@
     var code = {};
     challenges.forEach(function (c) { var v = load(codeKeyOf(c), null); if (v != null) code[c.id] = v; });
     mine.forEach(function (st) { var v = load(codeKeyOf(st), null); if (v != null) code['my.' + st.id] = v; });
-    var data = { app: 'ciberrato-academy', version: 1, progress: progress, code: code, free: load('ciberrato.code', null),
+    var data = { app: 'ciberrato-academy', version: 2, progress: progress, code: code, free: load('ciberrato.code', null),
                  levels: mine.map(function (st) { return { id: st.id, src: st.src }; }) };
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
@@ -507,12 +567,13 @@
   function importProgress(file) {
     file.text().then(function (txt) {
       var d = JSON.parse(txt);
-      if (!d || (d.app !== 'ciberrato-academy' && d.app !== 'ciberrato-jr') || typeof d.progress !== 'object') throw new Error(t('import.bad'));
+      if (!d || d.app !== 'ciberrato-academy' || typeof d.progress !== 'object') throw new Error(t('import.bad'));
       if (!confirm(t('import.confirm'))) return;
       progress = {};
-      Object.keys(d.progress || {}).forEach(function (id) {
+      if (d.version >= 2) Object.keys(d.progress || {}).forEach(function (id) { /* version 1 stars were not stages */
         var p = d.progress[id];
-        if (p && p.stars >= 1 && p.stars <= 3) progress[id] = { stars: p.stars | 0, ticks: +p.ticks || 0, score: +p.score || 0 };
+        if (p && p.stars >= 1 && p.stars <= STAGES)
+          progress[id] = { stars: p.stars | 0, ticks: (Array.isArray(p.ticks) ? p.ticks : []).map(function (x) { return +x || 0; }) };
       });
       saveProgress();
       Object.keys(d.code || {}).forEach(function (id) { if (typeof d.code[id] === 'string') save('ciberrato.code.' + id, d.code[id]); });
@@ -608,7 +669,7 @@
     call('web_set_lang', [l]);
     challenges.concat(levels, mine).forEach(localize);
     if (current) {
-      call('web_set_level_name', [current.title]);
+      call('web_set_level_name', [shownName(current)]);
       /* untouched starter code follows the language */
       if (view.state.doc.toString() === oldStarter) view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: starterOf(current) } });
     }

@@ -3,6 +3,7 @@
  * from the simulation model (noise disabled unless stated). */
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "sim/sim.h"
 #include "sim/level.h"
@@ -327,7 +328,7 @@ static void test_challenge(void)
     box(10, 4, 2, 2, 0);
     lv.lab.targets[lv.lab.ntargets++] = (Target){ { 5, 2 }, 1.0 };
     sim_init(&sim, &lv, 1, 1);
-    CHECK(challenge_parse(&w, "{\"win\":{\"reach_target\":true,\"return_home\":true},\"stars\":{\"time\":100}}",
+    CHECK(challenge_parse(&w, "{\"win\":{\"reach_target\":true,\"return_home\":true}}",
                           err, sizeof err));
     CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING);
     CHECK(challenge_check(&w, &sim, 0, true, &why) == CH_FAIL); /* script ended early */
@@ -337,10 +338,6 @@ static void test_challenge(void)
     CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING); /* not home yet */
     sim.robots[0].pose.x = 2.3;
     CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_WIN);
-    CHECK(challenge_stars(&w, &sim, 0) == 3);
-    sim.cycle = 101;
-    sim.robots[0].collisions = 1;
-    CHECK(challenge_stars(&w, &sim, 0) == 1);
 
     /* constraints fail at once */
     CHECK(challenge_parse(&w, "{\"win\":{\"visit_all\":true,\"no_collisions\":true,\"under_time\":50}}",
@@ -368,6 +365,50 @@ static void test_challenge(void)
     sim.robots[0].pose.x = 8;
     sim_step(&sim);
     CHECK(challenge_check(&w, &sim, 0, true, &why) == CH_FAIL); /* drove past it */
+
+    /* signal: the cheese counts only with the visiting LED lit on it */
+    CHECK(challenge_parse(&w, "{\"win\":{\"reach_target\":true,\"return_home\":true,\"signal\":true}}", err, sizeof err));
+    sim_init(&sim, &lv, 1, 1);
+    sim.robots[0].pose.x = 5;
+    sim_step(&sim);
+    sim.robots[0].pose.x = 2.3;
+    sim_step(&sim);
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING); /* passed by, LED off */
+    sim_set_led(&sim, 0, true, false);
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_FAIL);    /* LED on, no cheese here */
+    sim.robots[0].pose.x = 5;
+    sim_step(&sim);
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING);
+    sim_set_led(&sim, 0, false, false);
+    sim.robots[0].pose.x = 2.3;
+    sim_step(&sim);
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_PENDING); /* home, returning LED off */
+    sim_set_led(&sim, 0, false, true);
+    CHECK(challenge_check(&w, &sim, 0, false, &why) == CH_WIN);
+}
+
+static void test_stages(void)
+{
+    puts("stages");
+    const char *json = "{\"width\":5,\"height\":4,\"goal\":\"base\",\"win\":{\"reach_target\":true},"
+                       "\"stages\":[{\"goal\":\"one\",\"width\":7},"
+                       "{\"pt\":{\"goal\":\"dois\"},\"win\":{\"visit_all\":true,\"variants\":1},"
+                       "\"variants\":[{\"height\":9}]}]}";
+    CHECK(challenge_stage_count(json) == 2);
+    CHECK(challenge_variant_count(json) == 0);
+    CHECK(!challenge_stage(json, 2));
+    char *s0 = challenge_stage(json, 0), *s1 = challenge_stage(json, 1), err[128];
+    WinRule w;
+    CHECK(s0 && level_load_json(&lv, s0, err, sizeof err) && lv.lab.width == 7 && lv.lab.height == 4);
+    CHECK(s0 && strstr(s0, "\"base\"") && !strstr(s0, "stages")); /* stage text stays out */
+    CHECK(s1 && challenge_parse(&w, s1, err, sizeof err) && w.visit_all && w.reach_target == -2 && w.variants == 1);
+    CHECK(s1 && challenge_variant_count(s1) == 1);
+    char *v0 = s1 ? challenge_variant(s1, 0) : NULL;
+    CHECK(v0 && level_load_json(&lv, v0, err, sizeof err) && lv.lab.width == 5 && lv.lab.height == 9);
+    CHECK(v0 && !strstr(v0, "variants\":["));
+    free(s0);
+    free(s1);
+    free(v0);
 }
 
 int main(void)
@@ -382,6 +423,7 @@ int main(void)
     test_time_finish_determinism();
     test_level();
     test_challenge();
+    test_stages();
     printf("%d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }

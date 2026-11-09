@@ -1,0 +1,194 @@
+{
+  "chapter": 5,
+  "title": "There and back again",
+  "goal": [
+    "Grab the cheese under the light, then **come back home** to where you started. Home has no light, but you have a GPS.",
+    "",
+    "Tell the judge what you are doing: the **visiting** LED on while you stand on the cheese (then off), and the **returning** LED on for the trip home."
+  ],
+  "starter": "14-home.lua",
+  "hints": [
+    "Remember home first: `local hx, hy = gps()` (better: the average of 20 readings while you stand still).",
+    "Going home is like going to a light, but you compute the angle yourself: `math.deg(math.atan(hy - y, hx - x)) - compass()`, wrapped to -180..180.",
+    "Close to home, stop, average the GPS again and do the last bit carefully."
+  ],
+  "pt": {
+    "title": "Ida e volta",
+    "goal": [
+      "Apanha o queijo debaixo da luz e depois **volta a casa**, onde começaste. Em casa não há luz, mas tens um GPS.",
+      "",
+      "Diz ao júri o que estás a fazer: o LED de **visita** aceso enquanto estás em cima do queijo (e depois apagado), e o LED de **regresso** aceso na viagem para casa."
+    ],
+    "hints": [
+      "Primeiro lembra-te de casa: `local hx, hy = gps()` (melhor: a média de 20 leituras com o rato parado).",
+      "Ir para casa é como ir para uma luz, mas és tu que calculas o ângulo: `math.deg(math.atan(hy - y, hx - x)) - compass()`, ajustado para -180..180.",
+      "Perto de casa, para, faz outra vez a média do GPS e faz o último bocado com cuidado."
+    ],
+    "starter": "14-home.pt.lua"
+  },
+  "win": {
+    "reach_target": true,
+    "return_home": true,
+    "signal": true
+  },
+  "name": "There and back again",
+  "width": 20,
+  "height": 14,
+  "time_limit": 3000,
+  "gps": true,
+  "noise": {
+    "motors": 2,
+    "ir": 0,
+    "compass": 0,
+    "beacon": 2,
+    "gps": 0.2
+  },
+  "beacons": [
+    {
+      "x": 17,
+      "y": 10,
+      "height": 4
+    }
+  ],
+  "targets": [
+    {
+      "x": 17,
+      "y": 10,
+      "radius": 1
+    }
+  ],
+  "start": [
+    {
+      "x": 3,
+      "y": 3,
+      "dir": 0
+    }
+  ],
+  "stages": [
+    {
+      "goal": "An open room.",
+      "pt": {
+        "goal": "Uma sala aberta."
+      }
+    },
+    {
+      "goal": "Walls in the way, there and back. **No bumps**.",
+      "pt": {
+        "goal": "Paredes no caminho, na ida e na volta. **Sem toques**."
+      },
+      "walls": [
+        {
+          "height": 1,
+          "corners": [
+            [
+              8,
+              3
+            ],
+            [
+              9.5,
+              3
+            ],
+            [
+              9.5,
+              8
+            ],
+            [
+              8,
+              8
+            ]
+          ]
+        },
+        {
+          "height": 1,
+          "corners": [
+            [
+              12.5,
+              6
+            ],
+            [
+              14,
+              6
+            ],
+            [
+              14,
+              11
+            ],
+            [
+              12.5,
+              11
+            ]
+          ]
+        }
+      ],
+      "win": {
+        "reach_target": true,
+        "return_home": true,
+        "signal": true,
+        "no_collisions": true
+      }
+    },
+    {
+      "goal": "The same walls in a noisy world: wheels, compass, sensors and GPS.",
+      "pt": {
+        "goal": "As mesmas paredes num mundo com ruído: rodas, bússola, sensores e GPS."
+      },
+      "walls": [
+        {
+          "height": 1,
+          "corners": [
+            [
+              8,
+              3
+            ],
+            [
+              9.5,
+              3
+            ],
+            [
+              9.5,
+              8
+            ],
+            [
+              8,
+              8
+            ]
+          ]
+        },
+        {
+          "height": 1,
+          "corners": [
+            [
+              12.5,
+              6
+            ],
+            [
+              14,
+              6
+            ],
+            [
+              14,
+              11
+            ],
+            [
+              12.5,
+              11
+            ]
+          ]
+        }
+      ],
+      "noise": {
+        "motors": 4,
+        "ir": 0.2,
+        "compass": 2,
+        "beacon": 3,
+        "gps": 0.6
+      },
+      "win": {
+        "reach_target": true,
+        "return_home": true,
+        "signal": true,
+        "no_collisions": true
+      }
+    }
+  ]
+}

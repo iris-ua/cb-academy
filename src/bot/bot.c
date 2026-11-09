@@ -459,4 +459,5 @@ void bot_tick(Bot *b, Sim *s, int r)
 
 BotState    bot_state(const Bot *b)      { return b->state; }
 const char *bot_error(const Bot *b)      { return b->err; }
+const char *bot_code(const Bot *b)       { return b->code; }
 int         bot_error_line(const Bot *b) { return b->err_line; }

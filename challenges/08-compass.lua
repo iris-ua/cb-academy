@@ -1,0 +1,6 @@
+turn_to(0)
+forward(10)
+turn_to(90)
+forward(8)
+turn_to(180)
+forward(6)

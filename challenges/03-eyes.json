@@ -1,0 +1,46 @@
+{
+  "chapter": 1,
+  "title": "Eyes in front",
+  "goal": [
+    "Drive to the cheese and **stop on it**, without bumping. It sits right in front of a wall.",
+    "",
+    "`ir(0)` is the front sensor. It reads about `1 / distance` to the wall: the closer the wall, the bigger the number."
+  ],
+  "starter": "03-eyes.lua",
+  "hints": [
+    "Use a `while` loop: keep driving while `ir(0)` is small.",
+    "The cheese starts where `ir(0)` is about `1`. Stop when it goes over `1.5`.",
+    "`ground()` is the cheese under the mouse (`0`), or `-1` if there is none. Stop the program when you are on it."
+  ],
+  "pt": {
+    "title": "Olhos à frente",
+    "goal": [
+      "Vai até ao queijo e **para em cima dele**, sem bater. Está mesmo à frente de uma parede.",
+      "",
+      "`ir(0)` é o sensor da frente. Lê cerca de `1 / distância` até à parede: quanto mais perto a parede, maior o número."
+    ],
+    "hints": [
+      "Usa um ciclo `while`: continua a andar enquanto `ir(0)` for pequeno.",
+      "O queijo começa onde `ir(0)` é cerca de `1`. Para quando passar de `1.5`.",
+      "`ground()` é o queijo debaixo do rato (`0`), ou `-1` se não houver nenhum. Termina o programa quando estiveres em cima dele."
+    ],
+    "starter": "03-eyes.pt.lua"
+  },
+  "win": { "reach_target": true, "stop_on_target": true, "no_collisions": true },
+  "name": "Eyes in front",
+  "time_limit": 1200,
+  "noise": { "motors": 0, "ir": 0, "compass": 0, "beacon": 0 },
+  "height": 5,
+  "start": [ { "x": 2, "y": 2.5, "dir": 0 } ],
+  "stages": [
+    { "goal": "Stop in front of the wall.", "pt": { "goal": "Para à frente da parede." },
+      "width": 12, "targets": [ { "x": 11, "y": 2.5, "radius": 1 } ] },
+    { "goal": "Same idea, but the room is longer.", "pt": { "goal": "A mesma ideia, mas a sala é mais comprida." },
+      "width": 17, "targets": [ { "x": 16, "y": 2.5, "radius": 1 } ] },
+    { "goal": "The cheese is at the **third** wall. At each wall, turn left, until `ground()` says you are on the cheese.",
+      "pt": { "goal": "O queijo está na **terceira** parede. Em cada parede vira à esquerda, até `ground()` dizer que estás em cima do queijo." },
+      "width": 14, "height": 10, "start": [ { "x": 2, "y": 1.5, "dir": 0 } ],
+      "walls": [ { "height": 2, "corners": [[4, 4], [4.5, 4], [4.5, 10], [4, 10]] } ],
+      "targets": [ { "x": 5.5, "y": 8.9, "radius": 1 } ] }
+  ]
+}

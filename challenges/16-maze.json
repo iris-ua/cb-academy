@@ -1,0 +1,645 @@
+{
+  "chapter": 6,
+  "title": "A small maze",
+  "goal": [
+    "Find the cheese in the maze. Rule of thumb: **keep one hand on the wall** and you never get lost.",
+    "",
+    "Each square is `2` long. Walls show up in `ir(0)` (front), `ir(1)` (left) and `ir(2)` (right).",
+    "",
+    "**Hidden mazes:** after a win, your code also runs on 5 hidden versions of the stage (another maze, start and cheese). It must win at least 4 of them, so counting squares will not do."
+  ],
+  "starter": "16-maze.lua",
+  "hints": [
+    "Move one square at a time, then look around. Right-hand rule: if the right is open turn right, else if the front is open go on, else if the left is open turn left, else turn back.",
+    "Keep the heading as a number `dir` (0 east, 1 north, 2 west, 3 south) and use `turn_to(dir * 90)`, so turning errors never add up.",
+    "With noise, keep in the middle: steer with `compass()` and with `ir(1) - ir(2)` while driving, and use a wall in front to stop at the right spot."
+  ],
+  "pt": {
+    "title": "Um labirinto pequeno",
+    "goal": [
+      "Encontra o queijo no labirinto. Regra de ouro: **mantém uma mão na parede** e nunca te perdes.",
+      "",
+      "Cada quadrado mede `2`. As paredes aparecem em `ir(0)` (frente), `ir(1)` (esquerda) e `ir(2)` (direita).",
+      "",
+      "**Labirintos escondidos:** depois de uma vitória, o teu código também corre em 5 versões escondidas da etapa (outro labirinto, partida e queijo). Tem de vencer pelo menos 4, por isso contar quadrados não serve."
+    ],
+    "hints": [
+      "Avança um quadrado de cada vez e depois olha à volta. Regra da mão direita: se a direita estiver livre vira à direita, senão se a frente estiver livre avança, senão se a esquerda estiver livre vira à esquerda, senão volta para trás.",
+      "Guarda a direção num número `dir` (0 este, 1 norte, 2 oeste, 3 sul) e usa `turn_to(dir * 90)`, assim os erros das viragens nunca se acumulam.",
+      "Com ruído, mantém-te no meio: corrige com `compass()` e com `ir(1) - ir(2)` enquanto andas, e usa uma parede à frente para parares no sítio certo."
+    ],
+    "starter": "16-maze.pt.lua"
+  },
+  "win": {
+    "reach_target": true,
+    "variants": 4
+  },
+  "name": "A small maze",
+  "time_limit": 4000,
+  "noise": { "motors": 0, "ir": 0, "compass": 0, "beacon": 0 },
+  "stages": [
+    {
+      "goal": "A quiet maze: no noise.",
+      "pt": {
+        "goal": "Um labirinto calmo: sem ruído."
+      },
+      "width": 14,
+      "height": 8,
+      "walls": [
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              0
+            ],
+            [
+              14,
+              0
+            ],
+            [
+              14,
+              0.1
+            ],
+            [
+              0,
+              0.1
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              7.9
+            ],
+            [
+              14,
+              7.9
+            ],
+            [
+              14,
+              8
+            ],
+            [
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              0
+            ],
+            [
+              0.1,
+              0
+            ],
+            [
+              0.1,
+              8
+            ],
+            [
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              13.9,
+              0
+            ],
+            [
+              14,
+              0
+            ],
+            [
+              14,
+              8
+            ],
+            [
+              13.9,
+              8
+            ]
+          ]
+        }
+      ],
+      "maze": [
+        "     |              ",
+        "  +--+  +--+--+--+  ",
+        "  |     |        |  ",
+        "  +  +--+--+--+  +  ",
+        "  |           |  |  ",
+        "  +--+--+--+  +  +  ",
+        "              |     "
+      ],
+      "start": [
+        { "x": 13, "y": 1, "dir": 90 }
+      ],
+      "targets": [
+        { "x": 5, "y": 3, "radius": 1 }
+      ],
+      "variants": [
+        {
+          "maze": [
+            "                    ",
+            "  +--+--+--+--+  +--",
+            "  |  |        |     ",
+            "  +  +  +--+  +--+  ",
+            "     |  |  |  |     ",
+            "--+  +  +  +--+  +  ",
+            "     |           |  "
+          ],
+          "start": [
+            { "x": 13, "y": 1, "dir": 90 }
+          ],
+          "targets": [
+            { "x": 1, "y": 3, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "        |           ",
+            "  +--+  +--+--+--+  ",
+            "     |     |     |  ",
+            "--+--+--+  +  +  +  ",
+            "        |  |  |     ",
+            "  +--+  +  +  +--+  ",
+            "     |        |     "
+          ],
+          "start": [
+            { "x": 1, "y": 7, "dir": -90 }
+          ],
+          "targets": [
+            { "x": 9, "y": 5, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "              |  |  ",
+            "  +--+--+--+  +  +  ",
+            "     |  |     |  |  ",
+            "--+  +  +  +--+  +  ",
+            "  |     |     |  |  ",
+            "  +--+  +--+  +  +  ",
+            "           |        "
+          ],
+          "start": [
+            { "x": 13, "y": 1, "dir": 90 }
+          ],
+          "targets": [
+            { "x": 5, "y": 3, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "                    ",
+            "  +--+--+  +  +--+--",
+            "  |     |  |        ",
+            "--+  +  +--+--+--+  ",
+            "  |  |              ",
+            "  +  +--+--+--+--+  ",
+            "     |              "
+          ],
+          "start": [
+            { "x": 1, "y": 7, "dir": -90 }
+          ],
+          "targets": [
+            { "x": 7, "y": 1, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "                    ",
+            "  +--+--+  +--+--+--",
+            "  |        |        ",
+            "  +--+--+--+--+--+  ",
+            "     |           |  ",
+            "  +  +  +--+  +--+  ",
+            "  |        |        "
+          ],
+          "start": [
+            { "x": 1, "y": 7, "dir": -90 }
+          ],
+          "targets": [
+            { "x": 11, "y": 3, "radius": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "goal": "The same size, now with noise everywhere.",
+      "pt": {
+        "goal": "Do mesmo tamanho, agora com ruído em tudo."
+      },
+      "noise": { "motors": 1.5, "ir": 0.1, "compass": 2, "beacon": 2 },
+      "width": 14,
+      "height": 8,
+      "walls": [
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              0
+            ],
+            [
+              14,
+              0
+            ],
+            [
+              14,
+              0.1
+            ],
+            [
+              0,
+              0.1
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              7.9
+            ],
+            [
+              14,
+              7.9
+            ],
+            [
+              14,
+              8
+            ],
+            [
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              0
+            ],
+            [
+              0.1,
+              0
+            ],
+            [
+              0.1,
+              8
+            ],
+            [
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              13.9,
+              0
+            ],
+            [
+              14,
+              0
+            ],
+            [
+              14,
+              8
+            ],
+            [
+              13.9,
+              8
+            ]
+          ]
+        }
+      ],
+      "maze": [
+        "     |              ",
+        "  +  +  +--+--+--+  ",
+        "  |           |  |  ",
+        "--+  +--+--+  +  +  ",
+        "  |  |     |     |  ",
+        "  +--+  +  +--+--+  ",
+        "        |           "
+      ],
+      "start": [
+        { "x": 13, "y": 7, "dir": 180 }
+      ],
+      "targets": [
+        { "x": 3, "y": 1, "radius": 1 }
+      ],
+      "variants": [
+        {
+          "maze": [
+            "     |              ",
+            "  +  +--+--+  +--+  ",
+            "  |  |     |  |     ",
+            "--+  +  +  +  +  +--",
+            "  |  |  |  |  |     ",
+            "  +  +  +  +--+--+  ",
+            "        |           "
+          ],
+          "start": [
+            { "x": 1, "y": 7, "dir": -90 }
+          ],
+          "targets": [
+            { "x": 13, "y": 7, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "              |  |  ",
+            "  +--+  +--+  +  +  ",
+            "  |     |        |  ",
+            "  +  +--+  +--+--+  ",
+            "  |     |  |        ",
+            "  +--+  +--+  +--+--",
+            "     |              "
+          ],
+          "start": [
+            { "x": 1, "y": 7, "dir": -90 }
+          ],
+          "targets": [
+            { "x": 11, "y": 1, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "           |        ",
+            "  +--+  +--+  +--+  ",
+            "     |     |  |     ",
+            "--+--+--+  +  +  +  ",
+            "        |     |  |  ",
+            "  +--+  +--+--+  +  ",
+            "  |              |  "
+          ],
+          "start": [
+            { "x": 13, "y": 1, "dir": 90 }
+          ],
+          "targets": [
+            { "x": 7, "y": 7, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "        |           ",
+            "  +--+--+  +  +--+  ",
+            "           |     |  ",
+            "  +--+--+--+--+  +  ",
+            "        |        |  ",
+            "--+--+  +  +--+--+  ",
+            "        |  |        "
+          ],
+          "start": [
+            { "x": 1, "y": 1, "dir": 0 }
+          ],
+          "targets": [
+            { "x": 11, "y": 5, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "        |  |        ",
+            "  +--+--+  +--+--+  ",
+            "        |     |     ",
+            "  +--+  +--+  +  +--",
+            "     |  |     |     ",
+            "--+  +  +  +--+--+  ",
+            "     |              "
+          ],
+          "start": [
+            { "x": 13, "y": 1, "dir": 90 }
+          ],
+          "targets": [
+            { "x": 5, "y": 3, "radius": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "goal": "A bigger maze with noise.",
+      "pt": {
+        "goal": "Um labirinto maior com ruído."
+      },
+      "noise": { "motors": 1.5, "ir": 0.1, "compass": 2, "beacon": 2 },
+      "time_limit": 7000,
+      "width": 20,
+      "height": 10,
+      "walls": [
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              0
+            ],
+            [
+              20,
+              0
+            ],
+            [
+              20,
+              0.1
+            ],
+            [
+              0,
+              0.1
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              9.9
+            ],
+            [
+              20,
+              9.9
+            ],
+            [
+              20,
+              10
+            ],
+            [
+              0,
+              10
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              0,
+              0
+            ],
+            [
+              0.1,
+              0
+            ],
+            [
+              0.1,
+              10
+            ],
+            [
+              0,
+              10
+            ]
+          ]
+        },
+        {
+          "height": 4,
+          "corners": [
+            [
+              19.9,
+              0
+            ],
+            [
+              20,
+              0
+            ],
+            [
+              20,
+              10
+            ],
+            [
+              19.9,
+              10
+            ]
+          ]
+        }
+      ],
+      "maze": [
+        "        |           |        ",
+        "--+  +--+  +  +--+--+  +  +--",
+        "     |     |           |     ",
+        "  +  +  +--+--+--+--+--+--+  ",
+        "  |  |              |     |  ",
+        "  +  +--+--+--+--+  +  +  +--",
+        "  |        |        |  |     ",
+        "  +--+--+--+  +--+--+--+  +  ",
+        "                          |  "
+      ],
+      "start": [
+        { "x": 1, "y": 9, "dir": -90 }
+      ],
+      "targets": [
+        { "x": 19, "y": 7, "radius": 1 }
+      ],
+      "variants": [
+        {
+          "maze": [
+            "           |           |     ",
+            "  +--+  +  +--+  +--+  +  +  ",
+            "  |  |  |  |     |  |     |  ",
+            "  +  +  +  +  +  +  +--+--+  ",
+            "  |  |  |     |  |  |     |  ",
+            "  +  +  +--+--+  +  +--+  +  ",
+            "  |  |  |        |     |  |  ",
+            "  +  +  +--+--+--+--+  +  +  ",
+            "     |                 |     "
+          ],
+          "start": [
+            { "x": 1, "y": 9, "dir": -90 }
+          ],
+          "targets": [
+            { "x": 9, "y": 3, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "              |        |  |  ",
+            "  +--+--+--+--+  +--+  +  +  ",
+            "  |     |        |  |     |  ",
+            "  +  +  +  +--+--+  +--+--+  ",
+            "     |     |        |        ",
+            "  +--+--+--+--+  +  +  +--+  ",
+            "  |              |     |     ",
+            "  +  +--+--+--+--+--+--+  +--",
+            "     |                       "
+          ],
+          "start": [
+            { "x": 1, "y": 1, "dir": 0 }
+          ],
+          "targets": [
+            { "x": 17, "y": 7, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "              |              ",
+            "  +--+--+--+  +  +--+--+--+  ",
+            "        |     |  |     |     ",
+            "  +--+  +  +--+  +  +  +--+--",
+            "     |  |  |  |     |        ",
+            "--+  +  +  +  +  +--+--+--+  ",
+            "  |  |  |  |     |           ",
+            "  +--+  +  +--+--+  +--+--+  ",
+            "        |           |        "
+          ],
+          "start": [
+            { "x": 19, "y": 1, "dir": 90 }
+          ],
+          "targets": [
+            { "x": 13, "y": 9, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "                 |           ",
+            "  +--+  +--+--+  +  +--+--+  ",
+            "     |        |  |     |     ",
+            "--+--+--+--+  +  +  +  +  +--",
+            "              |  |  |  |  |  ",
+            "  +  +--+--+--+  +--+  +  +  ",
+            "  |  |  |     |        |     ",
+            "  +--+  +  +  +--+--+--+--+  ",
+            "        |  |                 "
+          ],
+          "start": [
+            { "x": 1, "y": 1, "dir": 0 }
+          ],
+          "targets": [
+            { "x": 11, "y": 9, "radius": 1 }
+          ]
+        },
+        {
+          "maze": [
+            "     |  |                 |  ",
+            "  +--+  +--+  +--+--+--+  +  ",
+            "  |     |     |     |     |  ",
+            "  +  +--+  +--+  +  +  +--+  ",
+            "  |  |     |     |  |     |  ",
+            "  +  +  +  +--+  +--+--+  +  ",
+            "     |  |  |     |        |  ",
+            "  +--+--+  +  +--+  +--+--+  ",
+            "           |                 "
+          ],
+          "start": [
+            { "x": 19, "y": 9, "dir": 180 }
+          ],
+          "targets": [
+            { "x": 3, "y": 7, "radius": 1 }
+          ]
+        }
+      ]
+    }
+  ]
+}
