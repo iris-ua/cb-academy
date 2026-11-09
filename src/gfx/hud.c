@@ -55,7 +55,7 @@ static void dial(Vector2 c, float r, double deg, bool on, Color col)
 
 static void led(float x, float y, const char *name, bool on, Color c)
 {
-    if (on) DrawCircleGradient((int)x, (int)y, 13, color_alpha(c, 0.6f), color_alpha(c, 0));
+    if (on) DrawCircleGradient((Vector2){ x, y }, 13, color_alpha(c, 0.6f), color_alpha(c, 0));
     DrawCircleV((Vector2){ x, y }, 6, on ? c : (Color){ 55, 60, 76, 255 });
     text_draw(TEXT_UI, name, x + 12, y - 9, 13, on ? C_TEXT : C_DIM);
 }

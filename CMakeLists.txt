@@ -26,7 +26,7 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 set(CUSTOMIZE_BUILD OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(raylib
   GIT_REPOSITORY https://github.com/raysan5/raylib.git
-  GIT_TAG 5.5 GIT_SHALLOW TRUE
+  GIT_TAG 6.2 GIT_SHALLOW TRUE
   PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/patch_raylib.cmake)
 
 # --- Lua 5.4 -----------------------------------------------------------------
@@ -74,6 +74,10 @@ if(NOT MSVC)
 endif()
 
 if(EMSCRIPTEN)
+  # raylib 6.x exports only ccall; its flag lands after ours and would drop FS
+  get_target_property(rl_opts raylib INTERFACE_LINK_OPTIONS)
+  list(FILTER rl_opts EXCLUDE REGEX "EXPORTED_RUNTIME_METHODS")
+  set_target_properties(raylib PROPERTIES INTERFACE_LINK_OPTIONS "${rl_opts}")
   set_target_properties(cba PROPERTIES OUTPUT_NAME index SUFFIX ".html")
   target_link_options(cba PRIVATE
     -sUSE_GLFW=3 -sALLOW_MEMORY_GROWTH=1 -sSTACK_SIZE=1mb

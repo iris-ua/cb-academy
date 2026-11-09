@@ -66,11 +66,11 @@ Use short, single-line commit messages following Conventional Commits.
 - raylib culls back faces: triangles must be on-screen CCW. Use `fill_convex`, not raw `DrawTriangle`.
 - Never `BeginTextureMode` inside a draw pass: build RTs in `scene_prepare` before `BeginDrawing`.
 - Wall shadow mask: hull-extruded silhouette at 1/2 res + 3x3 taps. 1/4 res or stacked shifted copies show stair-steps.
-- `TakeScreenshot` double-scales on HiDPI (raylib 5.5); `--shot` renders to an RT instead.
+- `TakeScreenshot` double-scales on HiDPI (still in raylib 6.2: render size x DPI); `--shot` renders to an RT instead.
 - Web: canvas CSS must be 100vw/100vh; raylib's resize callback sets the buffer to the window size.
 - CMake de-duplicates repeated link flags: multiple `--preload-file` need `"SHELL:--preload-file ..."`.
-- raylib 5.5 HiDPI resize bug (X11/Windows): screen size became pixels -> layout 2x too big. Patched via `cmake/patch_raylib.cmake` (FetchContent PATCH_COMMAND); drop it when upgrading raylib.
-- Web canvas sizing: patched raylib sizes it to `#stage` (canvas parent), not the window; JS fires a window `resize` on ResizeObserver. HiDPI is patched in too (buffer = CSS size x devicePixelRatio, screen stays CSS px; stock raylib web was blurry). Mouse coords would be in device px if ever used.
+- Web canvas sizing: `cmake/patch_raylib.cmake` (FetchContent PATCH_COMMAND, fails loudly if raylib changes) sizes it to `#stage` (canvas parent), not the window; JS fires a window `resize` on ResizeObserver. HiDPI is patched in too (buffer = CSS size x devicePixelRatio, screen stays CSS px; stock raylib web was blurry). The handler must call `glfwSetWindowSize` *before* setting the buffer: since 6.x GLFW's size callback resets it and halves the screen (2x zoom, blurry). Mouse coords would be in device px if ever used.
 - Emscripten GLFW listens for keys on window in the *capture* phase (and preventDefaults Backspace/Tab): `shell.html` wraps `window.addEventListener` so keydown/keypress from `.ui` elements never reach raylib.
+- raylib 6.x adds a PUBLIC `-sEXPORTED_RUNTIME_METHODS=ccall` that overrides ours (drops `FS`); CMake strips it from raylib's INTERFACE_LINK_OPTIONS. Symptom: no challenges/levels, no error (`jsonFiles` swallows it).
 - Web page files are copied by the `web_page` target every build; POST_BUILD only ran when the wasm relinked.
 - `pkill -f <pattern>` from Bash matches its own shell's command line and kills it: use `pgrep`+`kill` with a narrow pattern.

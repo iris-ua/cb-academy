@@ -296,7 +296,7 @@ static void draw_target_area(const Scene *sc, const Sim *s, int t, const View *v
     float r = view_len(v, tg->radius);
 
     float pulse = 0.5f + 0.5f * sinf(sc->time * 3.2f);
-    DrawCircleGradient((int)c.x, (int)c.y, r * (1.05f + 0.1f * pulse), color_alpha(base, 0.30f + 0.15f * pulse), color_alpha(base, 0));
+    DrawCircleGradient(c, r * (1.05f + 0.1f * pulse), color_alpha(base, 0.30f + 0.15f * pulse), color_alpha(base, 0));
     DrawCircleV(c, r, color_alpha(base, 0.16f));
 
     float ph = fmodf(sc->time, 1.8f) / 1.8f;
@@ -356,7 +356,7 @@ static void draw_beacon_base(const Scene *sc, const Beacon *b, const View *v)
         float r = view_len(v, 0.35 + 2.4 * ph);
         DrawRing(c, r - 1.2f, r + 1.2f, 0, 360, 64, color_alpha(C_BEACON, (1 - ph) * 0.55f));
     }
-    DrawCircleGradient((int)c.x, (int)c.y, view_len(v, 0.9), color_alpha(C_BEACON, 0.45f), color_alpha(C_BEACON, 0));
+    DrawCircleGradient(c, view_len(v, 0.9), color_alpha(C_BEACON, 0.45f), color_alpha(C_BEACON, 0));
 }
 
 static void draw_beacon_pillar(const Scene *sc, const Beacon *b, const View *v)
@@ -539,7 +539,7 @@ static void draw_mouse(const Scene *sc, const Sim *s, int i, Pose p, float alpha
     if (r->led_visiting || r->led_returning) {
         Color lc = r->led_returning ? (Color){ 80, 220, 120, 255 } : (Color){ 255, 200, 40, 255 };
         Vector2 lp = frame_pt(v, &f, -0.25, 0);
-        DrawCircleGradient((int)lp.x, (int)lp.y, view_len(v, 0.22), color_alpha(lc, 0.7f), color_alpha(lc, 0));
+        DrawCircleGradient(lp, view_len(v, 0.22), color_alpha(lc, 0.7f), color_alpha(lc, 0));
         DrawCircleV(lp, view_len(v, 0.06), lc);
     }
     if (s->nrobots > 1) {
