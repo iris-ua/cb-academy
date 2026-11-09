@@ -15,10 +15,10 @@ include(FetchContent)
 # SOURCE_SUBDIR points at a missing dir so FetchContent only downloads (we build the sources ourselves).
 FetchContent_Declare(cjson
   GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
-  GIT_TAG v1.7.18 GIT_SHALLOW TRUE SOURCE_SUBDIR _none)
+  GIT_TAG v1.7.19 GIT_SHALLOW TRUE SOURCE_SUBDIR _none)
 FetchContent_Declare(lua
   GIT_REPOSITORY https://github.com/lua/lua.git
-  GIT_TAG v5.4.7 GIT_SHALLOW TRUE SOURCE_SUBDIR _none)
+  GIT_TAG v5.4.9 GIT_SHALLOW TRUE SOURCE_SUBDIR _none)
 FetchContent_MakeAvailable(cjson lua)
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

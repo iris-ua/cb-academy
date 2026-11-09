@@ -20,8 +20,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: mymindstorm/setup-emsdk@v14
+      - uses: actions/checkout@v7
+      - uses: emscripten-core/setup-emsdk@v16
         with:
           version: 7.0.0
       - run: sudo apt-get install -y ninja-build
@@ -35,7 +35,7 @@ jobs:
           cd build-web
           cp index.html index.js index.wasm index.data app.js app.css i18n.js sound.js leveledit.js favicon.svg apple-touch-icon.png ../site/
           cp -r vendor fonts ../site/
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
@@ -47,4 +47,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
