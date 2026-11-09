@@ -183,6 +183,12 @@
     if (runState !== 'running') run();
     else call('web_pause', [paused ? 0 : 1]);
   }
+  /* Step: one tick, paused; from idle it starts the script first. */
+  function stepButton() {
+    Sfx.unlock();
+    if (runState !== 'running') run();
+    call('web_step');
+  }
 
   function setState(st) {
     runState = st;
@@ -626,6 +632,7 @@
   showLang();
   showMute();
   $('run').onclick = runButton;
+  $('step').onclick = stepButton;
   $('reset').onclick = function () { call('web_reset'); setErr(0); hideResult(); };
   $('clear').onclick = function () { $('console').textContent = ''; };
   $('mute').onclick = function () { Sfx.setMuted(!Sfx.muted); Sfx.unlock(); showMute(); };

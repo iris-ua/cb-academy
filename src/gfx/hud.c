@@ -213,10 +213,10 @@ static void sec_keys(const HudState *st, float x, float y)
 {
     const char *keys[] = {
 #ifdef __EMSCRIPTEN__ /* the page runs the script; no level file to reload */
-        st->script ? L("space pause", "espaço pausa") : L("press Run to start", "carrega em Executar para começar"),
+        st->script ? L("space pause   N step", "espaço pausa   N passo") : L("press Run to start", "carrega em Executar para começar"),
         L("0-4 speed   R reset", "0-4 velocidade   R reiniciar"),
 #else
-        st->script ? "save the script to reload   space pause" : "arrows/WASD drive   space pause",
+        st->script ? "save the script to reload   space pause   N step" : "arrows/WASD drive   space pause   N step",
         "0-4 speed   R reset   L reload",
 #endif
         TextFormat(L("O overlays [%s]   T trail [%s]", "O sensores [%s]   T rasto [%s]"), st->overlays ? L("on", "sim") : L("off", "não"), st->trail ? L("on", "sim") : L("off", "não")),

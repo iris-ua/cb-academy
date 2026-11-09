@@ -28,6 +28,7 @@ static Fx    fx;
 static char  level_path[512] = "levels/default.json";
 static char  status_msg[256];
 static bool  paused;
+static bool  step_req; /* paused: advance one tick on the next frame */
 static float accum;
 static float speed = 1;  /* sim time multiplier: 0.5, 1, 2, 4, 8 */
 static WinRule rule;     /* challenge win rule (rule.active: the level is a challenge) */
@@ -281,6 +282,9 @@ EMSCRIPTEN_KEEPALIVE void web_run(const char *code)
 
 EMSCRIPTEN_KEEPALIVE void web_pause(int on) { paused = on != 0; }
 
+/* Pause and advance exactly one tick. */
+EMSCRIPTEN_KEEPALIVE void web_step(void) { paused = step_req = true; }
+
 EMSCRIPTEN_KEEPALIVE void web_reset(void)
 {
     script_on = false;
@@ -304,9 +308,23 @@ EMSCRIPTEN_KEEPALIVE void web_set_level_name(const char *name)
 }
 #endif
 
+/* One sim cycle: script, physics, effects, judge. */
+static void tick(bool scripted)
+{
+    if (scripted) bot_tick(bot, &sim, 0);
+    const Robot *rb = &sim.robots[0];
+    int hits = rb->collisions, got = 0;
+    for (int t = 0; t < sim.level.lab.ntargets; t++) got += rb->visited[t];
+    sim_step(&sim);
+    sound_cues(rb, hits, got);
+    scene_after_step(&scene, &sim, &fx);
+    judge();
+}
+
 static void frame(void)
 {
     if (IsKeyPressed(KEY_SPACE)) paused = !paused;
+    if (IsKeyPressed(KEY_N)) paused = step_req = true;
     if (IsKeyPressed(KEY_R)) restart();
 #ifndef __EMSCRIPTEN__
     if (IsKeyPressed(KEY_L)) load_level(level_path, NULL);
@@ -342,20 +360,17 @@ static void frame(void)
         accum += dt_frame * speed;
         int steps = 0;
         while (accum >= dt && steps < 32) {
-            if (scripted) bot_tick(bot, &sim, 0);
-            const Robot *rb = &sim.robots[0];
-            int hits = rb->collisions, got = 0;
-            for (int t = 0; t < sim.level.lab.ntargets; t++) got += rb->visited[t];
-            sim_step(&sim);
-            sound_cues(rb, hits, got);
-            scene_after_step(&scene, &sim, &fx);
+            tick(scripted);
             accum -= dt;
             steps++;
-            judge();
             if (judged) break;
         }
         if (steps == 32 || judged) accum = 0; /* fell behind: drop time rather than spiral */
+    } else if (step_req && !sim.over && !frozen && !judged) {
+        tick(scripted);
+        accum = dt; /* show the new pose; Resume interpolates on from it */
     }
+    step_req = false;
     float alpha = sim.over || judged ? 1.0f : fminf(1.0f, accum / dt);
     fx_update(&fx, dt_frame);
     scene_update(&scene, dt_frame);
