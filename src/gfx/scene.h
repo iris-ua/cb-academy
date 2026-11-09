@@ -12,6 +12,8 @@
 
 #define SCENE_TRAIL_N  1024
 #define SCENE_WALL_PTS (SIM_MAX_CORNERS * 5)
+#define SCENE_MAX_JOINTS SIM_MAX_WALLS
+#define SCENE_JOINT_PTS  8
 
 typedef struct {
     Pose   prev, cur;            /* committed poses before / after the last tick */
@@ -29,6 +31,8 @@ typedef struct {
     RobotVis rv[SIM_MAX_ROBOTS];
     Vec2     outline[SIM_MAX_WALLS][SCENE_WALL_PTS]; /* rounded wall outlines (world) */
     int      nout[SIM_MAX_WALLS];
+    Vec2     joint[SCENE_MAX_JOINTS][SCENE_JOINT_PTS]; /* fills for the outer corner of L joints */
+    int      njoint_pts[SCENE_MAX_JOINTS], joint_wall[SCENE_MAX_JOINTS], njoints;
     double   tall_h;             /* walls at least this tall get the "tall" colour */
 
     RenderTexture2D shadow;      /* low-res wall shadow mask */

@@ -36,15 +36,80 @@ static double shadow_len(double h) { return fmin(0.32, fmax(0.1, 0.07 * h)); }
 
 /* ---- level caches ------------------------------------------------------- */
 
+static bool on_wall(const Wall *w, Vec2 p) { return wall_contains(w, p) || wall_point_distance(w, p) < 1e-6; }
+
 static bool corner_joined(const Lab *lab, int self, Vec2 v)
 {
     const double e = 1e-6;
     if (v.x <= e || v.y <= e || v.x >= lab->width - e || v.y >= lab->height - e) return true;
     for (int k = 1; k < lab->nwalls; k++) {
         if (k == self || lab->walls[k].height <= 0) continue;
-        if (wall_contains(&lab->walls[k], v) || wall_point_distance(&lab->walls[k], v) < e) return true;
+        if (on_wall(&lab->walls[k], v)) return true;
     }
     return false;
+}
+
+static bool line_cross(Vec2 a, Vec2 b, Vec2 c, Vec2 d, Vec2 *out)
+{
+    double rx = b.x - a.x, ry = b.y - a.y, sx = d.x - c.x, sy = d.y - c.y;
+    double den = rx * sy - ry * sx;
+    if (fabs(den) < 1e-12) return false;
+    double t = ((c.x - a.x) * sy - (c.y - a.y) * sx) / den;
+    *out = (Vec2){ a.x + rx * t, a.y + ry * t };
+    return true;
+}
+
+static Vec2 toward(Vec2 a, Vec2 b, double t)
+{
+    double l = vec_dist(a, b);
+    t = fmin(t, 0.5 * l);
+    return (Vec2){ a.x + (b.x - a.x) / l * t, a.y + (b.y - a.y) / l * t };
+}
+
+/* Free corner of wall a whose cap runs into wall b: the cap neighbour is on b,
+ * the long-side neighbour is not, and the cap is the shorter edge (a one-cell
+ * wall's long side can end on b too). */
+static bool free_corner(const Lab *lab, int ia, int ib, int k, Vec2 *cap, Vec2 *side)
+{
+    const Wall *a = &lab->walls[ia], *b = &lab->walls[ib];
+    if (corner_joined(lab, ia, a->pts[k])) return false;
+    Vec2 p = a->pts[(k + a->n - 1) % a->n], n = a->pts[(k + 1) % a->n];
+    bool pin = on_wall(b, p), nin = on_wall(b, n);
+    if (pin == nin) return false;
+    *cap = pin ? p : n;
+    *side = pin ? n : p;
+    return vec_dist(a->pts[k], *cap) < vec_dist(a->pts[k], *side);
+}
+
+/* Two walls that each end in the middle of the other (maze L joints) leave the
+ * outer corner square uncovered. Fill it with a quad v-p-u-q, grown into both
+ * walls so the outer corner p gets the full rounding. */
+static void build_joints(Scene *sc, const Lab *lab)
+{
+    sc->njoints = 0;
+    for (int i = 1; i < lab->nwalls; i++)
+        for (int j = i + 1; j < lab->nwalls; j++) {
+            const Wall *a = &lab->walls[i], *b = &lab->walls[j];
+            if (a->height <= 0 || a->height != b->height) continue;
+            for (int ka = 0; ka < a->n; ka++) {
+                Vec2 v = a->pts[ka], vcap, vside;
+                if (!free_corner(lab, i, j, ka, &vcap, &vside)) continue;
+                for (int kb = 0; kb < b->n && sc->njoints < SCENE_MAX_JOINTS; kb++) {
+                    Vec2 u = b->pts[kb], ucap, uside, p, q;
+                    if (!free_corner(lab, j, i, kb, &ucap, &uside)) continue;
+                    double va = vec_dist(v, vcap), ub = vec_dist(u, ucap);
+                    if (!line_cross(v, vside, u, uside, &p) || !line_cross(v, vcap, u, ucap, &q)) continue;
+                    if (vec_dist(p, v) > ub + 1e-6 || vec_dist(p, u) > va + 1e-6) continue;
+                    Vec2 v2 = toward(v, vside, CORNER_R), u2 = toward(u, uside, CORNER_R);
+                    Vec2 quad[4] = { p, v2, { q.x + v2.x - v.x + u2.x - u.x, q.y + v2.y - v.y + u2.y - u.y }, u2 };
+                    double rad[4] = { CORNER_R, 0, 0, 0 };
+                    int n = sc->njoints;
+                    sc->njoint_pts[n] = rounded_outline(quad, 4, rad, 4, sc->joint[n], SCENE_JOINT_PTS);
+                    sc->joint_wall[n] = i;
+                    sc->njoints++;
+                }
+            }
+        }
 }
 
 static void reset_vis(Scene *sc, const Sim *s)
@@ -88,6 +153,7 @@ void scene_level(Scene *sc, const Sim *s)
         for (int j = 0; j < w->n; j++) rad[j] = corner_joined(lab, i, w->pts[j]) ? 0 : CORNER_R;
         sc->nout[i] = w->height > 0 ? rounded_outline(w->pts, w->n, rad, 4, sc->outline[i], SCENE_WALL_PTS) : 0;
     }
+    build_joints(sc, lab);
     sc->shadow_dirty = true;
     reset_vis(sc, s);
 }
@@ -186,6 +252,19 @@ static int convex_hull(Vec2 *pts, int n, Vec2 *out)
     return k - 1;
 }
 
+/* extruded silhouette: hull of the outline and its shadow-shifted copy */
+static void fill_shadow(const View *lv, const Vec2 *outline, int n, double height)
+{
+    double d = shadow_len(height) * 0.70710678;
+    Vec2 pts[2 * SCENE_WALL_PTS], hull[2 * SCENE_WALL_PTS + 1];
+    for (int k = 0; k < n; k++) {
+        pts[k] = outline[k];
+        pts[n + k] = (Vec2){ pts[k].x + d, pts[k].y - d };
+    }
+    int h = convex_hull(pts, 2 * n, hull);
+    fill_world(lv, hull, h, 0, 0, WHITE);
+}
+
 void scene_prepare(Scene *sc, const Sim *s, View v)
 {
     int w = (GetScreenWidth() + SHADOW_DOWN - 1) / SHADOW_DOWN;
@@ -208,19 +287,10 @@ void scene_prepare(Scene *sc, const Sim *s, View v)
     const Lab *lab = &s->level.lab;
     BeginTextureMode(sc->shadow);
     ClearBackground(BLANK);
-    for (int i = 1; i < lab->nwalls; i++) {
-        if (!sc->nout[i]) continue;
-        /* extruded silhouette: hull of the outline and its shadow-shifted copy */
-        double d = shadow_len(lab->walls[i].height) * 0.70710678;
-        Vec2 pts[2 * SCENE_WALL_PTS], hull[2 * SCENE_WALL_PTS + 1];
-        int n = sc->nout[i];
-        for (int k = 0; k < n; k++) {
-            pts[k] = sc->outline[i][k];
-            pts[n + k] = (Vec2){ pts[k].x + d, pts[k].y - d };
-        }
-        int h = convex_hull(pts, 2 * n, hull);
-        fill_world(&lv, hull, h, 0, 0, WHITE);
-    }
+    for (int i = 1; i < lab->nwalls; i++)
+        if (sc->nout[i]) fill_shadow(&lv, sc->outline[i], sc->nout[i], lab->walls[i].height);
+    for (int j = 0; j < sc->njoints; j++)
+        fill_shadow(&lv, sc->joint[j], sc->njoint_pts[j], lab->walls[sc->joint_wall[j]].height);
     EndTextureMode();
 }
 
@@ -238,14 +308,27 @@ static void draw_wall_shadows(const Scene *sc, Vector2 shake)
     }
 }
 
+/* Lowest walls first; within one height all sides go before all tops, so
+ * overlapping walls (and their joint fills) merge into one seamless top. */
 static void draw_walls(const Scene *sc, const Lab *lab, const View *v)
 {
-    for (int i = 1; i < lab->nwalls; i++) {
-        if (!sc->nout[i]) continue;
-        bool tall = lab->walls[i].height >= sc->tall_h;
-        double d = wall_depth(lab->walls[i].height);
-        fill_world(v, sc->outline[i], sc->nout[i], 0, 0, tall ? C_TALL_SIDE : C_LOW_SIDE);
-        fill_world(v, sc->outline[i], sc->nout[i], 0, d, tall ? C_TALL_TOP : C_LOW_TOP);
+    double h = 0;
+    for (;;) {
+        double next = INFINITY;
+        for (int i = 1; i < lab->nwalls; i++)
+            if (sc->nout[i] && lab->walls[i].height > h) next = fmin(next, lab->walls[i].height);
+        if (next == INFINITY) break;
+        h = next;
+        bool tall = h >= sc->tall_h;
+        double d = wall_depth(h);
+        for (int pass = 0; pass < 2; pass++) {
+            Color c = pass ? (tall ? C_TALL_TOP : C_LOW_TOP) : (tall ? C_TALL_SIDE : C_LOW_SIDE);
+            double dy = pass ? d : 0;
+            for (int i = 1; i < lab->nwalls; i++)
+                if (sc->nout[i] && lab->walls[i].height == h) fill_world(v, sc->outline[i], sc->nout[i], 0, dy, c);
+            for (int j = 0; j < sc->njoints; j++)
+                if (lab->walls[sc->joint_wall[j]].height == h) fill_world(v, sc->joint[j], sc->njoint_pts[j], 0, dy, c);
+        }
     }
 }
 
