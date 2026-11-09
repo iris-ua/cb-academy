@@ -10,8 +10,8 @@
 #define OVERLAY_MAX  3.0    /* IR cone length when nothing is seen */
 
 static const Color C_FLOOR      = { 239, 234, 224, 255 };
-static const Color C_GRID_MINOR = { 230, 224, 212, 255 };
-static const Color C_GRID_MAJOR = { 220, 212, 197, 255 };
+static const Color C_GRID_MINOR = { 222, 214, 199, 255 };
+static const Color C_GRID_MAJOR = { 202, 191, 170, 255 };
 static const Color C_WATERMARK  = { 150, 138, 115, 100 };
 static const Color C_FRAME      = { 62, 74, 114, 255 };
 static const Color C_TALL_SIDE  = { 58, 69, 110, 255 };
