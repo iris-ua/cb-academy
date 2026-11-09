@@ -19,6 +19,8 @@ typedef struct {
     Vec2   trail[SCENE_TRAIL_N];
     int    trail_head, trail_len;
     float  hit;                  /* collision flash, 1 -> 0 */
+    float  speed, speed_goal;    /* smoothed |vel| / max, for the tail wag */
+    double wag;                  /* tail wag phase, integrated so speed changes don't jump it */
     int    collisions;
     bool   visited[SIM_MAX_TARGETS];
 } RobotVis;

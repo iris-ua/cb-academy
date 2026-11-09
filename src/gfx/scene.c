@@ -103,6 +103,7 @@ void scene_after_step(Scene *sc, const Sim *s, Fx *fx)
         rv->cur = r->pose;
         rv->wheel_prev[0] = rv->wheel[0];
         rv->wheel_prev[1] = rv->wheel[1];
+        rv->speed_goal = (float)(fabs(r->vel) / SIM_MAX_POWER);
         if (!r->collision) {
             rv->wheel[0] += r->left.out;
             rv->wheel[1] += r->right.out;
@@ -133,7 +134,12 @@ void scene_after_step(Scene *sc, const Sim *s, Fx *fx)
 void scene_update(Scene *sc, float dt)
 {
     sc->time += dt;
-    for (int i = 0; i < SIM_MAX_ROBOTS; i++) sc->rv[i].hit = fmaxf(0, sc->rv[i].hit - dt * 2.5f);
+    for (int i = 0; i < SIM_MAX_ROBOTS; i++) {
+        RobotVis *rv = &sc->rv[i];
+        rv->hit = fmaxf(0, rv->hit - dt * 2.5f);
+        rv->speed += (rv->speed_goal - rv->speed) * fminf(1, dt * 6);
+        rv->wag += dt * (4 + 8 * rv->speed);
+    }
 }
 
 Pose scene_pose(const Scene *sc, int r, float a)
@@ -497,8 +503,7 @@ static void draw_mouse(const Scene *sc, const Sim *s, int i, Pose p, float alpha
     fill_ellipse(v, &sh, -0.02, 0, 0.52, 0.46, color_alpha(C_SHADOW, 0.22f));
 
     /* tail: wags faster when moving */
-    double spd = fabs(r->vel) / SIM_MAX_POWER;
-    double amp = 0.06 + 0.12 * spd, ph = sc->time * (4 + 8 * spd);
+    double amp = 0.06 + 0.12 * rv->speed, ph = rv->wag;
     enum { TN = 10 };
     Vector2 tail[TN];
     for (int k = 0; k < TN; k++) {
