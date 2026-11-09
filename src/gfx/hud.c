@@ -69,7 +69,9 @@ static void led(float x, float y, const char *name, bool on, Color c)
 
 static float sec_title(const Sim *s, const HudState *st, float x, float y, float w)
 {
-    text_draw(TEXT_BOLD, "CiberRato Academy", x, y - 6, 24, C_TEXT);
+    /* matches the web page brand: "Academy" in gold */
+    text_draw(TEXT_BOLD, "CiberRato ", x, y - 6, 24, C_TEXT);
+    text_draw(TEXT_BOLD, "Academy", x + text_width(TEXT_BOLD, "CiberRato ", 24), y - 6, 24, C_GOLD);
     text_draw(TEXT_UI, s->level.lab.name, x, y + 22, 13, C_DIM);
     if (st->paused || s->over) {
         const char *b = s->over ? L("FINISHED", "TERMINADO") : L("PAUSED", "EM PAUSA");
